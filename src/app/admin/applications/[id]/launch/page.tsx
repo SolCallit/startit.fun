@@ -7,6 +7,7 @@ import { getApplicationBundle } from "@/lib/applications/data";
 import { getLaunchConfigBundle } from "@/lib/launch/data";
 import { defaultSplitFor } from "@/lib/domain/fees";
 import { LaunchConfigForm, ReadyButton, SigningLinkButton } from "./launch-forms";
+import { LaunchRunner } from "./launch-runner";
 
 export default function LaunchConfig(props: PageProps<"/admin/applications/[id]/launch">) {
   return (
@@ -65,6 +66,18 @@ async function Body({ params }: PageProps<"/admin/applications/[id]/launch">) {
         <div className="flex flex-col gap-6">
           {editable ? (
             <Panel title="Settings"><LaunchConfigForm appId={id} defaults={defaults} selfLaunch={selfLaunch} /></Panel>
+          ) : null}
+          {app.status === "ready_for_deployment" || app.status === "launched" ? (
+            <Panel title="Launch on Solana devnet">
+              {cfg.launch?.status === "failed" && cfg.launch?.error ? (
+                <div className="mb-4"><Notice tone="error">Last attempt failed: {String(cfg.launch.error)}</Notice></div>
+              ) : null}
+              {app.status === "launched" ? (
+                <p className="text-verified">Launched and verified. Mint <Mono>{String(cfg.launch?.mint_address)}</Mono>.</p>
+              ) : (
+                <LaunchRunner appId={id} ticker={app.ticker ?? ""} initialStatus={String(cfg.launch?.status ?? "planned")} existingSignature={(cfg.launch?.tx_signature as string | null) ?? null} />
+              )}
+            </Panel>
           ) : null}
           <Panel title="Terms to be signed" aside={current ? <Mono className="text-[0.8125rem] text-muted">sha256 {current.slice(0, 16)}…</Mono> : null}>
             {cfg.launch?.terms_text ? (

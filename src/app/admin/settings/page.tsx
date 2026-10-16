@@ -4,6 +4,7 @@ import { Container, Notice, PageHeader, Panel } from "@/components/ui";
 import { requireStaff } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { FeeRouterForm } from "./settings-form";
+import { PlatformSetup } from "./platform-setup";
 
 export const metadata: Metadata = { title: "Platform settings" };
 
@@ -19,7 +20,9 @@ export default function Settings() {
 async function Body() {
   const user = await requireStaff();
   const supabase = await createClient();
-  const { data } = await supabase.from("platform_settings").select("value, updated_at").eq("key", "fee_router_address").maybeSingle();
+  const { data: rows } = await supabase.from("platform_settings").select("key, value, updated_at");
+  const get = (k: string) => rows?.find((r) => r.key === k);
+  const data = get("fee_router_address");
   return (
     <div className="max-w-2xl">
       {!user.roles.includes("admin") ? <div className="mb-6"><Notice tone="warn">Only admins can change these. You can view them.</Notice></div> : null}
@@ -27,6 +30,15 @@ async function Body() {
         <FeeRouterForm current={data?.value ?? null} />
         {data ? <p className="mt-4 text-[0.8125rem] text-muted">Last changed {new Date(data.updated_at).toLocaleString()}.</p> : null}
       </Panel>
+      <div className="mt-6">
+        <Panel title="Raydium LaunchLab platform (devnet)">
+          {!data ? <p className="text-ink-soft">Set the Fee Router first.</p> : !user.roles.includes("admin") ? (
+            <p className="text-ink-soft">{get("launchlab_platform_id") ? `Platform ${get("launchlab_platform_id")!.value}` : "Not set up yet. An admin must do this."}</p>
+          ) : (
+            <PlatformSetup platformId={get("launchlab_platform_id")?.value ?? null} redirected={!!get("launchlab_cp_creator_redirected")} />
+          )}
+        </Panel>
+      </div>
     </div>
   );
 }
