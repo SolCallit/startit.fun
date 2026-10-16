@@ -8,10 +8,17 @@ Status: **Phase 1 complete** (2026-10-16). Repo was empty (README + MIT license)
 |---|---|---|
 | Codebase | Greenfield in `SolCallit/startit.fun` | Nothing to reuse |
 | Chain | Solana (devnet first) | Meme-token liquidity + culture |
-| Launch mechanism | **Meteora Dynamic Bonding Curve (DBC)** | Native partner/creator fee split, locked LP post-migration, devnet program, TS SDK. No custom curve contract to audit |
+| Launch mechanism | **Raydium LaunchLab** (Startit registered as a LaunchLab *platform*) | Founder's call. Battle-tested curve + auto-migration to Raydium CPMM, devnet program, `raydium-sdk-v2`. No custom curve contract to audit |
 | Product | Standalone (not on HatchHL protocol) | Per founder decision |
 
-Rejected: **Raydium LaunchLab** — creator fee is capped at 50 bps pre-graduation and, since Aug 2026, new configs can't give the creator a post-migration LP share; the founder's 30% can't be expressed natively. **Custom Anchor program** — full control but needs an external audit before mainnet; revisit only if DBC blocks a requirement.
+Considered: **Meteora DBC** (native partner/creator split) — not chosen. **Custom Anchor program** — needs an external audit before mainnet; revisit only if LaunchLab blocks a requirement.
+
+Program IDs (cross-check against `api-v3.raydium.io/main/info` before signing):
+
+| | Mainnet | Devnet |
+|---|---|---|
+| LaunchLab | `LanMV9sAd7wArD4vJFi2qDdfnVhFxYSUg6eADduJ3uj` | `DRay6fNdQ5J82H7xV6uq2aV3mNrUZ1J4PgSKsWgptcm6` |
+| CPMM | `CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C` | `DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb` |
 
 ## Stack
 
@@ -20,7 +27,7 @@ Rejected: **Raydium LaunchLab** — creator fee is capped at 50 bps pre-graduati
 - **Jobs:** Postgres-backed queue (`pg-boss`) — no Redis until volume demands it
 - **AI:** `ScreeningProvider` interface → `AnthropicProvider`, `OpenAIProvider`; structured JSON output validated with Zod
 - **GitHub:** REST API via fine-grained token (server-only)
-- **Solana:** `@solana/web3.js` + `@meteora-ag/dynamic-bonding-curve-sdk`; Squads multisig for treasury + partner fee wallet
+- **Solana:** `@solana/web3.js` + `@raydium-io/raydium-sdk-v2` (`raydium.launchpad.*`); Squads multisig for treasuries + the Fee Router
 - **Observability:** pino structured logs, Sentry, DB audit log (hash-chained)
 - **Tests:** Vitest (unit), SQL invariant tests (`db/test/run.sh`), Playwright (e2e)
 
@@ -37,7 +44,7 @@ src/
       fetchers/           # safeFetch (SSRF guard), github.ts, website.ts
       pipeline.ts         # validate → fetch → analyze → persist findings
     fees/                 # allocation math, Fee Router payout planner, reconciliation
-    launch/               # DBC config builder, tx preview, confirm, submit, verify
+    launch/               # LaunchLab pool builder, tx preview, confirm, submit, verify
     chain/                # RPC client, indexer for fee claims/payouts
     audit/
   lib/                    # supabase server client, auth guards, env (validated)
@@ -54,21 +61,27 @@ db/migrations, db/test
 - Launch rows can't reach `submitted` without founder confirmation + operator confirmation + stored tx preview.
 - `audit_log`, `status_transitions`, `fee_claims` are append-only; audit rows are SHA-256 hash-chained.
 
-## Fee mechanics on Meteora DBC
+## Fee mechanics on Raydium LaunchLab
 
-Per Meteora's docs, the DBC protocol takes **20% of every trading fee off the top** (not configurable by us). The remaining 80% is the **distributable fee**, which DBC splits between *partner* (us) and *creator* via `creator_trading_fee_percentage`.
+LaunchLab has three fee streams that a platform can capture. Raydium's own trade fee is charged on top and never enters our split. Everything Startit captures is the **distributable fee**, and all of it lands in one place: the **Fee Router** (Squads multisig vault).
 
-To produce Startit's 20/30/50 of distributable fees:
+| Stream | When | LaunchLab setting | Goes to |
+|---|---|---|---|
+| Platform fee | Pre-graduation, every trade | `fee_rate` (cap 500 bps) → `platform_fee_wallet` | Fee Router |
+| LP fee share | Post-graduation (CPMM) | `platform_scale` → Fee Key NFT → `platform_nft_wallet`; remainder burned | Fee Router |
+| CPMM creator fee | Post-graduation | `updatePlatformCpCreator` → Fee Router address | Fee Router |
+| LaunchLab creator fee | Pre-graduation | `creator_fee_rate` = **0** | — (founder paid by router instead) |
 
-| Setting | Value | Result |
-|---|---|---|
-| `creator_trading_fee_percentage` | 30 | Founder claims **30%** directly on-chain |
-| Partner fee claimer | Startit **Fee Router** (Squads multisig) | Receives 70% |
-| Fee Router payout | 20/70 → platform, 50/70 → community treasury | **20% platform, 50% community** |
+The Fee Router then pays out per each launch's approved `fee_config`: **20% platform · 30% founder · 50% community treasury.**
 
-Post-migration LP (locked) fees follow the same partner/creator ratio set in the config and route the same way.
+Why route the founder through the router too: LaunchLab caps the creator fee at 50 bps and new configs give the creator no post-migration LP share. One path for all three recipients keeps the split exact and reconciliation simple.
 
-**Custody note (disclosed publicly):** the community's 50% passes through the Fee Router multisig before reaching the treasury. Every claim and payout is indexed from confirmed transactions only and shown with tx signatures; nothing is simulated. Launch fees are a separate table and never enter the split.
+**LaunchLab constraints that shape ops:**
+- `fee_rate`, `platform_scale` and `updatePlatformCpCreator` are **platform-wide**, not per-token. Per-launch split differences live in our `fee_configs`, applied at payout.
+- `updatePlatformCpCreator` only affects future migrations and config updates are rate-limited per epoch — set it once, before the first launch.
+- Fees may arrive as WSOL; the router unwraps before paying SOL.
+
+**Custody (disclosed publicly):** all three shares pass through the Fee Router multisig. Raydium's docs describe this redistribution pattern but provide no built-in multi-recipient split. Every claim and payout is indexed from confirmed transactions only and shown with tx signatures — nothing is simulated. Launch fees are a separate table and never enter the split.
 
 ## Screening pipeline
 
@@ -84,13 +97,14 @@ Post-migration LP (locked) fees follow the same partner/creator ratio set in the
 |---|---|---|
 | **1** ✅ | Plan, schema, DB invariant tests | 14/14 SQL tests pass |
 | **2** | Next.js scaffold, Supabase auth + roles, 12-step application with drafts, applicant dashboard, admin review page, screening worker (GitHub + website + provider abstraction), audit views | Real application screened end-to-end on staging |
-| **3** | Fee config UI, agreements (wallet-signed hash), treasury records, DBC devnet launch with preview → dual confirm → submit → on-chain verify, fee indexer, Fee Router payouts + reconciliation | Devnet token launched, fees claimed and split with visible tx sigs |
+| **3** | Fee config UI, agreements (wallet-signed hash), treasury records, LaunchLab devnet launch with preview → dual confirm → submit → on-chain verify, fee indexer, Fee Router payouts + reconciliation | Devnet token launched, fees claimed and split with visible tx sigs |
 | **4** | Authz boundary tests, SSRF/prompt-injection corpus, duplicate/failed-job tests, payout failure + retry tests, e2e | CI green |
 | **5** | Staging + prod env, monitoring, backups/PITR, runbooks, incident response, mainnet audit checklist | Sign-off |
 
 ## Open items
 
 - **Push access:** this session can read the repo but pushes are refused. Install the Claude GitHub App on `SolCallit` (or reconnect GitHub in claude.ai settings) so commits land on a branch.
-- **Fee Router custody:** confirm the community share may route through a Startit-controlled multisig (alternative: DBC creator claimer set to a founder+community split contract — more trustless, more build/audit).
+- **Fee Router custody:** with LaunchLab, founder + community shares necessarily route through a Startit-controlled multisig. Alternative: a custom on-chain splitter program as the fee recipient — more trustless, more build + audit.
+- **Platform fee rate:** pick LaunchLab `fee_rate` (≤500 bps) and `platform_scale` — these apply to every token on Startit.
 - **Launch fee amount** and currency (SOL/USDC).
-- **Mainnet:** external review of DBC config + Fee Router before any mainnet launch.
+- **Mainnet:** external review of LaunchLab platform config + Fee Router before any mainnet launch.

@@ -386,8 +386,11 @@ create table launches (
   fee_config_id            uuid not null references fee_configs(id),
   network                  network_kind not null default 'solana-devnet',
   status                   launch_status not null default 'planned',
-  dbc_config_address       text,
-  pool_address             text,
+  launchlab_platform_config text,          -- Startit's LaunchLab platform config account
+  launchlab_pool_address   text,            -- bonding-curve pool
+  cpmm_pool_address        text,            -- set after graduation/migration
+  fee_key_nft_mint         text,            -- platform's post-migration LP Fee Key NFT
+  graduated_at             timestamptz,
   mint_address             text,
   total_supply_raw         numeric(39,0),
   decimals                 smallint,
@@ -422,13 +425,13 @@ create table launch_fee_payments (
 create table fee_claims (
   id             uuid primary key default gen_random_uuid(),
   launch_id      uuid not null references launches(id),
-  claimer        text not null check (claimer in ('partner', 'creator')),
+  source         text not null check (source in ('platform_fee', 'lp_fee_key', 'cpmm_creator_fee')),
   amount_raw     numeric(39,0) not null check (amount_raw >= 0),
   quote_mint     text not null,
   tx_signature   text not null,
   slot           bigint not null,
   observed_at    timestamptz not null default now(),
-  unique (tx_signature, launch_id, claimer)
+  unique (tx_signature, launch_id, source)
 );
 
 create table payouts (
@@ -650,7 +653,7 @@ create view public_projects with (security_barrier = true) as
 select a.public_ref, a.project_name, a.project_summary, a.token_name, a.ticker, a.chain,
        a.token_concept, a.insider_allocation_disclosure, a.status,
        fc.platform_bps, fc.founder_bps, fc.community_bps, fc.disclosed_at as fees_disclosed_at,
-       l.network, l.mint_address, l.pool_address, l.mint_authority_revoked, l.freeze_authority_revoked,
+       l.network, l.mint_address, l.launchlab_pool_address, l.cpmm_pool_address, l.mint_authority_revoked, l.freeze_authority_revoked,
        l.total_supply_raw, l.decimals, l.insider_allocations, l.tx_signature as launch_tx,
        t.address as treasury_address, t.is_multisig, t.threshold, t.control_rules
 from applications a
