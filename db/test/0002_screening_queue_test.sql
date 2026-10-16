@@ -124,3 +124,24 @@ end $$;
 
 reset role;
 \echo ALL SCREENING QUEUE TESTS PASSED
+
+-- review_queue respects RLS (security_invoker)
+set role authenticated;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000c');
+do $$ begin
+  -- Latest run for Lattice is the 3rd failed retry, so it has no findings of its own.
+  if (select latest_run_status from review_queue where project_name = 'Lattice') is distinct from 'failed' then
+    raise exception 'FAIL  operator should see latest run status';
+  end if;
+  if (select flagged_count + needs_review_count from review_queue where project_name = 'Lattice') <> 0 then
+    raise exception 'FAIL  counts should come from the latest run only';
+  end if;
+  raise notice 'PASS  review_queue shows latest run to staff, counted from latest run only';
+end $$;
+select pg_temp.as_user('00000000-0000-0000-0000-0000000000e1');
+do $$ begin
+  if (select count(*) from review_queue) <> 1 then raise exception 'FAIL  applicant should see only own row'; end if;
+  if (select latest_run_status from review_queue) is not null then raise exception 'FAIL  applicant can see screening runs via review_queue'; end if;
+  raise notice 'PASS  review_queue hides other applicants and screening internals from applicants';
+end $$;
+reset role;
