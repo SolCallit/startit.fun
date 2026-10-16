@@ -203,7 +203,7 @@ export function EvidenceUploader({ appId }: { appId: string }) {
         <label htmlFor="kind" className="font-medium text-ink">What does this file show?</label>
         <select id="kind" name="kind" defaultValue="authorization"
           className="rounded-md border border-line-strong bg-surface px-3 py-2.5 text-ink focus:border-cobalt focus:outline-none">
-          <option value="authorization">Proof I'm authorized to represent the company</option>
+          <option value="authorization">Proof I&apos;m authorized to represent the company</option>
           <option value="founder_approval">Signed founder approval letter</option>
           <option value="identity">Founder identity</option>
           <option value="other">Other supporting evidence</option>
