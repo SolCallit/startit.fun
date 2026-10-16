@@ -15,4 +15,4 @@ PSQL=(psql -h "$DATA" -p "$PORT" -U postgres -v ON_ERROR_STOP=1 -q)
 "${PSQL[@]}" -c 'create database startit_test'
 "${PSQL[@]}" -d startit_test -f "$ROOT/db/test/bootstrap_local.sql"
 for f in "$ROOT"/db/migrations/*.sql; do "${PSQL[@]}" -d startit_test -f "$f"; done
-"${PSQL[@]}" -d startit_test -f "$ROOT/db/test/0001_schema_test.sql"
+for t in "$ROOT"/db/test/0*_test.sql; do "${PSQL[@]}" -d startit_test -f "$t"; done

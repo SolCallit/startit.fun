@@ -13,3 +13,7 @@ do $$ begin
     create role authenticated nologin;
   end if;
 end $$;
+
+-- Columns the real Supabase auth.users has that our migrations' triggers read.
+alter table auth.users add column if not exists raw_user_meta_data jsonb;
+alter table auth.users add column if not exists email_confirmed_at timestamptz;

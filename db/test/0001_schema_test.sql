@@ -11,12 +11,13 @@ insert into auth.users (id) values
   ('00000000-0000-0000-0000-00000000000b'),  -- other applicant
   ('00000000-0000-0000-0000-00000000000c'),  -- operator
   ('00000000-0000-0000-0000-00000000000d');  -- screening service
-insert into profiles (id, display_name) select id, 'u' || right(id::text, 1) from auth.users;
+-- Profiles + applicant role are created by the on_auth_user_created trigger (0002).
 insert into user_roles (user_id, role) values
   ('00000000-0000-0000-0000-00000000000a', 'applicant'),
   ('00000000-0000-0000-0000-00000000000b', 'applicant'),
   ('00000000-0000-0000-0000-00000000000c', 'operator'),
-  ('00000000-0000-0000-0000-00000000000d', 'screening_service');
+  ('00000000-0000-0000-0000-00000000000d', 'screening_service')
+on conflict do nothing;
 
 create temp table t_ids (k text primary key, v uuid);
 grant all on t_ids to authenticated;
