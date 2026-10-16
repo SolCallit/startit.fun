@@ -13,8 +13,14 @@
     "worker:screening": "tsx --conditions react-server --env-file-if-exists=.env.local worker/screening.ts"
   },
   "dependencies": {
+    "@noble/curves": "^2.4.0",
+    "@solana/wallet-standard-features": "^1.5.0",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.118.0",
+    "@wallet-standard/app": "^1.1.1",
+    "@wallet-standard/base": "^1.1.1",
+    "@wallet-standard/features": "^1.1.1",
+    "bs58": "^6.0.0",
     "next": "16.4.2",
     "react": "19.3.0",
     "react-dom": "19.3.0",
