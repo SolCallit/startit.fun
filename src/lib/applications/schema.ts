@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { validateSplit } from "@/lib/domain/fees";
+import { isDefaultSplit, validateSplit } from "@/lib/domain/fees";
 
 /** Six screens covering the 12 required sections of the application. */
 export const STEPS = [
@@ -44,6 +44,7 @@ export const stepSchemas = {
     applicant_name: required("Your name", 120),
     contact_email: z.email("Enter a valid email address."),
     applicant_role: required("Your role", 200),
+    applicant_is_founder: z.enum(["yes", "no"], { error: "Tell us whether you're the founder." }),
   }),
   2: z.object({
     project_name: required("Project name", 120),
@@ -68,16 +69,21 @@ export const stepSchemas = {
   }),
   5: z
     .object({
+      applicant_is_founder: z.enum(["yes", "no"]).optional(),
       proposed_platform_bps: z.coerce.number().int(),
       proposed_founder_bps: z.coerce.number().int(),
+      proposed_launcher_bps: z.coerce.number().int(),
       proposed_community_bps: z.coerce.number().int(),
       split_reason: trimmed(1000),
     })
     .superRefine((v, ctx) => {
-      const r = validateSplit({ platformBps: v.proposed_platform_bps, founderBps: v.proposed_founder_bps, communityBps: v.proposed_community_bps });
+      const split = { platformBps: v.proposed_platform_bps, founderBps: v.proposed_founder_bps, launcherBps: v.proposed_launcher_bps, communityBps: v.proposed_community_bps };
+      const r = validateSplit(split);
       if (!r.ok) ctx.addIssue({ code: "custom", message: r.error, path: ["proposed_community_bps"] });
-      const isDefault = v.proposed_platform_bps === 2000 && v.proposed_founder_bps === 3000 && v.proposed_community_bps === 5000;
-      if (!isDefault && !v.split_reason) ctx.addIssue({ code: "custom", message: "Explain why you're proposing a different split.", path: ["split_reason"] });
+      if (v.applicant_is_founder === "yes" && v.proposed_launcher_bps !== 0) {
+        ctx.addIssue({ code: "custom", message: "You're launching your own project, so there's no separate launcher share.", path: ["proposed_launcher_bps"] });
+      }
+      if (!isDefaultSplit(split) && !v.split_reason) ctx.addIssue({ code: "custom", message: "Explain why you're proposing a different split.", path: ["split_reason"] });
     }),
   6: z.object({
     insider_allocation_disclosure: required("Insider allocation disclosure", 4000),

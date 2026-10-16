@@ -44,7 +44,7 @@ async function ReviewBody({ params }: PageProps<"/admin/applications/[id]">) {
     ...(OPERATOR_ACTIONS[app.status] ?? []),
     ...(SUSPENDABLE.includes(app.status) ? [{ to: "suspended" as const, label: "Suspend", needsReason: true, intent: "danger" as const }] : []),
   ];
-  const split = { platformBps: app.proposed_platform_bps, founderBps: app.proposed_founder_bps, communityBps: app.proposed_community_bps };
+  const split = { platformBps: app.proposed_platform_bps, founderBps: app.proposed_founder_bps, launcherBps: app.proposed_launcher_bps, communityBps: app.proposed_community_bps };
   const { latest } = screening;
 
   return (
@@ -59,7 +59,7 @@ async function ReviewBody({ params }: PageProps<"/admin/applications/[id]">) {
           {app.project_name ?? "Untitled"} {app.ticker ? <span className="text-muted">${app.ticker}</span> : null}
         </h1>
         <p className="mt-2 text-ink-soft">
-          Submitted by {bundle.applicantName ?? "unknown"} ({app.applicant_role ?? "role not given"}) · {app.contact_email ?? "no contact email"}
+          Submitted by {bundle.applicantName ?? "unknown"} ({app.applicant_role ?? "role not given"}{app.applicant_is_founder === false ? ", launching on the founder's behalf" : app.applicant_is_founder ? ", founder" : ""}) · {app.contact_email ?? "no contact email"}
         </p>
       </header>
 
@@ -130,7 +130,7 @@ async function ReviewBody({ params }: PageProps<"/admin/applications/[id]">) {
               <Item label="Milestones">{bundle.milestones.length ? <ul className="list-disc pl-5">{bundle.milestones.map((m) => <li key={m.id}>{m.title}</li>)}</ul> : null}</Item>
               <Item label="Insider allocations">{app.insider_allocation_disclosure}</Item>
               <Item label="Proposed split">
-                Community {bpsToPercent(split.communityBps)}, founder {bpsToPercent(split.founderBps)}, platform {bpsToPercent(split.platformBps)}
+                Community {bpsToPercent(split.communityBps)}, founder {bpsToPercent(split.founderBps)}, launcher {bpsToPercent(split.launcherBps)}, platform {bpsToPercent(split.platformBps)}
                 {!isDefaultSplit(split) ? (
                   <span className="mt-1 block text-review">Non-default split. Reason: {String(app.draft_payload?.split_reason ?? "none given")}</span>
                 ) : null}

@@ -69,9 +69,10 @@ async function Project({ params }: { params: PageProps<"/projects/[ref]">["param
             {p.platform_bps === null ? (
               <p className="text-ink-soft">Not disclosed yet. A split is published before launch.</p>
             ) : (
-              <dl className="grid grid-cols-3 gap-3 text-center">
+              <dl className="grid grid-cols-2 gap-3 text-center sm:grid-cols-4">
                 <div><dt className="text-[0.875rem] text-muted">Community</dt><dd className="text-[1.375rem] font-bold text-ink">{bpsToPercent(p.community_bps!)}</dd></div>
                 <div><dt className="text-[0.875rem] text-muted">Founder</dt><dd className="text-[1.375rem] font-bold text-ink">{bpsToPercent(p.founder_bps!)}</dd></div>
+                <div><dt className="text-[0.875rem] text-muted">Launcher</dt><dd className="text-[1.375rem] font-bold text-ink">{bpsToPercent(p.launcher_bps ?? 0)}</dd></div>
                 <div><dt className="text-[0.875rem] text-muted">Platform</dt><dd className="text-[1.375rem] font-bold text-ink">{bpsToPercent(p.platform_bps)}</dd></div>
               </dl>
             )}

@@ -66,8 +66,20 @@ export function StepForm({ appId, step, defaults }: { appId: string; step: StepN
           <Field name="applicant_name" label="Your full name" defaultValue={d.applicant_name} errors={e} autoComplete="name" />
           <Field name="contact_email" label="Contact email" type="email" defaultValue={d.contact_email} errors={e} autoComplete="email"
             hint="Use an address on the company's domain if you can — it helps us verify you." />
-          <Field name="applicant_role" label="Your role at the company" defaultValue={d.applicant_role} errors={e}
-            placeholder="Co-founder and CEO" hint="If you aren't the founder, say how you're authorized to act for them." />
+          <fieldset className="flex flex-col gap-2">
+            <legend className="mb-1 font-medium text-ink">Are you the founder of this startup?</legend>
+            <label className="flex items-start gap-3 text-ink-soft">
+              <input type="radio" name="applicant_is_founder" value="yes" defaultChecked={d.applicant_is_founder === "yes"} className="mt-1 accent-[var(--cobalt)]" />
+              <span>Yes, I&apos;m a founder</span>
+            </label>
+            <label className="flex items-start gap-3 text-ink-soft">
+              <input type="radio" name="applicant_is_founder" value="no" defaultChecked={d.applicant_is_founder === "no"} className="mt-1 accent-[var(--cobalt)]" />
+              <span>No, I found this startup and I&apos;m launching with the founder&apos;s approval. Launchers earn 5% of collected trading fees after launch.</span>
+            </label>
+            {e?.applicant_is_founder ? <p className="text-[0.875rem] text-flagged">{e.applicant_is_founder}</p> : null}
+          </fieldset>
+          <Field name="applicant_role" label="Your role" defaultValue={d.applicant_role} errors={e}
+            placeholder="Co-founder and CEO" hint="If you aren't the founder, say how you know the team and how they authorized you." />
         </>
       )}
 
@@ -145,11 +157,14 @@ export function StepForm({ appId, step, defaults }: { appId: string; step: StepN
 }
 
 function FeeFields({ defaults, errors }: { defaults: Record<string, string>; errors?: Record<string, string> }) {
-  const [p, setP] = useState(Number(defaults.proposed_platform_bps || 2000));
-  const [f, setF] = useState(Number(defaults.proposed_founder_bps || 3000));
-  const [c, setC] = useState(Number(defaults.proposed_community_bps || 5000));
-  const total = p + f + c;
-  const isDefault = p === 2000 && f === 3000 && c === 5000;
+  const isFounder = defaults.applicant_is_founder === "yes";
+  const num = (v: string | undefined, fallback: number) => (v === undefined || v === "" ? fallback : Number(v));
+  const [p, setP] = useState(num(defaults.proposed_platform_bps, isFounder ? 2000 : 1500));
+  const [f, setF] = useState(num(defaults.proposed_founder_bps, 3000));
+  const [l, setL] = useState(isFounder ? 0 : num(defaults.proposed_launcher_bps, 500));
+  const [c, setC] = useState(num(defaults.proposed_community_bps, 5000));
+  const total = p + f + l + c;
+  const isDefault = isFounder ? p === 2000 && f === 3000 && l === 0 && c === 5000 : p === 1500 && f === 3000 && l === 500 && c === 5000;
   const pct = (n: number) => (Number.isFinite(n) ? n / 100 : 0);
 
   const row = (label: string, name: string, v: number, set: (n: number) => void, hint: string) => (
@@ -170,17 +185,24 @@ function FeeFields({ defaults, errors }: { defaults: Record<string, string>; err
 
   return (
     <div className="flex flex-col gap-5">
+      <input type="hidden" name="applicant_is_founder" value={defaults.applicant_is_founder ?? ""} />
       <p className="text-ink-soft">
-        These shares apply to trading fees Startit actually collects, not to trading volume. The default is 20% platform,
-        30% founder and 50% community. A different split needs a reason and must be approved before launch.
+        These shares apply to trading fees Startit actually collects, not to trading volume.{" "}
+        {isFounder
+          ? "Because you're the founder, there's no separate launcher share: the default is 50% community, 30% founder and 20% platform."
+          : "The default is 50% community, 30% founder, 5% to you as launcher and 15% platform."}{" "}
+        A different split needs a reason and must be approved before launch.
       </p>
       {row("Community treasury", "proposed_community_bps", c, setC, "Held in a published wallet with disclosed controls")}
       {row("Founder", "proposed_founder_bps", f, setF, "Paid to the founder's wallet")}
+      {isFounder ? <input type="hidden" name="proposed_launcher_bps" value={0} /> :
+        row("Launcher (you)", "proposed_launcher_bps", l, setL, "Paid to your wallet after launch")}
       {row("Platform", "proposed_platform_bps", p, setP, "Startit operations, screening and security")}
       <p className={`text-[0.9375rem] font-semibold ${total === 10000 ? "text-verified" : "text-flagged"}`} aria-live="polite">
         Total: {total / 100}%{total === 10000 ? "" : " — must be exactly 100%"}
       </p>
       {errors?.proposed_community_bps ? <p className="text-[0.875rem] text-flagged">{errors.proposed_community_bps}</p> : null}
+      {errors?.proposed_launcher_bps ? <p className="text-[0.875rem] text-flagged">{errors.proposed_launcher_bps}</p> : null}
       {!isDefault ? (
         <div className="flex flex-col gap-1.5">
           <label htmlFor="split_reason" className="font-medium text-ink">Why a different split?</label>

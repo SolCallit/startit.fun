@@ -103,34 +103,40 @@ export default function Home() {
           <div>
             <h2 className="text-[1.75rem] leading-tight font-bold tracking-[-0.02em] text-ink">Half of trading fees go to the community</h2>
             <p className="mt-4 max-w-md leading-relaxed text-ink-soft">
-              The default split applies to fees actually collected, not trading volume. Any other split must be approved
-              and published before launch.
+              The default split applies to fees Startit actually collects, not trading volume. Any other split must be
+              approved and published before launch.
             </p>
           </div>
           <div>
             <div className="flex h-14 overflow-hidden rounded-md text-[0.9375rem] font-semibold" role="img"
-              aria-label={`Platform ${bpsToPercent(DEFAULT_SPLIT.platformBps)}, founder ${bpsToPercent(DEFAULT_SPLIT.founderBps)}, community ${bpsToPercent(DEFAULT_SPLIT.communityBps)}`}>
-              <div className="flex items-center bg-unverified-soft px-3 text-ink" style={{ width: "20%" }}>20%</div>
-              <div className="flex items-center bg-cobalt-soft px-3 text-ink" style={{ width: "30%" }}>30%</div>
+              aria-label={`Community ${bpsToPercent(DEFAULT_SPLIT.communityBps)}, founder ${bpsToPercent(DEFAULT_SPLIT.founderBps)}, launcher ${bpsToPercent(DEFAULT_SPLIT.launcherBps)}, platform ${bpsToPercent(DEFAULT_SPLIT.platformBps)}`}>
               <div className="flex items-center bg-cobalt px-3 text-cobalt-ink" style={{ width: "50%" }}>50%</div>
+              <div className="flex items-center bg-cobalt-soft px-3 text-ink" style={{ width: "30%" }}>30%</div>
+              <div className="flex items-center justify-center bg-review-soft text-ink" style={{ width: "5%" }} title="Launcher 5%"><span className="sr-only">5%</span></div>
+              <div className="flex items-center bg-unverified-soft px-3 text-ink" style={{ width: "15%" }}>15%</div>
             </div>
-            <dl className="mt-6 grid gap-5 sm:grid-cols-3">
+            <dl className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
               <div>
-                <dt className="font-semibold text-ink">Community treasury</dt>
+                <dt className="font-semibold text-ink">Community treasury · 50%</dt>
                 <dd className="mt-1 text-[0.9375rem] leading-relaxed text-ink-soft">Held in a published wallet with disclosed control rules.</dd>
               </div>
               <div>
-                <dt className="font-semibold text-ink">Founder</dt>
-                <dd className="mt-1 text-[0.9375rem] leading-relaxed text-ink-soft">For supporting the launch and building the product.</dd>
+                <dt className="font-semibold text-ink">Founder · 30%</dt>
+                <dd className="mt-1 text-[0.9375rem] leading-relaxed text-ink-soft">For approving the launch and building the product.</dd>
               </div>
               <div>
-                <dt className="font-semibold text-ink">Platform</dt>
+                <dt className="font-semibold text-ink">Launcher · 5%</dt>
+                <dd className="mt-1 text-[0.9375rem] leading-relaxed text-ink-soft">For whoever found the startup and brought the founder on board.</dd>
+              </div>
+              <div>
+                <dt className="font-semibold text-ink">Platform · 15%</dt>
                 <dd className="mt-1 text-[0.9375rem] leading-relaxed text-ink-soft">Funds screening, security and operations.</dd>
               </div>
             </dl>
             <p className="mt-6 text-[0.875rem] leading-relaxed text-muted">
-              Fees are collected into a Startit multisig and paid out from there. Every collection and payout is shown with
-              its transaction signature.
+              When a founder launches their own project there&apos;s no separate launcher, and the platform takes 20%. Fees are
+              collected into a Startit multisig and paid out from there. Every collection and payout is shown with its
+              transaction signature.
             </p>
           </div>
         </Container>

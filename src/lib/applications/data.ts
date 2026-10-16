@@ -21,7 +21,9 @@ export type ApplicationRow = {
   community_plan: string | null;
   proposed_platform_bps: number;
   proposed_founder_bps: number;
+  proposed_launcher_bps: number;
   proposed_community_bps: number;
+  applicant_is_founder: boolean | null;
   founder_approval_statement: string | null;
   permitted_branding: string | null;
   insider_allocation_disclosure: string | null;
@@ -89,7 +91,10 @@ export function stepDefaults(b: ApplicationBundle, step: number): Record<string,
   const s = (v: string | null | undefined) => v ?? "";
   switch (step) {
     case 1:
-      return { applicant_name: s(b.applicantName), contact_email: s(a.contact_email), applicant_role: s(a.applicant_role) };
+      return {
+        applicant_name: s(b.applicantName), contact_email: s(a.contact_email), applicant_role: s(a.applicant_role),
+        applicant_is_founder: a.applicant_is_founder === null ? "" : a.applicant_is_founder ? "yes" : "no",
+      };
     case 2:
       return {
         project_name: s(a.project_name), project_summary: s(a.project_summary),
@@ -105,8 +110,10 @@ export function stepDefaults(b: ApplicationBundle, step: number): Record<string,
       };
     case 5:
       return {
+        applicant_is_founder: a.applicant_is_founder === null ? "" : a.applicant_is_founder ? "yes" : "no",
         proposed_platform_bps: String(a.proposed_platform_bps),
         proposed_founder_bps: String(a.proposed_founder_bps),
+        proposed_launcher_bps: String(a.proposed_launcher_bps),
         proposed_community_bps: String(a.proposed_community_bps),
         split_reason: typeof a.draft_payload?.split_reason === "string" ? a.draft_payload.split_reason : "",
       };

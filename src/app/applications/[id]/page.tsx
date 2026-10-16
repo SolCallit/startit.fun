@@ -96,7 +96,7 @@ async function Status({ params, searchParams }: PageProps<"/applications/[id]">)
               </Item>
               <Item label="Token">{app.token_name} {app.ticker ? `($${app.ticker})` : ""} on Solana</Item>
               <Item label="Fee split">
-                Community {bpsToPercent(app.proposed_community_bps)}, founder {bpsToPercent(app.proposed_founder_bps)}, platform {bpsToPercent(app.proposed_platform_bps)}
+                Community {bpsToPercent(app.proposed_community_bps)}, founder {bpsToPercent(app.proposed_founder_bps)}, launcher {bpsToPercent(app.proposed_launcher_bps)}, platform {bpsToPercent(app.proposed_platform_bps)}
               </Item>
               <Item label="Evidence files">{bundle.evidence.length} uploaded</Item>
             </dl>

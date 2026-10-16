@@ -87,7 +87,8 @@ export async function screen(supabase: SupabaseClient, appId: string, provider: 
     community_plan: app.community_plan, milestones: (milestones ?? []).map((m) => m.title),
     founder_approval_statement: app.founder_approval_statement, permitted_branding: app.permitted_branding,
     insider_allocation_disclosure: app.insider_allocation_disclosure,
-    proposed_fee_split_bps: { platform: app.proposed_platform_bps, founder: app.proposed_founder_bps, community: app.proposed_community_bps },
+    applicant_is_founder: app.applicant_is_founder,
+    proposed_fee_split_bps: { platform: app.proposed_platform_bps, founder: app.proposed_founder_bps, launcher: app.proposed_launcher_bps, community: app.proposed_community_bps },
   };
 
   const user = buildUserPrompt(application, deterministic, promptSources);

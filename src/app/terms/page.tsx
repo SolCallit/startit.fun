@@ -28,7 +28,9 @@ export default function Terms() {
         <h2>Fees and custody</h2>
         <p>
           Trading fees captured by Startit on Raydium LaunchLab are collected into a Startit-controlled multisig and then
-          paid out by the disclosed split. Between collection and payout, Startit holds those funds. Every collection and
+          paid out by the disclosed split — by default 50% to the community treasury, 30% to the founder, 5% to the person
+          who launched the project and 15% to Startit (20% when the founder launched it themselves). Between collection and
+          payout, Startit holds those funds. Every collection and
           payout is published with its transaction signature. Raydium charges its own protocol fee, which is separate.
         </p>
         <h2>Smart contracts</h2>

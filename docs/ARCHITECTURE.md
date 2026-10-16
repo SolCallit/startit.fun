@@ -72,7 +72,9 @@ LaunchLab has three fee streams that a platform can capture. Raydium's own trade
 | CPMM creator fee | Post-graduation | `updatePlatformCpCreator` → Fee Router address | Fee Router |
 | LaunchLab creator fee | Pre-graduation | `creator_fee_rate` = **0** | — (founder paid by router instead) |
 
-The Fee Router then pays out per each launch's approved `fee_config`: **20% platform · 30% founder · 50% community treasury.**
+The Fee Router then pays out per each launch's approved `fee_config`: **15% platform · 30% founder · 5% launcher · 50% community treasury.** When the founder launches their own project there's no separate launcher and the platform takes 20% (20 / 30 / 0 / 50). The launcher reward starts only after launch and is forfeited if the project is suspended for misrepresentation.
+
+Pump.fun-style economics (decided 2026-10-16): traders pay ~1.25% total on the bonding curve, matching pump.fun (Startit `fee_rate` = 1.25% − Raydium's live protocol rate, read on-chain at setup); after graduation Startit keeps 100% of the LP-fee share (`platform_scale` = 1,000,000, nothing burned) plus redirected CPMM creator fees — pending devnet confirmation that the Fee Key cannot withdraw liquidity; no launch fee, founders pay only Solana network costs.
 
 Why route the founder through the router too: LaunchLab caps the creator fee at 50 bps and new configs give the creator no post-migration LP share. One path for all three recipients keeps the split exact and reconciliation simple.
 

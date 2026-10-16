@@ -42,7 +42,7 @@ export async function saveStep(appId: string, step: StepNumber, _prev: StepState
   if (!parsed.ok) return { errors: parsed.errors, values };
 
   const supabase = await createClient();
-  const { data: app } = await supabase.from("applications").select("id, status, draft_payload, applicant_id").eq("id", appId).maybeSingle();
+  const { data: app } = await supabase.from("applications").select("id, status, draft_payload, applicant_id, applicant_is_founder").eq("id", appId).maybeSingle();
   if (!app || app.applicant_id !== user.id) return { errors: { _form: "Application not found." } };
   if (!EDITABLE.includes(app.status)) return { errors: { _form: "This application is locked while it's being reviewed." } };
 
@@ -58,6 +58,14 @@ export async function saveStep(appId: string, step: StepNumber, _prev: StepState
       }
       update.contact_email = orNull(values.contact_email);
       update.applicant_role = orNull(values.applicant_role);
+      if (values.applicant_is_founder === "yes" || values.applicant_is_founder === "no") {
+        const isFounder = values.applicant_is_founder === "yes";
+        update.applicant_is_founder = isFounder;
+        // When who's launching changes, reset to that case's default split (DB enforces no launcher share on self-launch).
+        if (app.applicant_is_founder !== isFounder) Object.assign(update, isFounder
+          ? { proposed_platform_bps: 2000, proposed_founder_bps: 3000, proposed_launcher_bps: 0, proposed_community_bps: 5000 }
+          : { proposed_platform_bps: 1500, proposed_founder_bps: 3000, proposed_launcher_bps: 500, proposed_community_bps: 5000 });
+      }
       break;
     }
     case 2: {
@@ -99,9 +107,10 @@ export async function saveStep(appId: string, step: StepNumber, _prev: StepState
       break;
     }
     case 5: {
-      const p = Number(values.proposed_platform_bps), f = Number(values.proposed_founder_bps), c = Number(values.proposed_community_bps);
-      if ([p, f, c].every(Number.isInteger) && p + f + c === 10000) {
-        Object.assign(update, { proposed_platform_bps: p, proposed_founder_bps: f, proposed_community_bps: c });
+      const p = Number(values.proposed_platform_bps), f = Number(values.proposed_founder_bps);
+      const l = Number(values.proposed_launcher_bps), c = Number(values.proposed_community_bps);
+      if ([p, f, l, c].every(Number.isInteger) && p + f + l + c === 10000) {
+        Object.assign(update, { proposed_platform_bps: p, proposed_founder_bps: f, proposed_launcher_bps: l, proposed_community_bps: c });
       }
       update.draft_payload = { ...(app.draft_payload ?? {}), split_reason: orNull(values.split_reason) };
       break;

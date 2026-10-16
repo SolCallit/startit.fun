@@ -18,6 +18,7 @@ export type PublicProject = {
   platform_bps: number | null;
   founder_bps: number | null;
   community_bps: number | null;
+  launcher_bps: number | null;
   fees_disclosed_at: string | null;
   network: string | null;
   mint_address: string | null;
