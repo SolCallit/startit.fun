@@ -39,10 +39,17 @@ export function supabasePublicEnv() {
   return parsed.data;
 }
 
+function parseOrExplain<T extends z.ZodType>(schema: T, what: string): z.infer<T> {
+  const r = schema.safeParse(process.env);
+  if (r.success) return r.data;
+  const keys = [...new Set(r.error.issues.map((i) => String(i.path[0])))].join(", ");
+  throw new Error(`${what} is not configured. Missing or invalid: ${keys}. See .env.example.`);
+}
+
 export function supabaseServiceEnv() {
-  return { ...supabasePublicEnv(), ...serverSchema.parse(process.env) };
+  return { ...supabasePublicEnv(), ...parseOrExplain(serverSchema, "Supabase service access") };
 }
 
 export function screeningEnv() {
-  return screeningSchema.parse(process.env);
+  return parseOrExplain(screeningSchema, "AI screening");
 }

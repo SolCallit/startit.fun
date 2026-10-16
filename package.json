@@ -9,7 +9,8 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:db": "bash db/test/run.sh",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "worker:screening": "tsx --conditions react-server --env-file-if-exists=.env.local worker/screening.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
@@ -18,6 +19,7 @@
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "server-only": "^0.0.1",
+    "undici": "^8.12.2",
     "zod": "^4.6.7"
   },
   "devDependencies": {
@@ -28,6 +30,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.4.2",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5",
     "vitest": "^5.0.5"
   },

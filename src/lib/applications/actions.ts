@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { screenSoon } from "@/lib/screening/trigger";
 import { EDITABLE, getApplicationBundle, stepDefaults, type LinkKind } from "./data";
 import { EVIDENCE_MIME, MAX_EVIDENCE_BYTES, STEPS, parseStep, type FieldErrors, type StepNumber } from "./schema";
 
@@ -146,6 +147,7 @@ async function submitAfterFinalStep(appId: string): Promise<StepState> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("submit_application", { p_app: appId });
   if (error) return { errors: { _form: `Couldn't submit: ${error.message}` } };
+  screenSoon();
   redirect(`/applications/${appId}?submitted=1`);
 }
 
@@ -197,6 +199,7 @@ export async function resubmitApplication(appId: string) {
   const supabase = await createClient();
   const { error } = await supabase.rpc("submit_application", { p_app: appId });
   if (error) throw new Error(error.message);
+  screenSoon();
   revalidatePath(`/applications/${appId}`);
   redirect(`/applications/${appId}?submitted=1`);
 }

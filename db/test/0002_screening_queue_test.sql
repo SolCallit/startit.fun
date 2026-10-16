@@ -145,3 +145,18 @@ do $$ begin
   raise notice 'PASS  review_queue hides other applicants and screening internals from applicants';
 end $$;
 reset role;
+
+-- 0004: screening service can read applications but not operator notes
+set role authenticated;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000d');
+do $$ begin
+  if (select count(*) from applications) = 0 then raise exception 'FAIL  screening service cannot read applications'; end if;
+  if (select count(*) from operator_notes) <> 0 then raise exception 'FAIL  screening service can read operator notes'; end if;
+  raise notice 'PASS  screening service reads applications, not operator notes';
+end $$;
+update applications set project_name = 'pwned';  -- RLS: matches 0 rows, no error
+reset role;
+do $$ begin
+  if exists (select 1 from applications where project_name = 'pwned') then raise exception 'FAIL  screening service could edit applications'; end if;
+  raise notice 'PASS  screening service cannot edit applications';
+end $$;
