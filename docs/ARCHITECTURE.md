@@ -1,6 +1,6 @@
 # startit.fun — Architecture & Implementation Plan
 
-Status: **Phase 1 complete** (2026-10-16). Repo was empty (README + MIT license). Greenfield build.
+Status: **Phase 2 complete** (2026-10-16): app, auth, application workflow, operator review, AI screening. Phase 3 (fees + LaunchLab devnet launch) next.
 
 ## Decisions locked
 
@@ -24,11 +24,11 @@ Program IDs (cross-check against `api-v3.raydium.io/main/info` before signing):
 
 - **Web:** Next.js (App Router) · React · TypeScript (strict) · Tailwind
 - **DB/Auth/Storage:** Supabase Postgres + Auth + private Storage bucket for evidence
-- **Jobs:** Postgres-backed queue (`pg-boss`) — no Redis until volume demands it
+- **Jobs:** Postgres-backed queue via `claim_next_screening()` (`FOR UPDATE SKIP LOCKED`); runs after submit, from a cron endpoint, or a worker script
 - **AI:** `ScreeningProvider` interface → `AnthropicProvider`, `OpenAIProvider`; structured JSON output validated with Zod
 - **GitHub:** REST API via fine-grained token (server-only)
 - **Solana:** `@solana/web3.js` + `@raydium-io/raydium-sdk-v2` (`raydium.launchpad.*`); Squads multisig for treasuries + the Fee Router
-- **Observability:** pino structured logs, Sentry, DB audit log (hash-chained)
+- **Observability:** JSON structured logs, DB audit log (hash-chained); Sentry in Phase 5
 - **Tests:** Vitest (unit), SQL invariant tests (`db/test/run.sh`), Playwright (e2e)
 
 ## Module layout (one Next.js app, clear boundaries — no microservices)
@@ -96,14 +96,13 @@ Why route the founder through the router too: LaunchLab caps the creator fee at 
 | Phase | Deliverable | Done when |
 |---|---|---|
 | **1** ✅ | Plan, schema, DB invariant tests | 14/14 SQL tests pass |
-| **2** | Next.js scaffold, Supabase auth + roles, 12-step application with drafts, applicant dashboard, admin review page, screening worker (GitHub + website + provider abstraction), audit views | Real application screened end-to-end on staging |
+| **2** ✅ | Next.js scaffold, Supabase auth + roles, 12-step application with drafts, applicant dashboard, admin review page, screening worker (GitHub + website + provider abstraction), audit views | Built; 69 unit + 29 SQL tests pass. Needs a live Supabase project to run end-to-end |
 | **3** | Fee config UI, agreements (wallet-signed hash), treasury records, LaunchLab devnet launch with preview → dual confirm → submit → on-chain verify, fee indexer, Fee Router payouts + reconciliation | Devnet token launched, fees claimed and split with visible tx sigs |
 | **4** | Authz boundary tests, SSRF/prompt-injection corpus, duplicate/failed-job tests, payout failure + retry tests, e2e | CI green |
 | **5** | Staging + prod env, monitoring, backups/PITR, runbooks, incident response, mainnet audit checklist | Sign-off |
 
 ## Open items
 
-- **Push access:** this session can read the repo but pushes are refused. Install the Claude GitHub App on `SolCallit` (or reconnect GitHub in claude.ai settings) so commits land on a branch.
 - **Fee Router custody:** with LaunchLab, founder + community shares necessarily route through a Startit-controlled multisig. Alternative: a custom on-chain splitter program as the fee recipient — more trustless, more build + audit.
 - **Platform fee rate:** pick LaunchLab `fee_rate` (≤500 bps) and `platform_scale` — these apply to every token on Startit.
 - **Launch fee amount** and currency (SOL/USDC).
