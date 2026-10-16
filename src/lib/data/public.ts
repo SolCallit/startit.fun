@@ -67,3 +67,18 @@ export async function getPublicProject(ref: string) {
   if (!project) return null;
   return { project: project as PublicProject, findings: (findings ?? []) as PublicFinding[] };
 }
+
+export type PublicFeeClaim = { public_ref: string; source: "platform_fee" | "lp_fee_key" | "cpmm_creator_fee"; amount_raw: string; tx_signature: string; observed_at: string };
+export type PublicPayout = { public_ref: string; recipient: "platform" | "founder" | "launcher" | "community"; recipient_address: string; amount_raw: string; status: string; tx_signature: string | null; updated_at: string };
+
+export async function getPublicFees(ref?: string): Promise<{ connected: false } | { connected: true; claims: PublicFeeClaim[]; payouts: PublicPayout[] }> {
+  await connection();
+  if (!isSupabaseConfigured()) return { connected: false };
+  const supabase = createAnonClient();
+  let c = supabase.from("public_fee_claims").select("public_ref, source, amount_raw, tx_signature, observed_at").order("observed_at", { ascending: false }).limit(200);
+  let p = supabase.from("public_payouts").select("public_ref, recipient, recipient_address, amount_raw, status, tx_signature, updated_at").order("updated_at", { ascending: false }).limit(400);
+  if (ref) { c = c.eq("public_ref", ref); p = p.eq("public_ref", ref); }
+  const [{ data: claims, error: e1 }, { data: payouts, error: e2 }] = await Promise.all([c, p]);
+  if (e1 || e2) throw new Error(`Couldn't load fee records: ${(e1 ?? e2)!.message}`);
+  return { connected: true, claims: (claims ?? []) as PublicFeeClaim[], payouts: (payouts ?? []) as PublicPayout[] };
+}

@@ -11,7 +11,10 @@ export default function Admin() {
   return (
     <Container className="py-12">
       <PageHeader title="Review queue" lede="Applications waiting on a decision, and the state of every launch and payout."
-        actions={<Link href="/admin/settings" className="rounded-md border border-line-strong bg-surface px-3 py-2 font-semibold text-ink hover:border-ink">Platform settings</Link>} />
+        actions={<>
+          <Link href="/admin/payouts" className="rounded-md border border-line-strong bg-surface px-3 py-2 font-semibold text-ink hover:border-ink">Payouts</Link>
+          <Link href="/admin/settings" className="rounded-md border border-line-strong bg-surface px-3 py-2 font-semibold text-ink hover:border-ink">Platform settings</Link>
+        </>} />
       <Suspense fallback={<p className="text-muted">Loading…</p>}>
         <Overview />
       </Suspense>

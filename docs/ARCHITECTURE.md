@@ -1,6 +1,6 @@
 # startit.fun — Architecture & Implementation Plan
 
-Status: **Phase 2 complete** (2026-10-16): app, auth, application workflow, operator review, AI screening. Phase 3 (fees + LaunchLab devnet launch) next.
+Status: **Phase 3 built** (2026-10-16): four-way split, launch configuration with wallet-signed terms, LaunchLab devnet launch with on-chain verification, fee indexing, Squads payout proposals, reconciliation. Not yet exercised against devnet. Phase 4 (security testing) next.
 
 ## Decisions locked
 
@@ -99,7 +99,7 @@ Why route the founder through the router too: LaunchLab caps the creator fee at 
 |---|---|---|
 | **1** ✅ | Plan, schema, DB invariant tests | 14/14 SQL tests pass |
 | **2** ✅ | Next.js scaffold, Supabase auth + roles, 12-step application with drafts, applicant dashboard, admin review page, screening worker (GitHub + website + provider abstraction), audit views | Built; 69 unit + 29 SQL tests pass. Needs a live Supabase project to run end-to-end |
-| **3** | Fee config UI, agreements (wallet-signed hash), treasury records, LaunchLab devnet launch with preview → dual confirm → submit → on-chain verify, fee indexer, Fee Router payouts + reconciliation | Devnet token launched, fees claimed and split with visible tx sigs |
+| **3** ✅ | Fee config UI, agreements (wallet-signed hash), treasury records, LaunchLab devnet launch with preview → dual confirm → submit → on-chain verify, fee indexer, Fee Router payouts + reconciliation | Built; 105 unit + 64 SQL tests pass. Needs a devnet run (README lists what to confirm) |
 | **4** | Authz boundary tests, SSRF/prompt-injection corpus, duplicate/failed-job tests, payout failure + retry tests, e2e | CI green |
 | **5** | Staging + prod env, monitoring, backups/PITR, runbooks, incident response, mainnet audit checklist | Sign-off |
 

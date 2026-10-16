@@ -5,6 +5,7 @@ import { requireStaff } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { FeeRouterForm } from "./settings-form";
 import { PlatformSetup } from "./platform-setup";
+import { PayoutSettingsForm } from "./payout-settings-form";
 
 export const metadata: Metadata = { title: "Platform settings" };
 
@@ -30,6 +31,13 @@ async function Body() {
         <FeeRouterForm current={data?.value ?? null} />
         {data ? <p className="mt-4 text-[0.8125rem] text-muted">Last changed {new Date(data.updated_at).toLocaleString()}.</p> : null}
       </Panel>
+      <div className="mt-6">
+        <Panel title="Payouts">
+          {user.roles.includes("admin") ? (
+            <PayoutSettingsForm multisig={get("fee_router_multisig")?.value ?? null} platform={get("platform_treasury_address")?.value ?? null} />
+          ) : <p className="text-ink-soft">Multisig {get("fee_router_multisig")?.value ?? "not set"}; platform wallet {get("platform_treasury_address")?.value ?? "not set"}.</p>}
+        </Panel>
+      </div>
       <div className="mt-6">
         <Panel title="Raydium LaunchLab platform (devnet)">
           {!data ? <p className="text-ink-soft">Set the Fee Router first.</p> : !user.roles.includes("admin") ? (

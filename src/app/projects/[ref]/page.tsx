@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Container, FindingBadge, Mono, Notice, Panel, StatusBadge } from "@/components/ui";
-import { getPublicProject } from "@/lib/data/public";
+import { getPublicFees, getPublicProject } from "@/lib/data/public";
+import { FeeRecordLists, FeeTotals } from "@/components/fee-records";
 import { bpsToPercent } from "@/lib/domain/fees";
 
 export default function ProjectPage({ params }: PageProps<"/projects/[ref]">) {
@@ -93,7 +94,22 @@ async function Project({ params }: { params: PageProps<"/projects/[ref]">["param
           </Panel>
         </div>
       </div>
+      {p.status === "launched" ? <ProjectFees refId={p.public_ref} /> : null}
     </>
+  );
+}
+
+async function ProjectFees({ refId }: { refId: string }) {
+  const r = await getPublicFees(refId);
+  if (!r.connected) return null;
+  return (
+    <section className="mt-10">
+      <h2 className="mb-4 text-[1.375rem] font-semibold text-ink">Fees collected and paid</h2>
+      <div className="flex flex-col gap-6">
+        <FeeTotals claims={r.claims} payouts={r.payouts} />
+        <FeeRecordLists claims={r.claims} payouts={r.payouts} />
+      </div>
+    </section>
   );
 }
 

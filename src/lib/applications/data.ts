@@ -50,11 +50,11 @@ export async function listMyApplications(userId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("applications")
-    .select("id, public_ref, status, project_name, ticker, updated_at, submitted_at")
+    .select("id, public_ref, status, project_name, ticker, updated_at, submitted_at, applicant_is_founder")
     .eq("applicant_id", userId)
     .order("updated_at", { ascending: false });
   if (error) throw new Error(error.message);
-  return data as Pick<ApplicationRow, "id" | "public_ref" | "status" | "project_name" | "ticker" | "updated_at" | "submitted_at">[];
+  return data as Pick<ApplicationRow, "id" | "public_ref" | "status" | "project_name" | "ticker" | "updated_at" | "submitted_at" | "applicant_is_founder">[];
 }
 
 /** Loads an application with everything the applicant (or staff) may see. RLS decides access. */

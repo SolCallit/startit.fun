@@ -13,6 +13,7 @@ export function SiteHeader() {
         </Link>
         <nav aria-label="Main" className="flex items-center gap-5 text-[0.9375rem] font-medium text-ink-soft">
           <Link href="/explore" className="hover:text-ink">Projects</Link>
+          <Link href="/fees" className="hidden hover:text-ink sm:inline">Fees</Link>
           <Link href="/methodology" className="hidden hover:text-ink sm:inline">How we verify</Link>
           <Suspense fallback={<span className="w-16" aria-hidden />}>
             <AccountNav />

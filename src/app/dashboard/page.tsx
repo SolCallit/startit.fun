@@ -4,6 +4,8 @@ import { Suspense } from "react";
 import { ButtonLink, Container, EmptyState, Mono, PageHeader, StatusBadge } from "@/components/ui";
 import { requireUser } from "@/lib/auth";
 import { listMyApplications } from "@/lib/applications/data";
+import { getPublicFees } from "@/lib/data/public";
+import { sol } from "@/components/fee-records";
 
 export const metadata: Metadata = { title: "My applications" };
 
@@ -28,7 +30,10 @@ async function Applications() {
       </EmptyState>
     );
   }
+  const launched = apps.filter((a) => a.status === "launched" && a.applicant_is_founder === false);
   return (
+    <div className="flex flex-col gap-10">
+    {launched.length ? <LauncherRewards refs={launched.map((a) => a.public_ref)} /> : null}
     <ul className="divide-y divide-line rounded-lg border border-line bg-surface">
       {apps.map((a) => (
         <li key={a.id}>
@@ -45,5 +50,24 @@ async function Applications() {
         </li>
       ))}
     </ul>
+    </div>
+  );
+}
+
+/** What a launcher has earned: their 5% share, from the public payout records. */
+async function LauncherRewards({ refs }: { refs: string[] }) {
+  const all = await Promise.all(refs.map((r) => getPublicFees(r)));
+  const payouts = all.flatMap((r) => (r.connected ? r.payouts : [])).filter((p) => p.recipient === "launcher");
+  const total = (st: string[]) => payouts.filter((p) => st.includes(p.status)).reduce((a, p) => a + BigInt(p.amount_raw), BigInt(0));
+  return (
+    <section className="rounded-lg border border-line bg-surface p-5">
+      <h2 className="font-semibold text-ink">Launcher rewards</h2>
+      <p className="mt-1 text-[0.9375rem] text-ink-soft">Your 5% of trading fees collected on projects you launched. Paid automatically from the Fee Router multisig.</p>
+      <dl className="mt-4 grid grid-cols-3 gap-4">
+        <div><dt className="text-[0.8125rem] text-muted">Paid</dt><dd className="text-[1.25rem] font-bold text-ink">{sol(total(["confirmed"]))}</dd></div>
+        <div><dt className="text-[0.8125rem] text-muted">On the way</dt><dd className="text-[1.25rem] font-bold text-ink">{sol(total(["pending", "submitted"]))}</dd></div>
+        <div><dt className="text-[0.8125rem] text-muted">Projects</dt><dd className="text-[1.25rem] font-bold text-ink">{refs.length}</dd></div>
+      </dl>
+    </section>
   );
 }

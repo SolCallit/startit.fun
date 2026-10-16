@@ -17,7 +17,10 @@ Next.js 16 (App Router, Cache Components) · TypeScript · Tailwind v4 · Supaba
 | Applicant dashboard, status timeline, evidence requests + resubmit | Working once Supabase is connected |
 | Operator dashboard + review page, decisions, notes, decision history | Working once Supabase is connected |
 | AI screening (Claude or OpenAI), SSRF-guarded fetching, GitHub checks | Working once Supabase + an AI key are connected |
-| Fee config, agreements, LaunchLab devnet launch, payouts | **Not built yet** (Phase 3). No financial figures are simulated anywhere |
+| Four-way fee split (15/30/5/50; 20/30/0/50 on self-launch), launcher rewards | Working |
+| Launch configuration, one-time signing links, founder/launcher wallet signatures | Working once Supabase is connected |
+| LaunchLab platform setup + devnet token launch (prepare → confirm → sign → verify) | Built; **not yet run against devnet** (see below) |
+| Fee indexing, Squads payout proposals, reconciliation + auto-pause, public /fees | Built; **not yet run against devnet** |
 
 ## Local development
 
@@ -76,6 +79,18 @@ select id, 'screening_service' from auth.users where email = 'screening@yourdoma
 - **Self-hosted:** `pnpm worker:screening` polls every 30 s (`--once` to drain and exit).
 
 A run that fails three times sends the application to human review with the failure recorded.
+
+## Launching on devnet (Phase 3)
+
+Order of operations for an admin:
+
+1. **Platform settings → Fee Router:** the Squads multisig *vault* address that receives all fees.
+2. **Platform settings → Payouts:** the Squads *multisig* account (its vault #0 must equal the Fee Router — checked) and Startit's own platform wallet (a different multisig).
+3. **Platform settings → LaunchLab platform:** connect the admin wallet (hardware wallet), sign step 1 (creates the platform with the live fee rate) and step 2 (redirects post-graduation creator fees to the Fee Router).
+4. Per project: approve → *Start launch configuration* → fill the launch page → send signing links → founder (and launcher) sign → *Mark ready* → *Launch on devnet* (four steps) → verified on-chain → status becomes Launched.
+5. Point a scheduler at `GET /api/cron/fees` (`Authorization: Bearer $CRON_SECRET`) to index fees, plan payouts, confirm executed payouts and reconcile.
+
+**What still needs a live devnet run before anyone relies on it:** LaunchLab's actual mint/freeze authority after launch (verification refuses to finalize if a person holds either), whether platform-fee claims arrive as SOL or wrapped SOL (the indexer currently counts native SOL), the CPMM config index used for graduation, and the Fee Key's exact rights. Mainnet stays locked in code until an external review.
 
 ## Security model (short version)
 
