@@ -58,6 +58,9 @@ async function ReviewBody({ params }: PageProps<"/admin/applications/[id]">) {
         <h1 className="mt-4 text-[2.25rem] leading-tight font-bold tracking-[-0.02em] text-ink">
           {app.project_name ?? "Untitled"} {app.ticker ? <span className="text-muted">${app.ticker}</span> : null}
         </h1>
+        {["launch_config_pending", "ready_for_deployment", "launched"].includes(app.status) ? (
+          <p className="mt-3"><Link href={`/admin/applications/${id}/launch`} className="font-semibold text-cobalt">Open launch configuration</Link></p>
+        ) : null}
         <p className="mt-2 text-ink-soft">
           Submitted by {bundle.applicantName ?? "unknown"} ({app.applicant_role ?? "role not given"}{app.applicant_is_founder === false ? ", launching on the founder's behalf" : app.applicant_is_founder ? ", founder" : ""}) · {app.contact_email ?? "no contact email"}
         </p>
