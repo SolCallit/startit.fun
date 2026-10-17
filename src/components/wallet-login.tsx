@@ -5,16 +5,23 @@ import { usePathname, useRouter } from "next/navigation";
 import { getWallets } from "@wallet-standard/app";
 import type { Wallet } from "@wallet-standard/base";
 import { StandardConnect, type StandardConnectFeature } from "@wallet-standard/features";
-import { SolanaSignMessage, type SolanaSignMessageFeature } from "@solana/wallet-standard-features";
+import {
+  SolanaSignIn,
+  SolanaSignMessage,
+  type SolanaSignInFeature,
+  type SolanaSignMessageFeature,
+} from "@solana/wallet-standard-features";
 import { createBrowserSupabase } from "@/lib/supabase/browser";
+import { buildSiwsMessage } from "@/lib/siws";
 
-type LoginWallet = Wallet & { features: StandardConnectFeature & SolanaSignMessageFeature };
+type LoginWallet = Wallet & { features: StandardConnectFeature & Partial<SolanaSignInFeature & SolanaSignMessageFeature> };
 
+const isSolana = (w: Wallet) => w.chains.some((c) => c.startsWith("solana:"));
 const canLogin = (w: Wallet): w is LoginWallet =>
-  StandardConnect in w.features && SolanaSignMessage in w.features && w.chains.some((c) => c.startsWith("solana:"));
+  isSolana(w) && StandardConnect in w.features && (SolanaSignIn in w.features || SolanaSignMessage in w.features);
 
 /** Shown in the wallet's sign-in prompt. Single line (Sign in with Solana requirement). */
-const STATEMENT = "Sign in to Startit.fun. This only proves you own this wallet: no transaction, no fee.";
+const STATEMENT = "Sign in to Startit.fun. This only proves you own this wallet. No transaction, no fee.";
 
 const INSTALL = [
   { name: "Phantom", url: "https://phantom.com/download" },
@@ -34,25 +41,37 @@ function useLoginWallets() {
   return wallets;
 }
 
-/** Connects a Wallet Standard wallet and signs the Sign-in-with-Solana message through Supabase Auth. */
+/**
+ * Signs a Sign-in-with-Solana message and exchanges it for a Supabase session.
+ * Prefers the wallet's own `solana:signIn` (the wallet writes and shows the message itself);
+ * otherwise connects and signs a standard-format message we build.
+ */
 async function signInWith(w: LoginWallet) {
-  const { accounts } = await w.features[StandardConnect].connect();
-  const account = accounts.find((a) => a.chains.some((c) => c.startsWith("solana:"))) ?? accounts[0];
-  if (!account) throw new Error("The wallet didn't share an account.");
-
   const supabase = createBrowserSupabase();
-  const { error } = await supabase.auth.signInWithWeb3({
-    chain: "solana",
-    statement: STATEMENT,
-    wallet: {
-      publicKey: { toBase58: () => account.address },
-      signMessage: async (message: Uint8Array) => {
-        const [out] = await w.features[SolanaSignMessage].signMessage({ account, message });
-        if (!out) throw new Error("The wallet returned no signature.");
-        return out.signature;
-      },
-    },
-  });
+  const { host, href } = window.location;
+  const issuedAt = new Date().toISOString();
+  let message: string;
+  let signature: Uint8Array;
+
+  const signIn = w.features[SolanaSignIn];
+  if (signIn) {
+    const [out] = await signIn.signIn({ domain: host, uri: href, version: "1", statement: STATEMENT, issuedAt });
+    if (!out) throw new Error("The wallet returned no signature.");
+    message = new TextDecoder().decode(out.signedMessage);
+    signature = out.signature;
+  } else {
+    const signMessage = w.features[SolanaSignMessage];
+    if (!signMessage) throw new Error("This wallet can't sign messages.");
+    const { accounts } = await w.features[StandardConnect].connect();
+    const account = accounts.find((a) => a.chains.some((c) => c.startsWith("solana:"))) ?? accounts[0];
+    if (!account) throw new Error("The wallet didn't share an account.");
+    message = buildSiwsMessage({ domain: host, address: account.address, statement: STATEMENT, uri: href, issuedAt });
+    const [out] = await signMessage.signMessage({ account, message: new TextEncoder().encode(message) });
+    if (!out) throw new Error("The wallet returned no signature.");
+    signature = out.signature;
+  }
+
+  const { error } = await supabase.auth.signInWithWeb3({ chain: "solana", message, signature });
   if (error) throw new Error(friendly(error.message));
 }
 
