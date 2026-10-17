@@ -1,0 +1,50 @@
+{
+  "name": "startit-fun",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "test": "vitest run",
+    "test:db": "bash db/test/run.sh",
+    "typecheck": "tsc --noEmit",
+    "worker:screening": "tsx --conditions react-server --env-file-if-exists=.env.local worker/screening.ts"
+  },
+  "dependencies": {
+    "@noble/curves": "^2.4.0",
+    "@raydium-io/raydium-sdk-v2": "0.2.74-alpha",
+    "@solana/spl-token": "^0.4.15",
+    "@solana/wallet-standard-features": "^1.5.0",
+    "@solana/web3.js": "^1.99.0",
+    "@sqds/multisig": "^2.1.4",
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.118.0",
+    "@wallet-standard/app": "^1.1.1",
+    "@wallet-standard/base": "^1.1.1",
+    "@wallet-standard/features": "^1.1.1",
+    "bn.js": "^5.2.5",
+    "bs58": "^6.0.0",
+    "next": "16.4.2",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "server-only": "^0.0.1",
+    "undici": "^8.12.2",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/turbopack": "^4",
+    "@types/bn.js": "^5.2.0",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.2",
+    "tailwindcss": "^4",
+    "tsx": "^4.23.15",
+    "typescript": "^5",
+    "vitest": "^5.0.5"
+  },
+  "packageManager": "pnpm@10.28.0"
+}
