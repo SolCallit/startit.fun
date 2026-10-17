@@ -14,3 +14,9 @@ do $$ begin
   if (select count(*) from status_transition_rules) = 0 then raise exception 'FAIL  rules were deleted'; end if;
   raise notice 'PASS  transition rules cannot be changed by users';
 end $$;
+
+-- 0010: applicants can't read another project's launch checklist
+set role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000e1', false);
+select pg_temp.expect_fail($$select launch_blockers('00000000-0000-0000-0000-00000000a001')$$, 'applicants cannot call launch_blockers');
+reset role;
