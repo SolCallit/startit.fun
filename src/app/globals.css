@@ -1,54 +1,35 @@
 @import "tailwindcss";
 
 /*
-  Startit — "verification ledger".
-  Cool paper, deep ink, cobalt for actions. Status colours carry meaning and are
-  only ever used for verification / application state.
+  Startit — shares Call-It's design language: deep navy, tactile raised controls,
+  Bricolage Grotesque for display, Schibsted Grotesk for text.
+  Blue is reserved for actions; mint / amber / rose only ever mean verification or status.
 */
 :root {
-  --paper: #f4f6f9;
-  --surface: #ffffff;
-  --ink: #0f1b2d;
-  --ink-soft: #3d4b5f;
-  --muted: #5b6b80;
-  --line: #d8dee7;
-  --line-strong: #b9c3d1;
-  --cobalt: #2346d6;
-  --cobalt-ink: #ffffff;
-  --cobalt-soft: #e7ecfd;
+  --paper: #0b1b27;        /* page */
+  --surface: #10263a;      /* cards, inputs */
+  --surface-2: #16314a;    /* hover, raised */
+  --ink: #ffffff;
+  --ink-soft: #c9d6e2;
+  --muted: #8fa6ba;
+  --line: #1e3a54;
+  --line-strong: #2b4d6b;
+  --cobalt: #4da8ff;       /* actions */
+  --cobalt-ink: #06121c;
+  --cobalt-soft: #12324f;
 
-  --verified: #127a4a;
-  --verified-soft: #e3f3ea;
-  --review: #a35f00;
-  --review-soft: #fdf1dc;
-  --flagged: #c2312b;
-  --flagged-soft: #fbe6e5;
-  --unverified: #5b6b80;
-  --unverified-soft: #eceff3;
-}
+  --verified: #3ddc97;
+  --verified-soft: #0f3529;
+  --review: #f5b84d;
+  --review-soft: #3a2c10;
+  --flagged: #ff6b8a;
+  --flagged-soft: #3f1622;
+  --unverified: #9fb3c6;
+  --unverified-soft: #182f45;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --paper: #0c1522;
-    --surface: #121e2f;
-    --ink: #e8edf4;
-    --ink-soft: #c3ccd8;
-    --muted: #8d9bb0;
-    --line: #23324a;
-    --line-strong: #34465f;
-    --cobalt: #7d97ff;
-    --cobalt-ink: #0c1522;
-    --cobalt-soft: #1b2850;
-
-    --verified: #5fd39b;
-    --verified-soft: #10301f;
-    --review: #f0b65a;
-    --review-soft: #3a2a0f;
-    --flagged: #ff8a82;
-    --flagged-soft: #3d1614;
-    --unverified: #9aa8bb;
-    --unverified-soft: #1d2a3d;
-  }
+  --raise: 0 1px 0 #ffffff14 inset, 0 3px 0 #00000059, 0 10px 20px -8px #0000008c;
+  --raise-sm: 0 1px 0 #ffffff0f inset, 0 2px 0 #0000004d, 0 6px 12px -6px #00000080;
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -71,8 +52,12 @@
   --color-unverified: var(--unverified);
   --color-unverified-soft: var(--unverified-soft);
 
-  --font-sans: var(--font-hanken);
+  --color-surface-2: var(--surface-2);
+  --font-sans: var(--font-schibsted);
+  --font-display: var(--font-bricolage);
   --font-mono: var(--font-jetbrains);
+  --shadow-raise: var(--raise);
+  --shadow-raise-sm: var(--raise-sm);
 }
 
 html {
@@ -81,9 +66,16 @@ html {
 }
 
 body {
-  font-family: var(--font-hanken), system-ui, sans-serif;
-  font-feature-settings: "ss01", "cv11";
+  font-family: var(--font-schibsted), ui-sans-serif, system-ui, sans-serif;
 }
+
+h1, h2, h3 {
+  font-family: var(--font-bricolage), var(--font-schibsted), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+
+::selection { background: var(--cobalt-soft); color: var(--ink); }
 
 :focus-visible {
   outline: 2px solid var(--cobalt);

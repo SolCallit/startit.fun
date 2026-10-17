@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { getCurrentUser } from "@/lib/auth";
-import { signOut } from "@/app/(auth)/actions";
+import { signOut } from "@/app/(site)/(auth)/actions";
 import { Container } from "./ui";
 import { WalletLogin } from "./wallet-login";
 
@@ -9,7 +9,7 @@ export function SiteHeader() {
   return (
     <header className="border-b border-line bg-paper/90 backdrop-blur supports-[backdrop-filter]:bg-paper/75 sticky top-0 z-20">
       <Container className="flex h-16 items-center justify-between gap-6">
-        <Link href="/" className="flex items-baseline gap-0.5 text-[1.25rem] font-bold tracking-[-0.03em] text-ink">
+        <Link href="/" className="flex items-baseline gap-0.5 font-display text-[1.375rem] font-extrabold tracking-[-0.03em] text-ink">
           startit<span className="text-cobalt">.fun</span>
         </Link>
         <nav aria-label="Main" className="flex items-center gap-5 text-[0.9375rem] font-medium text-ink-soft">
@@ -32,6 +32,7 @@ async function AccountNav() {
   }
   return (
     <>
+      <Link href="/home" className="font-semibold text-ink hover:text-cobalt">Home</Link>
       {user.isStaff ? <Link href="/admin" className="hover:text-ink">Review queue</Link> : null}
       <Link href="/dashboard" className="hover:text-ink">My applications</Link>
       <span

@@ -39,6 +39,30 @@ export function httpsUrl(label: string, hosts?: string[]) {
 
 const optionalUrl = (label: string, hosts?: string[]) => z.union([z.literal(""), httpsUrl(label, hosts)]);
 
+/** "Paired with" — optional link to a related token, project or person. Informational; screened like any claim. */
+export const PAIR_KINDS = { token: "A Solana token", project: "A project or company", person: "A person" } as const;
+export const PAIR_RELATIONSHIPS = {
+  inspired_by: "Inspired by / related to — no affiliation or endorsement",
+  official: "Official partner — they've agreed, and I'll upload proof",
+} as const;
+
+const pairFields = {
+  pair_kind: z.enum(["", "token", "project", "person"]).default(""),
+  pair_name: trimmed(80).default(""),
+  pair_relationship: z.enum(["", "inspired_by", "official"]).default(""),
+  pair_reason: trimmed(600).default(""),
+  pair_url: optionalUrl("Pair link").default(""),
+  pair_mint: z.union([z.literal(""), z.string().trim().regex(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/, "Enter the token's Solana mint address.")]).default(""),
+};
+
+function checkPair(v: { pair_kind: string; pair_name: string; pair_relationship: string; pair_reason: string; pair_mint: string }, ctx: z.RefinementCtx) {
+  if (!v.pair_kind) return;
+  if (!v.pair_name) ctx.addIssue({ code: "custom", message: "Name what you're pairing with.", path: ["pair_name"] });
+  if (!v.pair_relationship) ctx.addIssue({ code: "custom", message: "Say how the project relates to it.", path: ["pair_relationship"] });
+  if (!v.pair_reason) ctx.addIssue({ code: "custom", message: "Explain the connection in a sentence or two.", path: ["pair_reason"] });
+  if (v.pair_kind === "token" && !v.pair_mint) ctx.addIssue({ code: "custom", message: "A token pairing needs the token's mint address.", path: ["pair_mint"] });
+}
+
 export const stepSchemas = {
   1: z.object({
     applicant_name: required("Your name", 120),
@@ -60,13 +84,16 @@ export const stepSchemas = {
     founder_approval_statement: required("Written founder approval", 4000).min(40, "Write at least a sentence or two of approval from the founder."),
     permitted_branding: required("Permitted branding", 2000),
   }),
-  4: z.object({
-    token_name: required("Token name", 32),
-    ticker: z.string().trim().toUpperCase().regex(/^[A-Z0-9]{2,10}$/, "Ticker must be 2–10 letters or numbers."),
-    token_concept: required("Token concept", 4000),
-    community_plan: required("Community plan", 4000),
-    milestones: trimmed(4000),
-  }),
+  4: z
+    .object({
+      token_name: required("Token name", 32),
+      ticker: z.string().trim().toUpperCase().regex(/^[A-Z0-9]{2,10}$/, "Ticker must be 2–10 letters or numbers."),
+      token_concept: required("Token concept", 4000),
+      community_plan: required("Community plan", 4000),
+      milestones: trimmed(4000),
+      ...pairFields,
+    })
+    .superRefine(checkPair),
   5: z
     .object({
       applicant_is_founder: z.enum(["yes", "no"]).optional(),

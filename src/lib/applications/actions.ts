@@ -97,6 +97,14 @@ export async function saveStep(appId: string, step: StepNumber, _prev: StepState
       update.ticker = orNull(values.ticker)?.toUpperCase() ?? null;
       update.token_concept = orNull(values.token_concept);
       update.community_plan = orNull(values.community_plan);
+      // Pairing: all-or-nothing on the kind; clearing the kind clears the rest.
+      const kind = orNull(values.pair_kind);
+      update.pair_kind = kind;
+      update.pair_name = kind ? orNull(values.pair_name) : null;
+      update.pair_relationship = kind ? orNull(values.pair_relationship) : null;
+      update.pair_reason = kind ? orNull(values.pair_reason) : null;
+      update.pair_url = kind ? orNull(values.pair_url) : null;
+      update.pair_mint = kind === "token" ? orNull(values.pair_mint) : null;
       const titles = (values.milestones ?? "").split("\n").map((t) => t.trim()).filter(Boolean).slice(0, 20);
       const del = await supabase.from("milestone_plans").delete().eq("application_id", appId);
       if (fail(del.error)) return fail(del.error)!;

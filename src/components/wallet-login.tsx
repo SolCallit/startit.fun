@@ -87,7 +87,7 @@ export const shortAddress = (a: string) => `${a.slice(0, 4)}…${a.slice(-4)}`;
 /** Wallet picker. `variant="header"` renders a button that opens a dialog; `"panel"` renders the list inline. */
 export function WalletLogin({ next, variant = "panel" }: { next?: string; variant?: "panel" | "header" }) {
   const pathname = usePathname();
-  const target = next ?? (variant === "header" ? pathname : "/dashboard");
+  const target = next ?? (variant === "header" && pathname !== "/" && pathname !== "/login" ? pathname : "/home");
   const wallets = useLoginWallets();
   const router = useRouter();
   const [busy, setBusy] = useState<string | null>(null);
@@ -154,7 +154,7 @@ export function WalletLogin({ next, variant = "panel" }: { next?: string; varian
       <button
         type="button"
         onClick={() => { setError(null); dialog.current?.showModal(); }}
-        className="rounded-md bg-ink px-3.5 py-2 text-[0.875rem] font-semibold text-paper hover:opacity-90"
+        className="rounded-full bg-ink shadow-raise-sm active:translate-y-[2px] active:shadow-none px-3.5 py-2 text-[0.875rem] font-semibold text-paper hover:opacity-90"
       >
         Connect wallet
       </button>

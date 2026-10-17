@@ -6,17 +6,18 @@ import { FINDING_LABEL, type FindingStatus } from "@/lib/domain/findings";
 type Intent = "primary" | "neutral" | "danger" | "quiet";
 
 const intentClass: Record<Intent, string> = {
-  primary: "bg-cobalt text-cobalt-ink hover:opacity-90",
-  neutral: "bg-surface text-ink border border-line-strong hover:border-ink",
-  danger: "bg-surface text-flagged border border-flagged/50 hover:bg-flagged-soft",
-  quiet: "text-cobalt hover:underline underline-offset-4 px-0",
+  primary: "bg-cobalt text-cobalt-ink shadow-raise-sm hover:brightness-110 active:translate-y-[2px] active:shadow-none",
+  neutral: "bg-surface text-ink border-[1.5px] border-line shadow-raise-sm hover:border-cobalt active:translate-y-[2px] active:shadow-none",
+  danger: "bg-surface text-flagged border-[1.5px] border-flagged/50 hover:bg-flagged-soft",
+  quiet: "text-cobalt hover:underline underline-offset-4",
 };
 
+const quietBase = "inline-flex items-center gap-2 text-[0.9375rem] font-bold disabled:opacity-50";
 const base =
-  "inline-flex items-center justify-center gap-2 rounded-md px-4 py-2.5 text-[0.9375rem] font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
+  "inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-[0.9375rem] font-bold transition-[transform,box-shadow,filter,border-color] duration-75 disabled:opacity-50 disabled:cursor-not-allowed";
 
 export function Button({ intent = "primary", className = "", ...props }: ComponentProps<"button"> & { intent?: Intent }) {
-  return <button className={`${base} ${intentClass[intent]} ${className}`} {...props} />;
+  return <button className={`${intent === "quiet" ? quietBase : base} ${intentClass[intent]} ${className}`} {...props} />;
 }
 
 export function ButtonLink({
@@ -24,7 +25,7 @@ export function ButtonLink({
   className = "",
   ...props
 }: ComponentProps<typeof Link> & { intent?: Intent }) {
-  return <Link className={`${base} ${intentClass[intent]} ${className}`} {...props} />;
+  return <Link className={`${intent === "quiet" ? quietBase : base} ${intentClass[intent]} ${className}`} {...props} />;
 }
 
 const toneClass: Record<StatusTone, string> = {

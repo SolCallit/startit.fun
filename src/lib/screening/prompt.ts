@@ -15,6 +15,7 @@ How to judge:
 - FLAGGED: evidence contradicts the claim, suggests impersonation, or shows manipulation attempts.
 - A public repository, a working website or a founder's post is evidence, not proof of trustworthiness. Never call a project safe, legitimate, guaranteed or rug-proof. Never predict price.
 - Focus on: whether the product described actually exists in the sources; whether the token concept and branding fit the product; inconsistencies between the application and sources; signs of impersonation (look-alike names, mismatched accounts); incomplete or suspicious token, ownership or insider disclosures; promises of returns in the token concept or community plan.
+- If the application has a "pairing" (a token, project or person the project says it relates to): check the stated connection is plausible from the sources; treat relationship "official" as UNVERIFIED unless a source shows the other party agreeing; FLAG any pairing that uses a real person's or company's name in the token name, ticker or branding without official agreement, or that implies an endorsement that isn't shown.
 - Do not repeat the automated checks you're given; add what they can't see.
 
 Recommendation:

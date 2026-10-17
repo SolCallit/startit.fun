@@ -88,6 +88,9 @@ export async function screen(supabase: SupabaseClient, appId: string, provider: 
     founder_approval_statement: app.founder_approval_statement, permitted_branding: app.permitted_branding,
     insider_allocation_disclosure: app.insider_allocation_disclosure,
     applicant_is_founder: app.applicant_is_founder,
+    pairing: app.pair_kind
+      ? { kind: app.pair_kind, name: app.pair_name, relationship: app.pair_relationship, reason: app.pair_reason, url: app.pair_url, mint: app.pair_mint }
+      : null,
     proposed_fee_split_bps: { platform: app.proposed_platform_bps, founder: app.proposed_founder_bps, launcher: app.proposed_launcher_bps, community: app.proposed_community_bps },
   };
 

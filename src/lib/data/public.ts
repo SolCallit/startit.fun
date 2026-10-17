@@ -33,6 +33,12 @@ export type PublicProject = {
   is_multisig: boolean | null;
   threshold: number | null;
   control_rules: string | null;
+  pair_kind: "token" | "project" | "person" | null;
+  pair_name: string | null;
+  pair_url: string | null;
+  pair_mint: string | null;
+  pair_relationship: "inspired_by" | "official" | null;
+  created_at: string;
 };
 
 export type PublicFinding = {

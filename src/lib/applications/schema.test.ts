@@ -50,3 +50,25 @@ describe("parseStep", () => {
     expect(r.ok && r.data?.ticker).toBe("FORGE");
   });
 });
+
+describe("pairing (step 4)", () => {
+  const base = { token_name: "Forge", ticker: "FORGE", token_concept: "c", community_plan: "p", milestones: "" };
+  it("is optional", () => {
+    expect(parseStep(4, { ...base, pair_kind: "" }, true).ok).toBe(true);
+  });
+  it("needs name, relationship and reason once a kind is chosen", () => {
+    const r = parseStep(4, { ...base, pair_kind: "person" }, true);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(Object.keys(r.errors)).toEqual(expect.arrayContaining(["pair_name", "pair_relationship", "pair_reason"]));
+  });
+  it("needs a mint for token pairings", () => {
+    const r = parseStep(4, { ...base, pair_kind: "token", pair_name: "Jupiter", pair_relationship: "inspired_by", pair_reason: "We build on Jupiter." }, true);
+    expect(!r.ok && r.errors.pair_mint).toBeTruthy();
+    const ok = parseStep(4, { ...base, pair_kind: "token", pair_name: "Jupiter", pair_relationship: "inspired_by", pair_reason: "We build on Jupiter.", pair_mint: "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN" }, true);
+    expect(ok.ok).toBe(true);
+  });
+  it("rejects non-https pair links", () => {
+    const r = parseStep(4, { ...base, pair_kind: "project", pair_name: "HF", pair_relationship: "inspired_by", pair_reason: "x", pair_url: "http://hf.co" }, true);
+    expect(!r.ok && r.errors.pair_url).toBeTruthy();
+  });
+});
