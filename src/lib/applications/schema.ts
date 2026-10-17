@@ -39,7 +39,7 @@ export function httpsUrl(label: string, hosts?: string[]) {
 const optionalUrl = (label: string, hosts?: string[]) => z.union([z.literal(""), httpsUrl(label, hosts)]);
 
 /** "Paired with" — optional link to a related token, project or person. Informational; screened like any claim. */
-export const PAIR_KINDS = { token: "A Solana token", project: "A project or team", person: "A person" } as const;
+export const PAIR_KINDS = { token: "Stock / coin", project: "Product", person: "Person" } as const;
 export const PAIR_RELATIONSHIPS = {
   inspired_by: "Inspired by / related to — no affiliation or endorsement",
   official: "Official partner — they've agreed, and I'll upload proof",

@@ -86,6 +86,7 @@ export function SiteFooter() {
           checked and when. It isn&apos;t an endorsement, an audit or a promise about price.
         </p>
         <nav aria-label="Footer" className="flex gap-5">
+          <Link href="/about" className="hover:text-ink">About us</Link>
           <Link href="/methodology" className="hover:text-ink">Methodology</Link>
           <Link href="/terms" className="hover:text-ink">Terms and risks</Link>
         </nav>

@@ -171,14 +171,7 @@ function CoinStep({ appId, d, e, quotes, imageUrl, proofs }: {
 
       <ProofPicker appId={appId} proofs={proofs} error={e?.proof} />
 
-      <section className="flex flex-col gap-2">
-        <h2 className="font-semibold text-ink">Paired with</h2>
-        <Chips name="quote_mint" value={quote} onChange={setQuote} options={pairOptions} />
-        <p className="text-[0.8125rem] text-muted">What people buy your coin with on the bonding curve. Fees are counted in it too.</p>
-        <Err msg={e?.quote_mint} />
-      </section>
-
-      <InspiredBy d={d} e={e} />
+      <InspiredBy d={d} e={e} quotes={quotes} quote={quote} setQuote={setQuote} pairOptions={pairOptions} />
     </>
   );
 }
@@ -297,24 +290,48 @@ function ProofPicker({ appId, proofs, error }: { appId: string; proofs: { id: st
   );
 }
 
-function InspiredBy({ d, e }: { d: Record<string, string>; e: Errors }) {
-  const [kind, setKind] = useState(d.pair_kind ?? "");
-  const [open, setOpen] = useState(!!d.pair_kind);
+function InspiredBy({ d, e, quotes, quote, setQuote, pairOptions }: {
+  d: Record<string, string>; e: Errors; quotes: QuoteOption[]; quote: string; setQuote: (v: string) => void; pairOptions: [string, string][];
+}) {
+  const [open, setOpen] = useState(!!d.pair_kind || (!!d.quote_mint && d.quote_mint !== SOL));
+  const [kind, setKind] = useState(d.pair_kind || (open ? "token" : ""));
   const [official, setOfficial] = useState(d.pair_relationship === "official");
+  // Picking a stock or coin as the pair pre-fills it as the inspiration.
+  const [prefill, setPrefill] = useState({ name: d.pair_name ?? "", mint: d.pair_mint ?? "", n: 0 });
+  const pickQuote = (v: string) => {
+    setQuote(v);
+    const q = quotes.find((x) => x.mint === v);
+    if (q && v !== SOL) { setKind("token"); setPrefill((p) => ({ name: `${q.name} (${q.symbol})`, mint: q.mint, n: p.n + 1 })); }
+  };
+  const toggle = (v: boolean) => {
+    setOpen(v);
+    if (!v) { setKind(""); setQuote(SOL); } else if (!kind) setKind("token");
+  };
   return (
     <section className="rounded-[18px] border border-line/70 bg-surface/40 p-4">
-      <Toggle name="$inspired" label="Inspired by someone?" sub="Link a token, project or person your product looks up to. Shown on the project page."
-        checked={open} onChange={(v) => { setOpen(v); if (!v) setKind(""); else if (!kind) setKind("project"); }} />
+      <Toggle name="$inspired" label="Inspired by a product?" sub="Pair with inspired stock / coin." checked={open} onChange={toggle} />
       <AnimatePresence initial={false}>
-        {open && kind ? (
-          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+        {open ? (
+          <motion.div key="open" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
             <div className="flex flex-col gap-4 pt-4">
-              <Chips name="pair_kind" value={kind} onChange={setKind} options={Object.entries(PAIR_KINDS).map(([v, l]) => [v, l] as [string, string])} />
-              <div className="grid gap-3 sm:grid-cols-2">
-                <Field name="pair_name" label={kind === "person" ? "Their name" : kind === "token" ? "Token" : "Project"} errors={e} defaultValue={d.pair_name}
-                  placeholder={kind === "person" ? "Andrej Karpathy" : kind === "token" ? "Jupiter (JUP)" : "Hugging Face"} />
+              <div className="flex flex-col gap-2">
+                <span className="text-[0.9375rem] font-semibold text-ink">Pair with</span>
+                <Chips name="quote_mint" value={quote} onChange={pickQuote} options={pairOptions} />
+                <p className="text-[0.8125rem] text-muted">
+                  What people buy your coin with on the bonding curve; fees are counted in it too.
+                  {pairOptions.length <= 1 ? " More stock and coin pairs show up here as Startit switches them on." : ""}
+                </p>
+                <Err msg={e?.quote_mint} />
+              </div>
+              <div className="flex flex-col gap-2">
+                <span className="text-[0.9375rem] font-semibold text-ink">Inspired by</span>
+                <Chips name="pair_kind" value={kind} onChange={setKind} options={Object.entries(PAIR_KINDS).map(([v, l]) => [v, l] as [string, string])} />
+              </div>
+              <div key={prefill.n} className="grid gap-3 sm:grid-cols-2">
+                <Field name="pair_name" label={kind === "person" ? "Their name" : kind === "token" ? "Stock or coin" : "Product"} errors={e} defaultValue={prefill.name}
+                  placeholder={kind === "person" ? "Andrej Karpathy" : kind === "token" ? "SP500 xStock (SPYx)" : "Hugging Face"} />
                 {kind === "token" ? (
-                  <Field name="pair_mint" label="Mint address" errors={e} defaultValue={d.pair_mint} />
+                  <Field name="pair_mint" label="Mint address" errors={e} defaultValue={prefill.mint} />
                 ) : (
                   <><input type="hidden" name="pair_mint" value="" /><Field name="pair_url" label="Link (optional)" errors={e} defaultValue={d.pair_url} placeholder="https://" /></>
                 )}
@@ -327,7 +344,12 @@ function InspiredBy({ d, e }: { d: Record<string, string>; e: Errors }) {
           </motion.div>
         ) : null}
       </AnimatePresence>
-      {!open || !kind ? ["pair_kind", "pair_name", "pair_mint", "pair_url", "pair_relationship", "pair_reason"].map((n) => <input key={n} type="hidden" name={n} value="" />) : null}
+      {!open ? (
+        <>
+          <input type="hidden" name="quote_mint" value={SOL} />
+          {["pair_kind", "pair_name", "pair_mint", "pair_url", "pair_relationship", "pair_reason"].map((n) => <input key={n} type="hidden" name={n} value="" />)}
+        </>
+      ) : null}
     </section>
   );
 }

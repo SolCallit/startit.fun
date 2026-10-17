@@ -24,6 +24,7 @@ export function Tray({ signedIn, isStaff }: { signedIn: boolean; isStaff: boolea
     ...(isStaff ? [{ href: "/admin", label: "Review queue" }] : []),
   ];
   const more: Item[] = [
+    { href: "/about", label: "About us" },
     { href: "/fees", label: "Fees and payouts" },
     { href: "/methodology", label: "How we verify" },
     { href: "/terms", label: "Terms and risks" },
