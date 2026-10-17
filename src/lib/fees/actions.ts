@@ -62,8 +62,16 @@ export async function preparePayoutProposal(memberWallet: string, payoutIds: str
     const ids = [...new Set(payoutIds)].filter((x) => /^[0-9a-f-]{36}$/i.test(x));
     if (!ids.length) throw new Error("Select at least one payout.");
     const supabase = await createClient();
-    const { data: rows } = await supabase.from("payouts").select("id, status, recipient_address, amount_raw").in("id", ids);
+    const { data: rows } = await supabase.from("payouts").select("id, status, recipient_address, amount_raw, launches(quote_mint)").in("id", ids);
     if (!rows || rows.length !== ids.length || rows.some((r) => r.status !== "pending")) throw new Error("Every selected payout must be pending.");
+    // Proposals are SOL transfers. Launches paired with another token collect fees in that token; paying those
+    // out as lamports would send the wrong asset, so refuse until SPL payouts exist.
+    const nonSol = rows.filter((r) => {
+      const q = (r.launches as { quote_mint: string | null } | { quote_mint: string | null }[] | null);
+      const mint = Array.isArray(q) ? q[0]?.quote_mint : q?.quote_mint;
+      return mint && mint !== "So11111111111111111111111111111111111111112";
+    });
+    if (nonSol.length) throw new Error("Some selected payouts belong to launches paired with a token other than SOL. Token payouts aren't supported yet; pay those separately.");
     const built = await buildPayoutProposal({
       member: new PublicKey(memberWallet), multisigPda: new PublicKey(msPda),
       transfers: rows.map((r) => ({ to: new PublicKey(r.recipient_address), lamports: BigInt(r.amount_raw) })),

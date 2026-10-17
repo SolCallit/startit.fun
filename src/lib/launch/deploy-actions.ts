@@ -81,7 +81,7 @@ export async function prepareLaunch(appId: string, operatorWallet: string, mintP
     const supabase = await createClient();
     const [{ data: app }, { data: launch }] = await Promise.all([
       supabase.from("applications").select("status, public_ref, token_name, ticker").eq("id", appId).single(),
-      supabase.from("launches").select("id, status, decimals, total_supply_raw, network, founder_confirmed_at, tx_signature, verification").eq("application_id", appId).single(),
+      supabase.from("launches").select("id, status, decimals, total_supply_raw, network, founder_confirmed_at, tx_signature, verification, quote_mint").eq("application_id", appId).single(),
     ]);
     if (!app || !launch) throw new Error("Launch configuration not found.");
     if (app.status !== "ready_for_deployment") throw new Error("The application must be ready for deployment.");
@@ -100,6 +100,7 @@ export async function prepareLaunch(appId: string, operatorWallet: string, mintP
       operator: pk(operatorWallet, "Operator wallet"), mint: pk(mintPubkey, "Mint"), platformId: pk(platformId, "Platform"),
       name: app.token_name, symbol: app.ticker, uri: `${siteUrl()}/api/token-metadata/${app.public_ref}`,
       decimals: launch.decimals, supplyRaw: String(launch.total_supply_raw),
+      quoteMint: launch.quote_mint ? pk(launch.quote_mint, "Quote token") : undefined,
     });
     const summary = summarizeTransaction(tx);
     if (!summary.requiredSigners.includes(mintPubkey) || summary.feePayer !== operatorWallet) {

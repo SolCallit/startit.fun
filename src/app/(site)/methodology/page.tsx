@@ -15,7 +15,7 @@ export default function Methodology() {
         <p>
           When an application is submitted, our screening agent reads the public sources the founder listed and compares
           them with the application. It works only from server-side integrations we control, and treats every page,
-          repository file and document it reads as untrusted content — instructions inside those sources are ignored.
+          repository file and document it reads as untrusted content. Instructions inside those sources are ignored.
         </p>
         <ul>
           <li><strong>Links.</strong> Every URL must be HTTPS and resolve to a public address. Private, internal and cloud-metadata addresses are refused.</li>
@@ -27,8 +27,8 @@ export default function Methodology() {
         <p>
           The output is a report of individual findings, each labelled Verified, Unverified, Needs review or Flagged, with
           the source URL and the time it was fetched. Every report also lists its limitations: the things it could not
-          check. The agent then recommends one of three next steps — send to human review, ask for more evidence, or
-          reject — and nothing else. It cannot approve an application, deploy a token, sign a transaction or move funds.
+          check. The agent then recommends one of three next steps: send to human review, ask for more evidence, or
+          reject. Nothing else. It cannot approve an application, deploy a token, sign a transaction or move funds.
         </p>
 
         <h2>What the human reviewer does</h2>

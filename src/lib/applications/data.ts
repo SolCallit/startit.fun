@@ -11,6 +11,7 @@ export type ApplicationRow = {
   status: ApplicationStatus;
   current_step: number;
   project_name: string | null;
+  quote_mint: string | null;
   pair_kind: "token" | "project" | "person" | null;
   pair_name: string | null;
   pair_relationship: "inspired_by" | "official" | null;
@@ -113,6 +114,7 @@ export function stepDefaults(b: ApplicationBundle, step: number): Record<string,
       return {
         token_name: s(a.token_name), ticker: s(a.ticker), token_concept: s(a.token_concept),
         community_plan: s(a.community_plan), milestones: b.milestones.map((m) => m.title).join("\n"),
+        quote_mint: s(a.quote_mint),
         pair_kind: s(a.pair_kind), pair_name: s(a.pair_name), pair_relationship: s(a.pair_relationship),
         pair_reason: s(a.pair_reason), pair_url: s(a.pair_url), pair_mint: s(a.pair_mint),
       };
@@ -130,4 +132,11 @@ export function stepDefaults(b: ApplicationBundle, step: number): Record<string,
     default:
       return {};
   }
+}
+
+/** Tokens a launch can be paired with on-chain (enabled quote tokens). SOL first. */
+export async function listQuoteOptions(): Promise<{ mint: string; symbol: string; name: string }[]> {
+  const supabase = await createClient();
+  const { data } = await supabase.from("quote_tokens").select("mint, symbol, name").eq("enabled", true).order("created_at");
+  return data ?? [];
 }

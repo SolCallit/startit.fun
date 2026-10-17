@@ -154,7 +154,7 @@ export function WalletLogin({ next, variant = "panel" }: { next?: string; varian
       <button
         type="button"
         onClick={() => { setError(null); dialog.current?.showModal(); }}
-        className="rounded-full bg-ink shadow-raise-sm active:translate-y-[2px] active:shadow-none px-3.5 py-2 text-[0.875rem] font-semibold text-paper hover:opacity-90"
+        className="btn-chrome !px-4 !py-2 !text-[0.875rem]"
       >
         Connect wallet
       </button>

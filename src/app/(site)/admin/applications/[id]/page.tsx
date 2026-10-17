@@ -180,8 +180,8 @@ async function ReviewBody({ params }: PageProps<"/admin/applications/[id]">) {
             <form action={addNote.bind(null, id)} className="flex flex-col gap-2">
               <label htmlFor="note" className="sr-only">Add a note</label>
               <textarea id="note" name="body" rows={3} required placeholder="Visible to Startit staff only"
-                className="rounded-full border-[1.5px] border-line bg-surface shadow-raise-sm px-3 py-2 text-ink placeholder:text-muted focus:border-cobalt focus:outline-none" />
-              <button type="submit" className="self-start rounded-full border-[1.5px] border-line bg-surface shadow-raise-sm px-3 py-1.5 font-semibold text-ink hover:border-ink">Add note</button>
+                className="rounded-[12px] border-[1.5px] border-line-strong bg-surface px-3 py-2 text-ink placeholder:text-muted focus:border-cobalt focus:outline-none" />
+              <button type="submit" className="self-start btn-chrome">Add note</button>
             </form>
             <ul className="mt-4 flex flex-col gap-3">
               {notes.map((n) => (

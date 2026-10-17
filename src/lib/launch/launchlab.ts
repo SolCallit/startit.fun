@@ -1,13 +1,15 @@
 import "server-only";
 import BN from "bn.js";
-import { clusterApiUrl, Connection, PublicKey, VersionedTransaction } from "@solana/web3.js";
+import { clusterApiUrl, Connection, PublicKey, TransactionMessage, VersionedTransaction } from "@solana/web3.js";
 import { NATIVE_MINT } from "@solana/spl-token";
 import {
+  createPlatformAllowConfigIns,
   DEV_LAUNCHPAD_AUTH,
   DEV_LAUNCHPAD_PROGRAM,
   DEVNET_PROGRAM_ID,
   getCpmmPdaAmmConfigId,
   getPdaLaunchpadConfigId,
+  getPdaPlatformAllowConfig,
   getPdaPlatformId,
   LaunchpadConfig,
   Raydium,
@@ -35,7 +37,37 @@ async function raydium(owner: PublicKey) {
   return Raydium.load({ connection: connection(), owner, cluster: "devnet", disableFeatureCheck: true, disableLoadToken: true, blockhashCommitment: "finalized" });
 }
 
-export const solGlobalConfigId = () => getPdaLaunchpadConfigId(LAUNCHLAB_PROGRAM, NATIVE_MINT, 0, 0).publicKey;
+export const SOL_MINT = NATIVE_MINT.toBase58();
+/** Raydium's LaunchLab global config for a quote token (constant-product curve, index 0). */
+export const configIdFor = (quoteMint: PublicKey) => getPdaLaunchpadConfigId(LAUNCHLAB_PROGRAM, quoteMint, 0, 0).publicKey;
+export const solGlobalConfigId = () => configIdFor(NATIVE_MINT);
+export const allowConfigIdFor = (platformId: PublicKey, configId: PublicKey) => getPdaPlatformAllowConfig(LAUNCHLAB_PROGRAM, platformId, configId).publicKey;
+
+/**
+ * Checks on-chain that Raydium has a LaunchLab config for this quote token, and reads the token's decimals.
+ * Throws a plain-language error when Raydium hasn't enabled the token.
+ */
+export async function readQuoteConfig(quoteMint: PublicKey) {
+  const conn = connection();
+  const configId = configIdFor(quoteMint);
+  const [cfgInfo, mintInfo] = await Promise.all([conn.getAccountInfo(configId), conn.getParsedAccountInfo(quoteMint)]);
+  if (!cfgInfo) throw new Error(`Raydium hasn't enabled ${quoteMint.toBase58()} as a LaunchLab quote token on this network (no config at ${configId.toBase58()}).`);
+  if (!cfgInfo.owner.equals(LAUNCHLAB_PROGRAM)) throw new Error("The config account isn't owned by the LaunchLab program.");
+  const cfg = LaunchpadConfig.decode(cfgInfo.data);
+  if (!cfg.mintB.equals(quoteMint)) throw new Error("The LaunchLab config is for a different quote token.");
+  const parsed = (mintInfo.value?.data as { parsed?: { type?: string; info?: { decimals: number } } } | undefined)?.parsed;
+  if (parsed?.type !== "mint" || parsed.info?.decimals === undefined) throw new Error("That address isn't a token mint.");
+  return { configId: configId.toBase58(), decimals: parsed.info.decimals, tradeFeeRate: cfg.tradeFeeRate.toNumber(), mintBProgram: mintInfo.value!.owner.toBase58() };
+}
+
+/** Admin: allow one of Raydium's quote-token configs on Startit's platform. */
+export async function buildAllowQuoteTx(p: { admin: PublicKey; platformId: PublicKey; configId: PublicKey }) {
+  const allow = allowConfigIdFor(p.platformId, p.configId);
+  const ix = createPlatformAllowConfigIns(LAUNCHLAB_PROGRAM, p.admin, p.platformId, p.configId, allow);
+  const { blockhash } = await connection().getLatestBlockhash("finalized");
+  const msg = new TransactionMessage({ payerKey: p.admin, recentBlockhash: blockhash, instructions: [ix] }).compileToV0Message();
+  return { txBase64: Buffer.from(new VersionedTransaction(msg).serialize()).toString("base64"), allowConfigId: allow.toBase58() };
+}
 export const platformIdFor = (admin: PublicKey) => getPdaPlatformId(LAUNCHLAB_PROGRAM, admin).publicKey;
 
 /** Reads Raydium's own LaunchLab trade fee from the on-chain global config (not from docs or memory). */
@@ -100,13 +132,19 @@ export async function buildRedirectCpCreatorTx(p: { admin: PublicKey; feeRouter:
 /** Builds the unsigned token launch. The mint's keypair stays in the operator's browser; only its public key comes here. */
 export async function buildLaunchTx(p: {
   operator: PublicKey; mint: PublicKey; platformId: PublicKey; name: string; symbol: string; uri: string; decimals: number; supplyRaw: string;
+  /** The on-chain pair. Defaults to SOL. */
+  quoteMint?: PublicKey;
 }) {
+  const quote = p.quoteMint ?? NATIVE_MINT;
+  const isSol = quote.equals(NATIVE_MINT);
   const r = await raydium(p.operator);
   const res = await r.launchpad.createLaunchpad({
     programId: LAUNCHLAB_PROGRAM,
     authProgramId: LAUNCHLAB_AUTH,
     platformId: p.platformId,
-    configId: solGlobalConfigId(),
+    configId: configIdFor(quote),
+    // The quote token comes from the config; non-SOL configs must be allow-listed on our platform.
+    ...(isSol ? {} : { platformAllowConfig: true }),
     mintA: p.mint,
     decimals: p.decimals,
     supply: new BN(p.supplyRaw),

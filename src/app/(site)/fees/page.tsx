@@ -13,7 +13,7 @@ export default function Fees() {
         lede="Every trading fee Startit collects and every payout from the Fee Router multisig, with the Solana transaction for each. Nothing here is estimated." />
       <Suspense fallback={<p className="text-muted">Loading fee records…</p>}><Body /></Suspense>
       <p className="mt-10 max-w-2xl text-[0.875rem] leading-relaxed text-muted">
-        Amounts are in SOL. Raydium&apos;s own protocol fee is charged separately and isn&apos;t shown. Payouts marked
+        Amounts are in SOL unless a launch is paired with another token. Raydium&apos;s own protocol fee is charged separately and isn&apos;t shown. Payouts marked
         “awaiting multisig” have been proposed in Squads and still need the multisig signers&apos; approval.
       </p>
     </Container>

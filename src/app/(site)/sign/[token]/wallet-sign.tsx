@@ -54,7 +54,7 @@ export function WalletSign(props: { token: string; role: SignerRole; publicRef: 
       if (!out) throw new Error("The wallet returned no signature.");
       setStatus({ kind: "working", text: "Verifying…" });
       const res = await submitSignature(props.token, { wallet: account.account.address, signature: bs58.encode(out.signature), issuedAt });
-      setStatus(res.ok ? { kind: "done", text: "Signed. Startit has recorded your signature — you can close this page." } : { kind: "error", text: res.error });
+      setStatus(res.ok ? { kind: "done", text: "Signed. Startit has recorded your signature. You can close this page." } : { kind: "error", text: res.error });
     } catch (e) {
       setStatus({ kind: "error", text: e instanceof Error ? e.message : "Signing was cancelled." });
     }
@@ -70,7 +70,7 @@ export function WalletSign(props: { token: string; role: SignerRole; publicRef: 
           <div className="flex flex-wrap gap-2">
             {wallets.map((w) => (
               <button key={w.name} type="button" onClick={() => connect(w)}
-                className="inline-flex items-center gap-2 rounded-full border-[1.5px] border-line bg-surface shadow-raise-sm px-3 py-2 font-semibold text-ink hover:border-ink">
+                className="inline-flex items-center gap-2 btn-chrome">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={w.icon} alt="" width={20} height={20} className="rounded" />
                 Connect {w.name}
@@ -84,7 +84,7 @@ export function WalletSign(props: { token: string; role: SignerRole; publicRef: 
         <div className="flex flex-col gap-3">
           <p className="text-ink-soft">Connected: <span className="font-mono text-[0.875rem] text-ink">{account.account.address}</span></p>
           <button type="button" onClick={sign} disabled={!right || status.kind === "working"}
-            className="self-start rounded-full bg-cobalt shadow-raise-sm active:translate-y-[2px] active:shadow-none px-4 py-2.5 font-semibold text-cobalt-ink hover:opacity-90 disabled:opacity-50">
+            className="self-start btn-start">
             Sign launch terms
           </button>
           <button type="button" onClick={() => { setAccount(null); setStatus({ kind: "idle" }); }} className="self-start text-[0.875rem] text-ink-soft hover:text-ink">Use a different wallet</button>

@@ -38,8 +38,8 @@ export function DecisionPanel({ appId, actions }: { appId: string; actions: Acti
           {chosen.to === "approved" ? (
             <fieldset className="flex flex-col gap-2">
               <legend className="mb-1 font-medium text-ink">Before approving</legend>
-              <label className="flex gap-3 text-ink-soft"><input type="checkbox" name="confirm_identity" className="mt-1 accent-[var(--cobalt)]" />I verified the founder&apos;s identity myself, not only from the AI report.</label>
-              <label className="flex gap-3 text-ink-soft"><input type="checkbox" name="confirm_authorization" className="mt-1 accent-[var(--cobalt)]" />I confirmed the founder explicitly approved this token and its branding.</label>
+              <label className="flex gap-3 text-ink-soft"><input type="checkbox" role="switch" name="confirm_identity" className="switch shrink-0" />I verified the founder&apos;s identity myself, not only from the AI report.</label>
+              <label className="flex gap-3 text-ink-soft"><input type="checkbox" role="switch" name="confirm_authorization" className="switch shrink-0" />I confirmed the founder explicitly approved this token and its branding.</label>
             </fieldset>
           ) : null}
           <div className="flex flex-col gap-1.5">
@@ -48,7 +48,7 @@ export function DecisionPanel({ appId, actions }: { appId: string; actions: Acti
               {chosen.needsReason ? "" : " (optional)"}
             </label>
             <textarea id="reason" name="reason" rows={3} required={chosen.needsReason}
-              className="rounded-full border-[1.5px] border-line bg-surface shadow-raise-sm px-3 py-2 text-ink focus:border-cobalt focus:outline-none" />
+              className="rounded-[12px] border-[1.5px] border-line-strong bg-surface px-3 py-2 text-ink focus:border-cobalt focus:outline-none" />
             {chosen.to === "evidence_requested" ? <p className="text-[0.875rem] text-muted">The applicant sees this message.</p> : null}
           </div>
           <div className="flex items-center gap-3">

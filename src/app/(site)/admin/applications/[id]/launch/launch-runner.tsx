@@ -83,14 +83,14 @@ export function LaunchRunner({ appId, ticker, initialStatus, existingSignature }
               <div className="flex flex-wrap gap-2">
                 {w.wallets.map((x) => (
                   <button key={x.name} type="button" onClick={() => run("Connecting…", async () => { await w.connect(x); })}
-                    className="rounded-full border-[1.5px] border-line bg-surface shadow-raise-sm px-3 py-2 font-semibold text-ink hover:border-ink">Connect {x.name}</button>
+                    className="btn-chrome">Connect {x.name}</button>
                 ))}
               </div>
             ) : <p className="text-ink-soft">No Solana wallet that can sign transactions was found in this browser.</p>
           ) : (
             <>
               <p className="text-ink-soft">Connected <span className="font-mono text-[0.875rem] text-ink">{w.address}</span> ({w.walletName}). Make sure it&apos;s on <strong>devnet</strong> with a little devnet SOL for fees.</p>
-              <button type="button" onClick={prepare} disabled={!!busy} className="self-start rounded-full bg-cobalt shadow-raise-sm active:translate-y-[2px] active:shadow-none px-4 py-2.5 font-semibold text-cobalt-ink disabled:opacity-50">Prepare launch transaction</button>
+              <button type="button" onClick={prepare} disabled={!!busy} className="self-start btn-start">Prepare launch transaction</button>
             </>
           )}
         </div>
@@ -103,12 +103,12 @@ export function LaunchRunner({ appId, ticker, initialStatus, existingSignature }
             <TxSummary s={prep.summary} labels={{ [mint.publicKey.toBase58()]: `new $${ticker} mint (generated in this browser)`, ...(w.address ? { [w.address]: "your wallet" } : {}) }} />
           </div>
           <label className="flex items-start gap-3 text-ink-soft">
-            <input type="checkbox" checked={ack} onChange={(e) => setAck(e.target.checked)} className="mt-1 accent-[var(--cobalt)]" />
+            <input type="checkbox" role="switch" checked={ack} onChange={(e) => setAck(e.target.checked)} className="switch shrink-0" />
             I checked the programs and signers. Launching creates a public token that can&apos;t be undone.
           </label>
           <div className="flex gap-3">
-            <button type="button" onClick={confirm} disabled={!ack || !!busy} className="rounded-full bg-cobalt shadow-raise-sm active:translate-y-[2px] active:shadow-none px-4 py-2.5 font-semibold text-cobalt-ink disabled:opacity-50">Confirm this transaction</button>
-            <button type="button" onClick={prepare} disabled={!!busy} className="rounded-full border-[1.5px] border-line bg-surface shadow-raise-sm px-4 py-2.5 font-semibold text-ink">Rebuild</button>
+            <button type="button" onClick={confirm} disabled={!ack || !!busy} className="btn-start">Confirm this transaction</button>
+            <button type="button" onClick={prepare} disabled={!!busy} className="btn-chrome">Rebuild</button>
           </div>
         </div>
       ) : null}
@@ -118,8 +118,8 @@ export function LaunchRunner({ appId, ticker, initialStatus, existingSignature }
           <p className="text-ink">Confirmed. Your wallet will ask you to sign; this page then adds the mint&apos;s signature and the server broadcasts it only if it matches what you confirmed.</p>
           <p className="text-[0.875rem] text-muted">Blockhashes expire after about a minute. If signing fails with an expired blockhash, rebuild and confirm again.</p>
           <div className="flex gap-3">
-            <button type="button" onClick={signAndSubmit} disabled={!!busy} className="rounded-full bg-cobalt shadow-raise-sm active:translate-y-[2px] active:shadow-none px-4 py-2.5 font-semibold text-cobalt-ink disabled:opacity-50">Sign and launch on devnet</button>
-            <button type="button" onClick={prepare} disabled={!!busy} className="rounded-full border-[1.5px] border-line bg-surface shadow-raise-sm px-4 py-2.5 font-semibold text-ink">Rebuild</button>
+            <button type="button" onClick={signAndSubmit} disabled={!!busy} className="btn-start">Sign and launch on devnet</button>
+            <button type="button" onClick={prepare} disabled={!!busy} className="btn-chrome">Rebuild</button>
           </div>
         </div>
       ) : null}
@@ -127,7 +127,7 @@ export function LaunchRunner({ appId, ticker, initialStatus, existingSignature }
       {stage === "submitted" ? (
         <div className="flex flex-col gap-3">
           <p className="text-ink">Broadcast: {sig ? <a href={explorer(sig)} target="_blank" rel="noopener noreferrer" className="font-mono text-[0.875rem] text-cobalt break-all">{sig}</a> : "—"}</p>
-          <button type="button" onClick={verify} disabled={!!busy} className="self-start rounded-full bg-cobalt shadow-raise-sm active:translate-y-[2px] active:shadow-none px-4 py-2.5 font-semibold text-cobalt-ink disabled:opacity-50">Verify on-chain</button>
+          <button type="button" onClick={verify} disabled={!!busy} className="self-start btn-start">Verify on-chain</button>
           {problems?.length ? <ul className="flex flex-col gap-1 text-flagged">{problems.map((p) => <li key={p}>{p}</li>)}</ul> : null}
         </div>
       ) : null}

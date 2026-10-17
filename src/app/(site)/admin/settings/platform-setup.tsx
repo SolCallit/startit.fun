@@ -34,7 +34,7 @@ export function PlatformSetup({ platformId, redirected }: { platformId: string |
         <div className="flex flex-wrap gap-2">
           {w.wallets.length ? w.wallets.map((x) => (
             <button key={x.name} type="button" onClick={() => run("Connecting…", async () => { await w.connect(x); })}
-              className="rounded-full border-[1.5px] border-line bg-surface shadow-raise-sm px-3 py-2 font-semibold text-ink hover:border-ink">Connect {x.name}</button>
+              className="btn-chrome">Connect {x.name}</button>
           )) : <p className="text-ink-soft">No Solana wallet found in this browser.</p>}
         </div>
       ) : !prep ? (
@@ -42,7 +42,7 @@ export function PlatformSetup({ platformId, redirected }: { platformId: string |
           const r = await preparePlatformSetup(w.address!, step);
           if (!r.ok) throw new Error(r.error);
           setPrep({ txBase64: r.txBase64, summary: r.summary, detail: r.detail }); setAck(false);
-        })} className="self-start rounded-full bg-cobalt shadow-raise-sm active:translate-y-[2px] active:shadow-none px-4 py-2.5 font-semibold text-cobalt-ink disabled:opacity-50">
+        })} className="self-start btn-start">
           Build {step === "create" ? "platform" : "fee redirect"} transaction
         </button>
       ) : (
@@ -50,7 +50,7 @@ export function PlatformSetup({ platformId, redirected }: { platformId: string |
           <p className="font-medium text-ink">{prep.detail}</p>
           <div className="rounded-md border border-line bg-paper p-4"><TxSummary s={prep.summary} labels={{ [w.address]: "your admin wallet" }} /></div>
           <label className="flex items-start gap-3 text-ink-soft">
-            <input type="checkbox" checked={ack} onChange={(e) => setAck(e.target.checked)} className="mt-1 accent-[var(--cobalt)]" />
+            <input type="checkbox" role="switch" checked={ack} onChange={(e) => setAck(e.target.checked)} className="switch shrink-0" />
             I reviewed the fee rate, programs and signer.
           </label>
           <button type="button" disabled={!ack || !!busy} onClick={() => run("Waiting for your wallet…", async () => {
@@ -59,7 +59,7 @@ export function PlatformSetup({ platformId, redirected }: { platformId: string |
             const r = await sendPlatformSetup(w.address!, step, toB64(signed));
             if (!r.ok) throw new Error(r.error);
             setMsg({ ok: true, text: `Done: ${r.signature}. Reload to continue.` }); setPrep(null);
-          })} className="self-start rounded-full bg-cobalt shadow-raise-sm active:translate-y-[2px] active:shadow-none px-4 py-2.5 font-semibold text-cobalt-ink disabled:opacity-50">Sign and send on devnet</button>
+          })} className="self-start btn-start">Sign and send on devnet</button>
         </div>
       )}
       {busy ? <p role="status" className="text-ink-soft">{busy}</p> : null}

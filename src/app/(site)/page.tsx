@@ -14,7 +14,7 @@ const PIPELINE: { actor: string; step: string; detail: string }[] = [
   {
     actor: "AI screening agent",
     step: "Checks what can be checked",
-    detail: "Reads public sources, compares them with the application, and records every finding with its source and timestamp. It can recommend — it cannot approve.",
+    detail: "Reads public sources, compares them with the application, and records every finding with its source and timestamp. It can recommend. It can't approve.",
   },
   {
     actor: "Startit operator",
@@ -55,7 +55,7 @@ export default function Home() {
               Founder-approved tokens.
             </h1>
             <p className="mt-6 max-w-[34rem] text-[1.1875rem] leading-relaxed text-ink-soft">
-              Startit launches community tokens only for startups whose founders signed off — after an AI screen and a
+              Startit launches community tokens only for startups whose founders signed off, after an AI screen and a
               human review. We publish what we checked, what we couldn&apos;t, and where every fee goes.
             </p>
             <div className="mt-9 flex flex-wrap gap-3">
@@ -123,15 +123,15 @@ export default function Home() {
             </div>
             <dl className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
               <div>
-                <dt className="font-semibold text-ink">Community treasury · 50%</dt>
+                <dt className="font-semibold text-ink">Community treasury, 50%</dt>
                 <dd className="mt-1 text-[0.9375rem] leading-relaxed text-ink-soft">Held in a published wallet with disclosed control rules.</dd>
               </div>
               <div>
-                <dt className="font-semibold text-ink">Founder · 30%</dt>
+                <dt className="font-semibold text-ink">Founder, 30%</dt>
                 <dd className="mt-1 text-[0.9375rem] leading-relaxed text-ink-soft">For approving the launch and building the product.</dd>
               </div>
               <div>
-                <dt className="font-semibold text-ink">Launcher · 5%</dt>
+                <dt className="font-semibold text-ink">Launcher, 5%</dt>
                 <dd className="mt-1 text-[0.9375rem] leading-relaxed text-ink-soft">For whoever found the startup and brought the founder on board.</dd>
               </div>
               <div>
@@ -155,7 +155,7 @@ export default function Home() {
             <p className="mt-4 leading-relaxed text-ink-soft">
               A working website, a public repository or a post from a founder doesn&apos;t prove a team is trustworthy or
               that a token is safe. Approval means a project passed our checks at the time we made them. It isn&apos;t a
-              guarantee, an audit, or a prediction about price — and a product milestone never promises token returns.
+              guarantee, an audit, or a prediction about price, and a product milestone never promises token returns.
             </p>
             <ButtonLink href="/methodology" intent="quiet" className="mt-4">Read the full methodology</ButtonLink>
           </div>

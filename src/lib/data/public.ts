@@ -39,6 +39,8 @@ export type PublicProject = {
   pair_mint: string | null;
   pair_relationship: "inspired_by" | "official" | null;
   created_at: string;
+  quote_mint: string;
+  quote_symbol: string;
 };
 
 export type PublicFinding = {

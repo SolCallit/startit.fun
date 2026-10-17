@@ -29,8 +29,11 @@ export async function saveLaunchConfig(appId: string, _prev: ConfigState, formDa
 
   const supabase = await createClient();
   const { data: app } = await supabase.from("applications")
-    .select("id, public_ref, status, project_name, token_name, ticker, permitted_branding, applicant_is_founder").eq("id", appId).maybeSingle();
+    .select("id, public_ref, status, project_name, token_name, ticker, permitted_branding, applicant_is_founder, quote_mint").eq("id", appId).maybeSingle();
   if (!app) return { errors: { _form: "Application not found." }, values };
+  const quoteMint = app.quote_mint ?? "So11111111111111111111111111111111111111112";
+  const { data: quote } = await supabase.from("quote_tokens").select("mint, symbol, enabled").eq("mint", quoteMint).maybeSingle();
+  if (!quote?.enabled) return { errors: { _form: "The pair this application chose isn't enabled on the platform. Enable it in Platform settings or ask the founder to pick another." }, values };
   if (app.status !== "launch_config_pending") return { errors: { _form: "Launch settings can only change while configuration is pending." }, values };
   if (app.applicant_is_founder && v.launcher_bps > 0) return { errors: { launcher_bps: "The founder submitted this project, so there's no launcher share." }, values };
 
@@ -70,6 +73,7 @@ export async function saveLaunchConfig(appId: string, _prev: ConfigState, formDa
     wallets: { founder: v.founder_wallet, launcher: v.launcher_wallet || null, communityTreasury: v.treasury_address, feeRouter: router.value },
     treasury: { isMultisig, threshold, signers, controlRules: v.treasury_rules },
     permittedBranding: app.permitted_branding ?? "",
+    quote: { symbol: quote.symbol, mint: quote.mint },
   });
   const termsSha = await sha256Hex(termsText);
 
@@ -78,6 +82,7 @@ export async function saveLaunchConfig(appId: string, _prev: ConfigState, formDa
     total_supply_raw: wholeToRaw(DEFAULT_SUPPLY, DEFAULT_DECIMALS), decimals: DEFAULT_DECIMALS,
     mint_authority_revoked: true, freeze_authority_revoked: true, insider_allocations: allocations,
     founder_wallet: v.founder_wallet, launcher_wallet: v.launcher_wallet || null, terms_text: termsText, terms_sha256: termsSha,
+    quote_mint: quote.mint,
   };
   const lr = existingLaunch
     ? await supabase.from("launches").update(launchRow).eq("id", existingLaunch.id)

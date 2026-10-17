@@ -97,7 +97,8 @@ export async function saveStep(appId: string, step: StepNumber, _prev: StepState
       update.ticker = orNull(values.ticker)?.toUpperCase() ?? null;
       update.token_concept = orNull(values.token_concept);
       update.community_plan = orNull(values.community_plan);
-      // Pairing: all-or-nothing on the kind; clearing the kind clears the rest.
+      update.quote_mint = orNull(values.quote_mint);
+      // Inspired-by link: all-or-nothing on the kind; clearing the kind clears the rest.
       const kind = orNull(values.pair_kind);
       update.pair_kind = kind;
       update.pair_name = kind ? orNull(values.pair_name) : null;
@@ -134,6 +135,7 @@ export async function saveStep(appId: string, step: StepNumber, _prev: StepState
   const { error } = await supabase.from("applications").update(update).eq("id", appId);
   if (error) {
     if (error.code === "23505") return { errors: { ticker: "Another active application already uses this ticker." }, values };
+    if (error.code === "23503" && /quote_mint/.test(error.message)) return { errors: { quote_mint: "That pair isn't available. Pick one from the list." }, values };
     return { errors: { _form: `Couldn't save: ${error.message}` }, values };
   }
 

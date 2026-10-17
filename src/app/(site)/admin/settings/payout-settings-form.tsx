@@ -5,7 +5,7 @@ import { savePayoutSettings, type SettingState } from "@/lib/fees/actions";
 
 export function PayoutSettingsForm({ multisig, platform }: { multisig: string | null; platform: string | null }) {
   const [state, action, pending] = useActionState<SettingState, FormData>(savePayoutSettings, {});
-  const cls = "rounded-full border-[1.5px] border-line bg-surface shadow-raise-sm px-3 py-2 font-mono text-[0.875rem] text-ink focus:border-cobalt focus:outline-none";
+  const cls = "rounded-[12px] border-[1.5px] border-line-strong bg-surface px-3 py-2 font-mono text-[0.875rem] text-ink focus:border-cobalt focus:outline-none";
   return (
     <form action={action} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
@@ -19,7 +19,7 @@ export function PayoutSettingsForm({ multisig, platform }: { multisig: string | 
         <input id="platform_treasury_address" name="platform_treasury_address" defaultValue={platform ?? ""} spellCheck={false} className={cls} />
       </div>
       <div className="flex items-center gap-3">
-        <button type="submit" disabled={pending} className="rounded-full bg-cobalt shadow-raise-sm active:translate-y-[2px] active:shadow-none px-4 py-2.5 font-semibold text-cobalt-ink disabled:opacity-50">Save</button>
+        <button type="submit" disabled={pending} className="btn-start">Save</button>
         {state.error ? <p role="alert" className="text-flagged">{state.error}</p> : null}
         {state.message ? <p role="status" className="text-verified">{state.message}</p> : null}
       </div>

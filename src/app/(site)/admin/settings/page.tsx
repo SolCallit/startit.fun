@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { FeeRouterForm } from "./settings-form";
 import { PlatformSetup } from "./platform-setup";
 import { PayoutSettingsForm } from "./payout-settings-form";
+import { QuoteTokens, type QuoteRow } from "./quote-tokens";
 
 export const metadata: Metadata = { title: "Platform settings" };
 
@@ -24,6 +25,8 @@ async function Body() {
   const { data: rows } = await supabase.from("platform_settings").select("key, value, updated_at");
   const get = (k: string) => rows?.find((r) => r.key === k);
   const data = get("fee_router_address");
+  const { data: quotes } = await supabase.from("quote_tokens")
+    .select("mint, symbol, name, decimals, launchlab_config_id, platform_allowed_at, enabled").order("created_at");
   return (
     <div className="max-w-2xl">
       {!user.roles.includes("admin") ? <div className="mb-6"><Notice tone="warn">Only admins can change these. You can view them.</Notice></div> : null}
@@ -44,6 +47,15 @@ async function Body() {
             <p className="text-ink-soft">{get("launchlab_platform_id") ? `Platform ${get("launchlab_platform_id")!.value}` : "Not set up yet. An admin must do this."}</p>
           ) : (
             <PlatformSetup platformId={get("launchlab_platform_id")?.value ?? null} redirected={!!get("launchlab_cp_creator_redirected")} />
+          )}
+        </Panel>
+      </div>
+      <div className="mt-6">
+        <Panel title="Pairs (quote tokens)">
+          {user.roles.includes("admin") ? (
+            <QuoteTokens rows={(quotes ?? []) as QuoteRow[]} platformReady={!!get("launchlab_platform_id")} />
+          ) : (
+            <p className="text-ink-soft">{(quotes ?? []).filter((q) => q.enabled).map((q) => q.symbol).join(", ") || "SOL"}</p>
           )}
         </Panel>
       </div>

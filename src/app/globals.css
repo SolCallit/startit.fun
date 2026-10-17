@@ -1,35 +1,84 @@
 @import "tailwindcss";
 
 /*
-  Startit — shares Call-It's design language: deep navy, tactile raised controls,
-  Bricolage Grotesque for display, Schibsted Grotesk for text.
-  Blue is reserved for actions; mint / amber / rose only ever mean verification or status.
+  Startit — "arcade chrome", taken from the START button logo.
+  Gunmetal and chrome surfaces; the glossy red START pill is the one primary action per screen;
+  neon cyan marks links, focus and selection. Neon green / yellow / pink only ever mean status.
+  Dark is the default; [data-theme="light"] is brushed aluminium.
 */
-:root {
-  --paper: #0b1b27;        /* page */
-  --surface: #10263a;      /* cards, inputs */
-  --surface-2: #16314a;    /* hover, raised */
-  --ink: #ffffff;
-  --ink-soft: #c9d6e2;
-  --muted: #8fa6ba;
-  --line: #1e3a54;
-  --line-strong: #2b4d6b;
-  --cobalt: #4da8ff;       /* actions */
-  --cobalt-ink: #06121c;
-  --cobalt-soft: #12324f;
+:root,
+[data-theme="dark"] {
+  --paper: #070c14;
+  --surface: #0f1825;
+  --surface-2: #172234;
+  --ink: #f2f6fb;
+  --ink-soft: #c3cfdd;
+  --muted: #8395ab;
+  --line: #213046;
+  --line-strong: #34475f;
+  --cobalt: #38d2ff;          /* neon cyan: links, focus, selected */
+  --cobalt-ink: #041019;
+  --cobalt-soft: #0d2a3b;
+  --start: #e3232e;           /* START red: primary action only */
+  --start-hi: #ff6a6f;
+  --start-lo: #8d0d14;
+  --start-ink: #ffffff;
+  --chrome-hi: #c9d3df;
+  --chrome-lo: #4b5868;
 
-  --verified: #3ddc97;
-  --verified-soft: #0f3529;
-  --review: #f5b84d;
-  --review-soft: #3a2c10;
-  --flagged: #ff6b8a;
-  --flagged-soft: #3f1622;
-  --unverified: #9fb3c6;
-  --unverified-soft: #182f45;
+  --verified: #42e57a;
+  --verified-soft: #0d2e1b;
+  --review: #ffd23f;
+  --review-soft: #2f2709;
+  --flagged: #ff5584;
+  --flagged-soft: #3a1020;
+  --unverified: #93a6bc;
+  --unverified-soft: #17243a;
 
-  --raise: 0 1px 0 #ffffff14 inset, 0 3px 0 #00000059, 0 10px 20px -8px #0000008c;
-  --raise-sm: 0 1px 0 #ffffff0f inset, 0 2px 0 #0000004d, 0 6px 12px -6px #00000080;
+  --glow-a: #2fe66a;  /* green arc  */
+  --glow-b: #2cc8ff;  /* cyan arc   */
+  --glow-c: #ffd02e;  /* yellow arc */
+  --glow-strength: 0.16;
+  --ring-opacity: 0.85;
+
+  --raise: 0 1px 0 #ffffff12 inset, 0 3px 0 #00000066, 0 14px 28px -12px #000000a6;
+  --raise-sm: 0 1px 0 #ffffff0f inset, 0 2px 0 #00000059, 0 8px 16px -8px #00000080;
   color-scheme: dark;
+}
+
+[data-theme="light"] {
+  --paper: #e8ecf1;
+  --surface: #f6f8fa;
+  --surface-2: #ffffff;
+  --ink: #0a111c;
+  --ink-soft: #2a394c;
+  --muted: #5a697c;
+  --line: #cdd5df;
+  --line-strong: #aab6c4;
+  --cobalt: #0a7fb3;
+  --cobalt-ink: #ffffff;
+  --cobalt-soft: #d9eef8;
+  --start: #d61d28;
+  --start-hi: #ff5b61;
+  --start-lo: #7c0a11;
+  --start-ink: #ffffff;
+  --chrome-hi: #ffffff;
+  --chrome-lo: #9aa6b4;
+
+  --verified: #12803e;
+  --verified-soft: #dcf3e5;
+  --review: #8a5f00;
+  --review-soft: #fbf0cf;
+  --flagged: #c0143f;
+  --flagged-soft: #fbe1e8;
+  --unverified: #4f6075;
+  --unverified-soft: #e2e8ef;
+
+  --glow-strength: 0.22;
+  --ring-opacity: 0.7;
+  --raise: 0 1px 0 #ffffff inset, 0 2px 0 #0a111c1f, 0 14px 24px -14px #0a111c40;
+  --raise-sm: 0 1px 0 #ffffff inset, 0 2px 0 #0a111c1a, 0 8px 14px -10px #0a111c33;
+  color-scheme: light;
 }
 
 @theme inline {
@@ -53,6 +102,8 @@
   --color-unverified-soft: var(--unverified-soft);
 
   --color-surface-2: var(--surface-2);
+  --color-start: var(--start);
+  --color-start-ink: var(--start-ink);
   --font-sans: var(--font-schibsted);
   --font-display: var(--font-bricolage);
   --font-mono: var(--font-jetbrains);
@@ -63,6 +114,21 @@
 html {
   background: var(--paper);
   color: var(--ink);
+}
+
+/* The page sits in the light of the button's ring: three soft arcs of its neon (green, cyan, yellow)
+   bleed in from the edges, over a faint brushed-metal grain. Fixed and static. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(60rem 34rem at -8% -12%, color-mix(in srgb, var(--glow-a) calc(var(--glow-strength) * 100%), transparent), transparent 70%),
+    radial-gradient(52rem 30rem at 108% -6%, color-mix(in srgb, var(--glow-b) calc(var(--glow-strength) * 120%), transparent), transparent 70%),
+    radial-gradient(48rem 30rem at 104% 112%, color-mix(in srgb, var(--glow-c) calc(var(--glow-strength) * 70%), transparent), transparent 70%),
+    repeating-linear-gradient(90deg, color-mix(in srgb, var(--ink) 2.2%, transparent) 0 1px, transparent 1px 3px);
 }
 
 body {
@@ -76,6 +142,99 @@ h1, h2, h3 {
 }
 
 ::selection { background: var(--cobalt-soft); color: var(--ink); }
+
+/* The START button: glossy red pill in a chrome rim. One per screen. */
+.btn-start {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  padding: 0.7rem 1.5rem;
+  font-weight: 800;
+  font-size: 0.9875rem;
+  letter-spacing: 0.005em;
+  color: var(--start-ink);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--start-hi) 70%, transparent) 0%, transparent 46%),
+    radial-gradient(120% 140% at 50% 120%, var(--start-lo), var(--start) 62%);
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--chrome-hi) 85%, transparent),
+    0 0 0 3.5px var(--chrome-lo),
+    0 1px 0 #ffffff66 inset,
+    0 -2px 6px #00000055 inset,
+    0 4px 0 color-mix(in srgb, var(--start-lo) 85%, black),
+    0 12px 24px -10px color-mix(in srgb, var(--start) 70%, transparent);
+  text-shadow: 0 1px 0 #00000059;
+  transition: transform 70ms ease-out, box-shadow 70ms ease-out, filter 120ms;
+}
+.btn-start:hover { filter: brightness(1.08) saturate(1.05); }
+.btn-start:active {
+  transform: translateY(3px);
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--chrome-hi) 85%, transparent),
+    0 0 0 3.5px var(--chrome-lo),
+    0 1px 0 #ffffff40 inset,
+    0 -1px 4px #00000066 inset,
+    0 1px 0 color-mix(in srgb, var(--start-lo) 85%, black);
+}
+.btn-start:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* Chrome secondary control. */
+.btn-chrome {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  padding: 0.65rem 1.25rem;
+  font-weight: 700;
+  font-size: 0.9375rem;
+  color: var(--ink);
+  background: linear-gradient(180deg, var(--surface-2), var(--surface));
+  border: 1.5px solid var(--line-strong);
+  box-shadow: var(--raise-sm);
+  transition: transform 70ms ease-out, box-shadow 70ms ease-out, border-color 120ms;
+}
+.btn-chrome:hover { border-color: var(--cobalt); }
+.btn-chrome:active { transform: translateY(2px); box-shadow: none; }
+.btn-chrome:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Switch: a real checkbox with role="switch". Track + thumb drawn here so forms keep native semantics. */
+.switch {
+  appearance: none;
+  position: relative;
+  flex: none;
+  width: 2.75rem;
+  height: 1.625rem;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1.5px solid var(--line-strong);
+  box-shadow: inset 0 2px 4px #00000040;
+  cursor: pointer;
+  transition: background-color 140ms, border-color 140ms;
+}
+.switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 1.125rem;
+  height: 1.125rem;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--chrome-hi), var(--chrome-lo));
+  box-shadow: 0 1px 2px #00000080;
+  transition: transform 160ms cubic-bezier(.34, 1.56, .64, 1);
+}
+.switch:checked {
+  background: color-mix(in srgb, var(--cobalt) 30%, var(--surface-2));
+  border-color: var(--cobalt);
+  box-shadow: inset 0 2px 4px #00000040, 0 0 12px -2px color-mix(in srgb, var(--cobalt) 70%, transparent);
+}
+.switch:checked::after { transform: translateX(1.125rem); background: linear-gradient(180deg, #ffffff, color-mix(in srgb, var(--cobalt) 40%, #ffffff)); }
+.switch:disabled { opacity: 0.5; cursor: not-allowed; }
+.switch[aria-invalid="true"] { border-color: var(--flagged); }
 
 :focus-visible {
   outline: 2px solid var(--cobalt);

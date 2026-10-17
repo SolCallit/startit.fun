@@ -20,6 +20,8 @@ export type LaunchTermsInput = {
   wallets: { founder: string; launcher: string | null; communityTreasury: string; feeRouter: string };
   treasury: { isMultisig: boolean; threshold: number | null; signers: string[]; controlRules: string };
   permittedBranding: string;
+  /** The on-chain pair (bonding-curve quote token). Omitted = SOL. */
+  quote?: { symbol: string; mint: string };
 };
 
 const BASE58_PUBKEY = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
@@ -45,6 +47,7 @@ export function renderLaunchTerms(t: LaunchTermsInput): string {
     `Application: ${t.publicRef}`,
     `Network: ${t.network === "solana-devnet" ? "Solana devnet (test network, no monetary value)" : "Solana mainnet"}`,
     `Launch mechanism: Raydium LaunchLab bonding curve, graduating to a Raydium CPMM pool`,
+    `Paired with: ${t.quote ? `${t.quote.symbol} (${t.quote.mint})` : "SOL"} — trading, graduation and fees are counted in this token`,
     ``,
     `## Token`,
     `- Name: ${t.tokenName}`,

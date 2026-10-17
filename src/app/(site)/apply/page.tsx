@@ -54,7 +54,7 @@ async function StartButton() {
   if (!user) return <ButtonLink href="/login?next=/apply">Connect wallet to start</ButtonLink>;
   return (
     <form action={startApplication}>
-      <button type="submit" className="rounded-full bg-cobalt shadow-raise-sm active:translate-y-[2px] active:shadow-none px-4 py-2.5 font-semibold text-cobalt-ink hover:opacity-90">
+      <button type="submit" className="btn-start">
         Start application
       </button>
     </form>

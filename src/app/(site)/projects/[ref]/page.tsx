@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { PairBadge } from "@/components/pair-badge";
+import { PairBadge, QuoteChip } from "@/components/pair-badge";
 import { Suspense } from "react";
 import { Container, FindingBadge, Mono, Notice, Panel, StatusBadge } from "@/components/ui";
 import { getPublicFees, getPublicProject } from "@/lib/data/public";
@@ -31,6 +31,7 @@ async function Project({ params }: { params: PageProps<"/projects/[ref]">["param
         <div className="flex flex-wrap items-center gap-3">
           <StatusBadge status={p.status} />
           <Mono className="text-muted">{p.public_ref}</Mono>
+          <QuoteChip symbol={p.quote_symbol ?? "SOL"} />
           <PairBadge pairing={p} size="md" />
         </div>
         <h1 className="mt-4 text-[2.5rem] leading-tight font-bold tracking-[-0.02em] text-ink">
@@ -57,7 +58,7 @@ async function Project({ params }: { params: PageProps<"/projects/[ref]">["param
                     {f.url ? (
                       <p className="mt-1 text-[0.875rem] text-muted">
                         <a href={f.url} rel="noopener noreferrer nofollow" target="_blank" className="break-all text-cobalt hover:underline">{f.url}</a>
-                        {f.fetched_at ? <> · checked {new Date(f.fetched_at).toUTCString()}</> : null}
+                        {f.fetched_at ? <>, checked {new Date(f.fetched_at).toUTCString()}</> : null}
                       </p>
                     ) : null}
                   </div>
@@ -85,8 +86,8 @@ async function Project({ params }: { params: PageProps<"/projects/[ref]">["param
             <dl className="grid gap-3 text-[0.9375rem]">
               <Row label="Name">{p.token_name}</Row>
               <Row label="Mint">{p.mint_address ? <a href={explorer(p.mint_address, p.network)} className="text-cobalt hover:underline" target="_blank" rel="noopener noreferrer"><Mono>{p.mint_address}</Mono></a> : "Not launched"}</Row>
-              <Row label="Mint authority">{p.mint_authority_revoked === null ? "—" : p.mint_authority_revoked ? "Revoked" : "Retained — see disclosures"}</Row>
-              <Row label="Freeze authority">{p.freeze_authority_revoked === null ? "—" : p.freeze_authority_revoked ? "Revoked" : "Retained — see disclosures"}</Row>
+              <Row label="Mint authority">{p.mint_authority_revoked === null ? "—" : p.mint_authority_revoked ? "Revoked" : "Retained, see disclosures"}</Row>
+              <Row label="Freeze authority">{p.freeze_authority_revoked === null ? "—" : p.freeze_authority_revoked ? "Revoked" : "Retained, see disclosures"}</Row>
               <Row label="Treasury">{p.treasury_address ? <Mono>{p.treasury_address}</Mono> : "Not set"}</Row>
               {p.is_multisig ? <Row label="Treasury control">{p.threshold}-of-N multisig</Row> : null}
             </dl>

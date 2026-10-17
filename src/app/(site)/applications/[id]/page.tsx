@@ -60,8 +60,8 @@ async function Status({ params, searchParams }: PageProps<"/applications/[id]">)
                       <form action={respondToEvidenceRequest.bind(null, id, r.id)} className="mt-3 flex flex-col gap-2">
                         <label htmlFor={`resp-${r.id}`} className="sr-only">Your reply</label>
                         <textarea id={`resp-${r.id}`} name="response" rows={3} required
-                          className="rounded-full border-[1.5px] border-line bg-surface shadow-raise-sm px-3 py-2 text-ink focus:border-cobalt focus:outline-none" />
-                        <button type="submit" className="self-start rounded-full border-[1.5px] border-line bg-surface shadow-raise-sm px-3 py-1.5 font-semibold text-ink hover:border-ink">Send reply</button>
+                          className="rounded-[12px] border-[1.5px] border-line-strong bg-surface px-3 py-2 text-ink focus:border-cobalt focus:outline-none" />
+                        <button type="submit" className="self-start btn-chrome">Send reply</button>
                       </form>
                     )}
                   </li>
@@ -71,7 +71,7 @@ async function Status({ params, searchParams }: PageProps<"/applications/[id]">)
                 <ButtonLink href={`/applications/${id}/edit?step=1`} intent="neutral">Edit application</ButtonLink>
                 <form action={resubmitApplication.bind(null, id)}>
                   <button type="submit" disabled={openRequests.length > 0}
-                    className="rounded-full bg-cobalt shadow-raise-sm active:translate-y-[2px] active:shadow-none px-4 py-2.5 font-semibold text-cobalt-ink hover:opacity-90 disabled:opacity-50">
+                    className="btn-start">
                     Resubmit for review
                   </button>
                 </form>

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { requireUser } from "@/lib/auth";
-import { listMyApplications, EDITABLE } from "@/lib/applications/data";
+import { listMyApplications, listQuoteOptions, EDITABLE } from "@/lib/applications/data";
 import { listPublicProjects } from "@/lib/data/public";
 import { STATUS_LABEL } from "@/lib/domain/status";
 import { ButtonLink } from "@/components/ui";
@@ -10,22 +10,12 @@ import { LaunchPathCard, ProjectCard } from "./cards";
 
 export const metadata: Metadata = { title: "Home" };
 
-const FILTERS = [
-  { key: "all", label: "All" },
-  { key: "token", label: "Tokens" },
-  { key: "project", label: "Projects" },
-  { key: "person", label: "People" },
-  { key: "none", label: "Unpaired" },
-] as const;
-type FilterKey = (typeof FILTERS)[number]["key"];
 
 export default function HomePage({ searchParams }: PageProps<"/home">) {
   return (
     <>
-      <header className="sticky top-0 z-10 hidden h-16 items-center border-b border-line bg-paper/90 px-6 backdrop-blur lg:flex">
-        <h1 className="text-[1.375rem]">Home</h1>
-      </header>
-      <div className="grid gap-7 px-4 py-6 sm:px-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+      <h1 className="sr-only">Home</h1>
+      <div className="mx-auto grid w-full max-w-6xl gap-7 px-4 py-8 sm:px-6 xl:grid-cols-[minmax(0,1fr)_300px]">
         <div className="flex min-w-0 flex-col gap-8">
           <Suspense fallback={<div className="h-[22rem] rounded-[22px] border border-line bg-surface" />}>
             <LaunchPath />
@@ -34,7 +24,7 @@ export default function HomePage({ searchParams }: PageProps<"/home">) {
             <Projects searchParams={searchParams} />
           </Suspense>
         </div>
-        <aside className="flex flex-col gap-5 xl:sticky xl:top-22 xl:self-start">
+        <aside className="flex flex-col gap-5 xl:sticky xl:top-24 xl:self-start">
           <Suspense fallback={<div className="h-40 rounded-[18px] border border-line bg-surface" />}>
             <MyApplications />
           </Suspense>
@@ -54,12 +44,15 @@ async function LaunchPath() {
 
 async function Projects({ searchParams }: { searchParams: PageProps<"/home">["searchParams"] }) {
   const sp = await searchParams;
-  const raw = typeof sp.pair === "string" ? sp.pair : "all";
-  const filter: FilterKey = FILTERS.some((f) => f.key === raw) ? (raw as FilterKey) : "all";
-  const res = await listPublicProjects();
+  const [res, quotes] = await Promise.all([listPublicProjects(), listQuoteOptions()]);
   const all = res.connected ? res.projects : [];
+  // Filter chips: every enabled pair, plus any pair a listed project already uses.
+  const symbols = [...new Set([...quotes.map((q) => q.symbol), ...all.map((p) => p.quote_symbol)])];
+  const FILTERS = [{ key: "all", label: "All" }, ...symbols.map((s) => ({ key: s, label: s }))];
+  const raw = typeof sp.pair === "string" ? sp.pair : "all";
+  const filter = FILTERS.some((f) => f.key === raw) ? raw : "all";
   const shown = all
-    .filter((p) => (filter === "all" ? true : filter === "none" ? !p.pair_kind : p.pair_kind === filter))
+    .filter((p) => (filter === "all" ? true : p.quote_symbol === filter))
     .sort((a, b) => (b.created_at ?? "").localeCompare(a.created_at ?? ""));
 
   return (
@@ -73,7 +66,7 @@ async function Projects({ searchParams }: { searchParams: PageProps<"/home">["se
         {FILTERS.map((f) => (
           <Link
             key={f.key}
-            href={f.key === "all" ? "/home" : `/home?pair=${f.key}`}
+            href={f.key === "all" ? "/home" : `/home?pair=${encodeURIComponent(f.key)}`}
             aria-current={filter === f.key ? "true" : undefined}
             className={`rounded-full border-[1.5px] px-3.5 py-1.5 text-[0.9375rem] font-semibold ${
               filter === f.key ? "border-cobalt bg-cobalt-soft text-ink" : "border-line text-ink-soft hover:border-line-strong hover:text-ink"

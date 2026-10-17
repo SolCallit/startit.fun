@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { PublicProject } from "@/lib/data/public";
 import { DEFAULT_SPLIT, bpsToPercent } from "@/lib/domain/fees";
-import { PairBadge } from "@/components/pair-badge";
+import { PairBadge, QuoteChip } from "@/components/pair-badge";
 import { ButtonLink, StatusBadge } from "@/components/ui";
 
 const PATH = [
@@ -75,7 +75,7 @@ export function LaunchPathCard({ draft }: { draft: { id: string; name: string | 
         <div className="flex flex-col gap-3 rounded-[16px] border border-line bg-paper/60 p-4">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <p className="font-semibold text-ink">Where trading fees go</p>
-            <p className="text-[0.875rem] text-muted">Of fees actually collected, paid in SOL</p>
+            <p className="text-[0.875rem] text-muted">Of fees actually collected, paid in the token each launch trades against</p>
           </div>
           <div className="flex h-3 overflow-hidden rounded-full" role="img" aria-label={SPLIT.map((s) => `${s.label} ${bpsToPercent(s.bps)}`).join(", ")}>
             {SPLIT.map((s) => <span key={s.label} className={s.cls} style={{ width: `${s.bps / 100}%` }} />)}
@@ -111,6 +111,7 @@ export function ProjectCard({ p }: { p: PublicProject }) {
         <p className="line-clamp-2 text-[0.9375rem] leading-snug text-ink-soft">{p.project_summary}</p>
         <div className="mt-auto flex flex-wrap items-center gap-2">
           <StatusBadge status={p.status} />
+          <QuoteChip symbol={p.quote_symbol ?? "SOL"} />
           <PairBadge pairing={p} />
           {p.network === "solana-devnet" ? <span className="rounded-full bg-review-soft px-2.5 py-0.5 text-[0.8125rem] font-semibold text-review">Devnet</span> : null}
         </div>

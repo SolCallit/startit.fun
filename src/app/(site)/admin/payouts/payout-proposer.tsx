@@ -30,7 +30,7 @@ export function PayoutProposer({ rows, paused }: { rows: PendingRow[]; paused: b
         {rows.map((r) => (
           <li key={r.id}>
             <label className="grid grid-cols-[auto_1fr_auto] items-center gap-3 px-3 py-2 text-[0.9375rem]">
-              <input type="checkbox" checked={selected.includes(r.id)} onChange={() => toggle(r.id)} disabled={!!prep} className="accent-[var(--cobalt)]" />
+              <input type="checkbox" role="switch" checked={selected.includes(r.id)} onChange={() => toggle(r.id)} disabled={!!prep} className="switch shrink-0" />
               <span><span className="font-semibold text-ink">{r.ref}</span> · {r.recipient} · <span className="font-mono text-[0.8125rem] text-muted">{r.address.slice(0, 6)}…{r.address.slice(-6)}</span></span>
               <span className="font-semibold text-ink">{sol(r.amountRaw)}</span>
             </label>
@@ -41,7 +41,7 @@ export function PayoutProposer({ rows, paused }: { rows: PendingRow[]; paused: b
       {paused ? <p className="text-flagged">Payouts are paused until an admin resumes them.</p> : !w.address ? (
         <div className="flex flex-wrap gap-2">
           {w.wallets.map((x) => <button key={x.name} type="button" onClick={() => run("Connecting…", async () => { await w.connect(x); })}
-            className="rounded-full border-[1.5px] border-line bg-surface shadow-raise-sm px-3 py-2 font-semibold text-ink hover:border-ink">Connect {x.name}</button>)}
+            className="btn-chrome">Connect {x.name}</button>)}
           {!w.wallets.length ? <p className="text-ink-soft">No Solana wallet found.</p> : null}
         </div>
       ) : !prep ? (
@@ -49,7 +49,7 @@ export function PayoutProposer({ rows, paused }: { rows: PendingRow[]; paused: b
           const r = await preparePayoutProposal(w.address!, selected);
           if (!r.ok) throw new Error(r.error);
           setPrep(r);
-        })} className="self-start rounded-full bg-cobalt shadow-raise-sm active:translate-y-[2px] active:shadow-none px-4 py-2.5 font-semibold text-cobalt-ink disabled:opacity-50">Build proposal for {selected.length} payout(s)</button>
+        })} className="self-start btn-start">Build proposal for {selected.length} payout(s)</button>
       ) : (
         <div className="flex flex-col gap-3">
           <p className="text-ink">Squads transaction #{prep.transactionIndex} paying {sol(prep.totalLamports)} from the Fee Router. Signing creates the proposal only; other signers must approve and execute it in Squads.</p>
@@ -61,8 +61,8 @@ export function PayoutProposer({ rows, paused }: { rows: PendingRow[]; paused: b
               const r = await submitPayoutProposal(selected, prep.transactionIndex, prep.ticket, toB64(signed));
               if (!r.ok) throw new Error(r.error);
               setMsg({ ok: true, text: `Proposal created (${r.signature}). Approve and execute it in Squads; the indexer confirms payouts once executed.` }); setPrep(null);
-            })} className="rounded-full bg-cobalt shadow-raise-sm active:translate-y-[2px] active:shadow-none px-4 py-2.5 font-semibold text-cobalt-ink disabled:opacity-50">Sign and create proposal</button>
-            <button type="button" onClick={() => setPrep(null)} className="rounded-full border-[1.5px] border-line bg-surface shadow-raise-sm px-4 py-2.5 font-semibold text-ink">Cancel</button>
+            })} className="btn-start">Sign and create proposal</button>
+            <button type="button" onClick={() => setPrep(null)} className="btn-chrome">Cancel</button>
           </div>
         </div>
       )}
@@ -76,7 +76,7 @@ export function ResumeButton() {
   const [state, action, pending] = useActionState<SettingState, FormData>(clearPayoutPause, {});
   return (
     <form action={action} className="mt-3 flex items-center gap-3">
-      <button type="submit" disabled={pending} className="rounded-full border-[1.5px] border-line bg-surface shadow-raise-sm px-3 py-2 font-semibold text-ink hover:border-ink">I investigated — resume payouts</button>
+      <button type="submit" disabled={pending} className="btn-chrome">I investigated — resume payouts</button>
       {state.error ? <span className="text-flagged">{state.error}</span> : null}
       {state.message ? <span className="text-verified">{state.message}</span> : null}
     </form>

@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { signIn, signUp, type AuthState } from "./actions";
 
 const input =
-  "w-full rounded-full border-[1.5px] border-line bg-surface shadow-raise-sm px-3 py-2.5 text-ink placeholder:text-muted focus:border-cobalt focus:outline-none";
+  "w-full rounded-[12px] border-[1.5px] border-line-strong bg-surface px-3 py-2.5 text-ink placeholder:text-muted focus:border-cobalt focus:outline-none";
 
 export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const next = useSearchParams().get("next") ?? "/home";
@@ -43,7 +43,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
       <button
         type="submit"
         disabled={pending}
-        className="rounded-full bg-cobalt shadow-raise-sm active:translate-y-[2px] active:shadow-none px-4 py-2.5 font-semibold text-cobalt-ink hover:opacity-90 disabled:opacity-50"
+        className="btn-start"
       >
         {pending ? (mode === "login" ? "Signing in…" : "Creating account…") : mode === "login" ? "Sign in" : "Create account"}
       </button>

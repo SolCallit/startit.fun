@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import { Container, Mono, Notice } from "@/components/ui";
 import { requireUser } from "@/lib/auth";
-import { EDITABLE, getApplicationBundle, stepDefaults } from "@/lib/applications/data";
+import { EDITABLE, getApplicationBundle, listQuoteOptions, stepDefaults } from "@/lib/applications/data";
 import { STEPS, type StepNumber } from "@/lib/applications/schema";
 import { EvidenceUploader, StepForm } from "./step-form";
 
@@ -86,7 +86,7 @@ async function Editor({ params, searchParams }: PageProps<"/applications/[id]/ed
           </div>
         ) : null}
 
-        <StepForm key={step} appId={id} step={step} defaults={stepDefaults(bundle, step)} />
+        <StepForm key={step} appId={id} step={step} defaults={stepDefaults(bundle, step)} quotes={step === 4 ? await listQuoteOptions() : []} />
       </section>
     </div>
   );

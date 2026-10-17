@@ -3,7 +3,7 @@
 import { useActionState, useState } from "react";
 import { createSigningLink, markReadyForDeployment, saveLaunchConfig, type ConfigState, type LinkState } from "@/lib/launch/actions";
 
-const input = "w-full rounded-full border-[1.5px] border-line bg-surface shadow-raise-sm px-3 py-2 text-ink focus:border-cobalt focus:outline-none aria-[invalid=true]:border-flagged";
+const input = "w-full rounded-[12px] border-[1.5px] border-line-strong bg-surface px-3 py-2 text-ink focus:border-cobalt focus:outline-none aria-[invalid=true]:border-flagged";
 
 function F({ name, label, hint, d, e, rows, mono }: { name: string; label: string; hint?: string; d: Record<string, string>; e?: Record<string, string>; rows?: number; mono?: boolean }) {
   const cls = `${input} ${mono ? "font-mono text-[0.875rem]" : ""}`;
@@ -55,8 +55,11 @@ export function LaunchConfigForm({ appId, defaults, selfLaunch }: { appId: strin
         <legend className="mb-2 text-[1.0625rem] font-semibold text-ink">Community treasury</legend>
         <F name="treasury_address" label="Treasury address" mono d={d} e={e} hint="For a Squads multisig, use the vault address." />
         <div className="flex gap-6 text-ink-soft">
-          <label className="flex items-center gap-2"><input type="radio" name="treasury_is_multisig" value="yes" defaultChecked={multisig} onChange={() => setMultisig(true)} className="accent-[var(--cobalt)]" />Multisig</label>
-          <label className="flex items-center gap-2"><input type="radio" name="treasury_is_multisig" value="no" defaultChecked={!multisig} onChange={() => setMultisig(false)} className="accent-[var(--cobalt)]" />Single signer</label>
+          <input type="hidden" name="treasury_is_multisig" value={multisig ? "yes" : "no"} />
+          <label className="flex items-center gap-3">
+            <input type="checkbox" role="switch" className="switch" checked={multisig} onChange={(ev) => setMultisig(ev.target.checked)} />
+            <span>{multisig ? "Multisig treasury" : "Single-signer treasury"}</span>
+          </label>
         </div>
         {multisig ? (
           <div className="grid gap-4 sm:grid-cols-[8rem_1fr]">
@@ -79,7 +82,7 @@ export function LaunchConfigForm({ appId, defaults, selfLaunch }: { appId: strin
       </fieldset>
 
       <div className="flex flex-wrap items-center gap-3 border-t border-line pt-5">
-        <button type="submit" disabled={pending} className="rounded-full bg-cobalt shadow-raise-sm active:translate-y-[2px] active:shadow-none px-4 py-2.5 font-semibold text-cobalt-ink hover:opacity-90 disabled:opacity-50">
+        <button type="submit" disabled={pending} className="btn-start">
           {pending ? "Saving…" : "Save and regenerate terms"}
         </button>
         {state.message ? <p role="status" className="text-[0.9375rem] text-verified">{state.message}</p> : null}
@@ -94,7 +97,7 @@ export function SigningLinkButton({ appId, role, disabled }: { appId: string; ro
   return (
     <form action={action} className="flex flex-col gap-2">
       <button type="submit" disabled={pending || disabled}
-        className="self-start rounded-full border-[1.5px] border-line bg-surface shadow-raise-sm px-3 py-2 font-semibold text-ink hover:border-ink disabled:opacity-50">
+        className="self-start btn-chrome">
         {pending ? "Creating…" : `Create ${role} signing link`}
       </button>
       {state.error ? <p className="text-[0.875rem] text-flagged">{state.error}</p> : null}
@@ -114,11 +117,11 @@ export function ReadyButton({ appId, blockers }: { appId: string; blockers: stri
   return (
     <form action={action} className="flex flex-col gap-3">
       <label className="flex items-start gap-3 text-ink-soft">
-        <input type="checkbox" checked={confirm} onChange={(ev) => setConfirm(ev.target.checked)} className="mt-1 accent-[var(--cobalt)]" />
+        <input type="checkbox" role="switch" checked={confirm} onChange={(ev) => setConfirm(ev.target.checked)} className="switch shrink-0" />
         I reviewed the signed terms. Marking ready publishes the fee split and terms and freezes them.
       </label>
       <button type="submit" disabled={pending || blockers.length > 0 || !confirm}
-        className="self-start rounded-full bg-cobalt shadow-raise-sm active:translate-y-[2px] active:shadow-none px-4 py-2.5 font-semibold text-cobalt-ink hover:opacity-90 disabled:opacity-50">
+        className="self-start btn-start">
         {pending ? "Checking…" : "Mark ready for deployment"}
       </button>
       {state.errors?._form ? <p role="alert" className="text-flagged">{state.errors._form}</p> : null}

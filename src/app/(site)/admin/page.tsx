@@ -12,8 +12,8 @@ export default function Admin() {
     <Container className="py-12">
       <PageHeader title="Review queue" lede="Applications waiting on a decision, and the state of every launch and payout."
         actions={<>
-          <Link href="/admin/payouts" className="rounded-full border-[1.5px] border-line bg-surface shadow-raise-sm px-3 py-2 font-semibold text-ink hover:border-ink">Payouts</Link>
-          <Link href="/admin/settings" className="rounded-full border-[1.5px] border-line bg-surface shadow-raise-sm px-3 py-2 font-semibold text-ink hover:border-ink">Platform settings</Link>
+          <Link href="/admin/payouts" className="btn-chrome">Payouts</Link>
+          <Link href="/admin/settings" className="btn-chrome">Platform settings</Link>
         </>} />
       <Suspense fallback={<p className="text-muted">Loading…</p>}>
         <Overview />

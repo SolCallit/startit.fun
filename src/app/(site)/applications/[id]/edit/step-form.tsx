@@ -43,16 +43,34 @@ function Check({ name, label, errors, values }: { name: string; label: string; e
   const err = errors?.[name];
   return (
     <div>
-      <label className="flex items-start gap-3 text-ink-soft">
-        <input type="checkbox" name={name} defaultChecked={values?.[name] === "on"} className="mt-1 size-4 accent-[var(--cobalt)]" aria-invalid={!!err} />
+      <label className="flex cursor-pointer items-start justify-between gap-4 text-ink-soft">
         <span>{label}</span>
+        <input type="checkbox" role="switch" name={name} defaultChecked={values?.[name] === "on"} className="switch mt-0.5" aria-invalid={!!err} />
       </label>
-      {err ? <p className="mt-1 ml-7 text-[0.875rem] text-flagged">{err}</p> : null}
+      {err ? <p className="mt-1 text-[0.875rem] text-flagged">{err}</p> : null}
     </div>
   );
 }
 
-export function StepForm({ appId, step, defaults }: { appId: string; step: StepNumber; defaults: Record<string, string> }) {
+/** Segmented toggle: radio inputs drawn as a row of toggle buttons. */
+function Segmented({ name, options, value, onChange }: { name: string; options: [string, string][]; value: string; onChange?: (v: string) => void }) {
+  return (
+    <div role="radiogroup" className="flex flex-wrap gap-1 rounded-full border-[1.5px] border-line-strong bg-surface p-1">
+      {options.map(([v, l]) => (
+        <label key={v} className="cursor-pointer">
+          <input type="radio" name={name} value={v} checked={value === v} onChange={() => onChange?.(v)} className="peer sr-only" />
+          <span className="block rounded-full px-3.5 py-1.5 text-[0.9375rem] font-semibold text-ink-soft peer-checked:bg-surface-2 peer-checked:text-ink peer-checked:shadow-raise-sm peer-focus-visible:outline-2 peer-focus-visible:outline-cobalt">
+            {l}
+          </span>
+        </label>
+      ))}
+    </div>
+  );
+}
+
+export type QuoteOption = { mint: string; symbol: string; name: string };
+
+export function StepForm({ appId, step, defaults, quotes = [] }: { appId: string; step: StepNumber; defaults: Record<string, string>; quotes?: QuoteOption[] }) {
   const [state, action, pending] = useActionState<StepState, FormData>(saveStep.bind(null, appId, step), {});
   const e = state.errors;
   const d = { ...defaults, ...state.values };
@@ -65,19 +83,20 @@ export function StepForm({ appId, step, defaults }: { appId: string; step: StepN
         <>
           <Field name="applicant_name" label="Your full name" defaultValue={d.applicant_name} errors={e} autoComplete="name" />
           <Field name="contact_email" label="Contact email" type="email" defaultValue={d.contact_email} errors={e} autoComplete="email"
-            hint="Use an address on the company's domain if you can — it helps us verify you." />
-          <fieldset className="flex flex-col gap-2">
-            <legend className="mb-1 font-medium text-ink">Are you the founder of this startup?</legend>
-            <label className="flex items-start gap-3 text-ink-soft">
-              <input type="radio" name="applicant_is_founder" value="yes" defaultChecked={d.applicant_is_founder === "yes"} className="mt-1 accent-[var(--cobalt)]" />
-              <span>Yes, I&apos;m a founder</span>
-            </label>
-            <label className="flex items-start gap-3 text-ink-soft">
-              <input type="radio" name="applicant_is_founder" value="no" defaultChecked={d.applicant_is_founder === "no"} className="mt-1 accent-[var(--cobalt)]" />
-              <span>No, I found this startup and I&apos;m launching with the founder&apos;s approval. Launchers earn 5% of collected trading fees after launch.</span>
+            hint="Use an address on the company's domain if you can. It helps us verify you." />
+          <div className="flex flex-col gap-1.5">
+            <input type="hidden" name="applicant_is_founder" value="no" />
+            <label className="flex cursor-pointer items-start justify-between gap-4">
+              <span>
+                <span className="font-medium text-ink">I&apos;m a founder of this startup</span>
+                <span className="block text-[0.875rem] text-muted">
+                  Switch off if you found the startup and are launching with the founder&apos;s written approval. Launchers earn 5% of collected trading fees.
+                </span>
+              </span>
+              <input type="checkbox" role="switch" name="applicant_is_founder" value="yes" defaultChecked={d.applicant_is_founder !== "no"} className="switch mt-0.5" />
             </label>
             {e?.applicant_is_founder ? <p className="text-[0.875rem] text-flagged">{e.applicant_is_founder}</p> : null}
-          </fieldset>
+          </div>
           <Field name="applicant_role" label="Your role" defaultValue={d.applicant_role} errors={e}
             placeholder="Co-founder and CEO" hint="If you aren't the founder, say how you know the team and how they authorized you." />
         </>
@@ -94,7 +113,7 @@ export function StepForm({ appId, step, defaults }: { appId: string; step: StepN
           <Field name="docs" label="Documentation (optional)" type="url" defaultValue={d.docs} errors={e} />
           <Field name="demo" label="Demo or live product (optional)" type="url" defaultValue={d.demo} errors={e} />
           <Field name="other_social" label="Other official account (optional)" type="url" defaultValue={d.other_social} errors={e}
-            hint="Discord, Telegram, LinkedIn — whichever the company uses most." />
+            hint="Discord, Telegram or LinkedIn, whichever the company uses most." />
         </>
       )}
 
@@ -120,8 +139,9 @@ export function StepForm({ appId, step, defaults }: { appId: string; step: StepN
           <Field name="token_concept" label="Token concept" multiline defaultValue={d.token_concept} errors={e}
             hint="What the meme is and how it connects to the product. Don't describe expected price or returns." />
           <Field name="milestones" label="Upcoming product milestones" multiline defaultValue={d.milestones} errors={e}
-            hint="One per line — model releases, features, integrations. These are shared as plans, not promises." />
+            hint="One per line: model releases, features, integrations. These are shared as plans, not promises." />
           <Field name="community_plan" label="How you'll work with the community" multiline defaultValue={d.community_plan} errors={e} />
+          <QuotePicker quotes={quotes} value={d.quote_mint} errors={e} />
           <PairFields defaults={d} errors={e} />
         </>
       )}
@@ -144,11 +164,11 @@ export function StepForm({ appId, step, defaults }: { appId: string; step: StepN
 
       <div className="flex flex-wrap items-center gap-3 border-t border-line pt-6">
         <button type="submit" name="$intent" value="continue" disabled={pending}
-          className="rounded-full bg-cobalt shadow-raise-sm active:translate-y-[2px] active:shadow-none px-4 py-2.5 font-semibold text-cobalt-ink hover:opacity-90 disabled:opacity-50">
+          className="btn-start">
           {step === 6 ? "Submit application" : "Save and continue"}
         </button>
         <button type="submit" name="$intent" value="draft" disabled={pending}
-          className="rounded-full border-[1.5px] border-line bg-surface shadow-raise-sm px-4 py-2.5 font-semibold text-ink hover:border-ink disabled:opacity-50">
+          className="btn-chrome">
           Save draft
         </button>
         <span role="status" className="text-[0.9375rem] text-verified">{pending ? "" : state.message}</span>
@@ -157,23 +177,39 @@ export function StepForm({ appId, step, defaults }: { appId: string; step: StepN
   );
 }
 
+/** The on-chain pair: the token your bonding curve trades against. */
+function QuotePicker({ quotes, value, errors }: { quotes: QuoteOption[]; value?: string; errors?: Record<string, string> }) {
+  const sol = "So11111111111111111111111111111111111111112";
+  const [v, setV] = useState(value || sol);
+  const options: [string, string][] = (quotes.length ? quotes : [{ mint: sol, symbol: "SOL", name: "Solana" }]).map((q) => [q.mint, q.symbol]);
+  const picked = quotes.find((q) => q.mint === v);
+  return (
+    <div className="flex flex-col gap-2">
+      <p className="font-medium text-ink">Paired with</p>
+      <p className="text-[0.875rem] text-muted">
+        The token people buy yours with on the bonding curve. Graduation targets and trading fees are counted in it.
+      </p>
+      <Segmented name="quote_mint" value={v} onChange={setV} options={options} />
+      {picked && picked.mint !== sol ? <p className="text-[0.875rem] text-ink-soft">{picked.name}: fees for your token will be collected and paid in {picked.symbol}.</p> : null}
+      {errors?.quote_mint ? <p className="text-[0.875rem] text-flagged">{errors.quote_mint}</p> : null}
+    </div>
+  );
+}
+
 function PairFields({ defaults, errors }: { defaults: Record<string, string>; errors?: Record<string, string> }) {
   const [kind, setKind] = useState(defaults.pair_kind ?? "");
-  const selectCls = "w-full rounded-full border-[1.5px] border-line bg-surface shadow-raise-sm px-3 py-2.5 text-ink focus:border-cobalt focus:outline-none";
   return (
     <fieldset className="flex flex-col gap-5 rounded-[18px] border border-line bg-paper p-5">
-      <legend className="px-1 font-semibold text-ink">Paired with <span className="font-normal text-muted">(optional)</span></legend>
+      <legend className="px-1 font-semibold text-ink">Inspired by <span className="font-normal text-muted">(optional)</span></legend>
       <p className="-mt-2 text-[0.9375rem] text-ink-soft">
-        Link your project to a token, project or person it&apos;s related to — the model it builds on, the lab that inspired it, a
-        founder you look up to. It shows as <span className="font-semibold text-ink">Paired with …</span> on your project page. It&apos;s a
-        public reference that we check, not an on-chain trading pair: every Startit token trades against SOL.
+        A token, project or person your product looks up to: the model it builds on, the lab behind it, a founder who shaped it.
+        It shows as <span className="font-semibold text-ink">Inspired by …</span> on your project page. We check it like any other claim,
+        and it never implies their endorsement unless you mark it official and prove it.
       </p>
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="pair_kind" className="font-medium text-ink">Pair with</label>
-        <select id="pair_kind" name="pair_kind" value={kind} onChange={(ev) => setKind(ev.target.value)} className={selectCls}>
-          <option value="">Nothing — no pairing</option>
-          {Object.entries(PAIR_KINDS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-        </select>
+        <p className="font-medium text-ink">Inspired by</p>
+        <Segmented name="pair_kind" value={kind} onChange={setKind}
+          options={[["", "None"], ...Object.entries(PAIR_KINDS).map(([v, l]) => [v, l] as [string, string])]} />
       </div>
       {kind ? (
         <>
@@ -187,11 +223,16 @@ function PairFields({ defaults, errors }: { defaults: Record<string, string>; er
           )}
           <Field name="pair_url" label="Official link (optional)" type="url" defaultValue={defaults.pair_url} errors={errors} placeholder="https://" />
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="pair_relationship" className="font-medium text-ink">Relationship</label>
-            <select id="pair_relationship" name="pair_relationship" defaultValue={defaults.pair_relationship ?? ""} className={selectCls}>
-              <option value="">Choose one</option>
-              {Object.entries(PAIR_RELATIONSHIPS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-            </select>
+            <input type="hidden" name="pair_relationship" value="inspired_by" />
+            <label className="flex cursor-pointer items-start justify-between gap-4">
+              <span>
+                <span className="font-medium text-ink">Official partner</span>
+                <span className="block text-[0.875rem] text-muted">
+                  {PAIR_RELATIONSHIPS.official}. Leave off for a reference: {PAIR_RELATIONSHIPS.inspired_by.toLowerCase()}.
+                </span>
+              </span>
+              <input type="checkbox" role="switch" name="pair_relationship" value="official" defaultChecked={defaults.pair_relationship === "official"} className="switch mt-0.5" />
+            </label>
             {errors?.pair_relationship ? <p className="text-[0.875rem] text-flagged">{errors.pair_relationship}</p> : null}
           </div>
           <Field name="pair_reason" label="Why this pairing?" multiline rows={3} defaultValue={defaults.pair_reason} errors={errors}
@@ -226,7 +267,7 @@ function FeeFields({ defaults, errors }: { defaults: Record<string, string>; err
       <div className="flex items-center gap-1.5">
         <input id={name} type="number" min={0} max={100} step={0.01} value={pct(v)}
           onChange={(ev) => set(Math.round(Number(ev.target.value) * 100))}
-          className="w-full rounded-full border-[1.5px] border-line bg-surface shadow-raise-sm px-3 py-2 text-right text-ink focus:border-cobalt focus:outline-none" />
+          className="w-full rounded-[12px] border-[1.5px] border-line-strong bg-surface px-3 py-2 text-right text-ink focus:border-cobalt focus:outline-none" />
         <span className="text-muted">%</span>
         <input type="hidden" name={name} value={v} />
       </div>
@@ -249,7 +290,7 @@ function FeeFields({ defaults, errors }: { defaults: Record<string, string>; err
         row("Launcher (you)", "proposed_launcher_bps", l, setL, "Paid to your wallet after launch")}
       {row("Platform", "proposed_platform_bps", p, setP, "Startit operations, screening and security")}
       <p className={`text-[0.9375rem] font-semibold ${total === 10000 ? "text-verified" : "text-flagged"}`} aria-live="polite">
-        Total: {total / 100}%{total === 10000 ? "" : " — must be exactly 100%"}
+        Total: {total / 100}%{total === 10000 ? "" : ". It must be exactly 100%."}
       </p>
       {errors?.proposed_community_bps ? <p className="text-[0.875rem] text-flagged">{errors.proposed_community_bps}</p> : null}
       {errors?.proposed_launcher_bps ? <p className="text-[0.875rem] text-flagged">{errors.proposed_launcher_bps}</p> : null}
@@ -257,7 +298,7 @@ function FeeFields({ defaults, errors }: { defaults: Record<string, string>; err
         <div className="flex flex-col gap-1.5">
           <label htmlFor="split_reason" className="font-medium text-ink">Why a different split?</label>
           <textarea id="split_reason" name="split_reason" rows={3} defaultValue={defaults.split_reason}
-            className="w-full rounded-full border-[1.5px] border-line bg-surface shadow-raise-sm px-3 py-2.5 text-ink focus:border-cobalt focus:outline-none" />
+            className="w-full rounded-[12px] border-[1.5px] border-line-strong bg-surface px-3 py-2.5 text-ink focus:border-cobalt focus:outline-none" />
           {errors?.split_reason ? <p className="text-[0.875rem] text-flagged">{errors.split_reason}</p> : null}
         </div>
       ) : (
@@ -274,7 +315,7 @@ export function EvidenceUploader({ appId }: { appId: string }) {
       <div className="flex flex-col gap-1.5">
         <label htmlFor="kind" className="font-medium text-ink">What does this file show?</label>
         <select id="kind" name="kind" defaultValue="authorization"
-          className="rounded-full border-[1.5px] border-line bg-surface shadow-raise-sm px-3 py-2.5 text-ink focus:border-cobalt focus:outline-none">
+          className="rounded-[12px] border-[1.5px] border-line-strong bg-surface px-3 py-2.5 text-ink focus:border-cobalt focus:outline-none">
           <option value="authorization">Proof I&apos;m authorized to represent the company</option>
           <option value="founder_approval">Signed founder approval letter</option>
           <option value="identity">Founder identity</option>
@@ -289,7 +330,7 @@ export function EvidenceUploader({ appId }: { appId: string }) {
       </div>
       <div className="flex items-center gap-3">
         <button type="submit" disabled={pending}
-          className="rounded-full border-[1.5px] border-line bg-surface shadow-raise-sm px-4 py-2 font-semibold text-ink hover:border-ink disabled:opacity-50">
+          className="btn-chrome">
           {pending ? "Uploading…" : "Upload file"}
         </button>
         {state.error ? <p role="alert" className="text-[0.9375rem] text-flagged">{state.error}</p> : null}

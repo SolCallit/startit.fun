@@ -91,6 +91,7 @@ export const stepSchemas = {
       token_concept: required("Token concept", 4000),
       community_plan: required("Community plan", 4000),
       milestones: trimmed(4000),
+      quote_mint: z.union([z.literal(""), z.string().trim().regex(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/, "Pick a pair from the list.")]).default(""),
       ...pairFields,
     })
     .superRefine(checkPair),
