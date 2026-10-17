@@ -1,3 +1,5 @@
+import { TokenMark } from "../../home/cards";
+import { projectImageUrl } from "@/lib/project-image";
 import { notFound } from "next/navigation";
 import { PairBadge, QuoteChip } from "@/components/pair-badge";
 import { Suspense } from "react";
@@ -34,10 +36,19 @@ async function Project({ params }: { params: PageProps<"/projects/[ref]">["param
           <QuoteChip symbol={p.quote_symbol ?? "SOL"} />
           <PairBadge pairing={p} size="md" />
         </div>
-        <h1 className="mt-4 text-[2.5rem] leading-tight font-bold tracking-[-0.02em] text-ink">
-          {p.project_name} <span className="text-muted">${p.ticker}</span>
-        </h1>
+        <div className="mt-4 flex items-center gap-4">
+          <TokenMark ticker={p.ticker} size={72} image={projectImageUrl(p.image_path)} />
+          <h1 className="text-[2.5rem] leading-tight font-bold tracking-[-0.02em] text-ink">
+            {p.project_name} <span className="text-muted">${p.ticker}</span>
+          </h1>
+        </div>
         <p className="mt-3 max-w-2xl text-[1.0625rem] leading-relaxed text-ink-soft">{p.project_summary}</p>
+        {Number(p.starter_buy_amount) > 0 ? (
+          <p className="mt-3 text-[0.9375rem] text-ink-soft">
+            <span className="font-semibold text-ink">Starter&apos;s buy:</span> the launcher disclosed a buy of {Number(p.starter_buy_amount)} {p.quote_symbol ?? "SOL"} right after launch.
+            {p.starter_buy_tx ? <> Done: <a className="text-cobalt hover:underline" target="_blank" rel="noopener noreferrer" href={`https://solscan.io/tx/${p.starter_buy_tx}${p.network === "solana-devnet" ? "?cluster=devnet" : ""}`}>view transaction</a>.</> : null}
+          </p>
+        ) : null}
       </header>
 
       {p.network === "solana-devnet" ? (

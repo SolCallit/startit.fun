@@ -1,18 +1,17 @@
 import { z } from "zod";
 import { isDefaultSplit, validateSplit } from "@/lib/domain/fees";
 
-/** Six screens covering the 12 required sections of the application. */
+/** Three screens, pump.fun style: the coin, the fee split, then an optional starter's buy. */
 export const STEPS = [
-  { n: 1, title: "About you", covers: "Who you are, how to reach you, and whether you're on the team" },
-  { n: 2, title: "The product", covers: "What it does, its website, X, GitHub, docs and demo" },
-  { n: 3, title: "Builder sign-off", covers: "Proof the builder is in, their approval in their own words, and branding" },
-  { n: 4, title: "The coin", covers: "Name, ticker, pair, idea, what ships next and the community plan" },
-  { n: 5, title: "Fee split", covers: "How collected trading fees are shared" },
-  { n: 6, title: "Disclosures and submit", covers: "Insider holdings and the things you agree to" },
+  { n: 1, title: "Your coin", covers: "Name, ticker, what it is, links, the builder's proof and an image" },
+  { n: 2, title: "Fees", covers: "Who gets what from collected trading fees" },
+  { n: 3, title: "Starter's buy", covers: "Buy in right after launch, if you want to" },
 ] as const;
 export type StepNumber = (typeof STEPS)[number]["n"];
-
 export const MAX_EVIDENCE_BYTES = 4 * 1024 * 1024; // Vercel request limit is 4.5 MB
+export const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
+export const IMAGE_MIME = ["image/png", "image/jpeg", "image/webp", "image/gif"] as const;
+export const MAX_STARTER_BUY = 25;
 export const EVIDENCE_MIME = ["application/pdf", "image/png", "image/jpeg", "image/webp", "text/plain"] as const;
 
 const trimmed = (max: number) => z.string().trim().max(max);
@@ -63,62 +62,47 @@ function checkPair(v: { pair_kind: string; pair_name: string; pair_relationship:
   if (v.pair_kind === "token" && !v.pair_mint) ctx.addIssue({ code: "custom", message: "A token pairing needs the token's mint address.", path: ["pair_mint"] });
 }
 
+const feeSplit = z
+  .object({
+    applicant_is_founder: z.enum(["yes", "no"]).optional(),
+    proposed_platform_bps: z.coerce.number().int(),
+    proposed_founder_bps: z.coerce.number().int(),
+    proposed_launcher_bps: z.coerce.number().int(),
+    proposed_community_bps: z.coerce.number().int(),
+    split_reason: trimmed(1000),
+  })
+  .superRefine((v, ctx) => {
+    const split = { platformBps: v.proposed_platform_bps, founderBps: v.proposed_founder_bps, launcherBps: v.proposed_launcher_bps, communityBps: v.proposed_community_bps };
+    const r = validateSplit(split);
+    if (!r.ok) ctx.addIssue({ code: "custom", message: r.error, path: ["proposed_community_bps"] });
+    if (v.applicant_is_founder === "yes" && v.proposed_launcher_bps !== 0) {
+      ctx.addIssue({ code: "custom", message: "You're on the team, so there's no separate launcher share.", path: ["proposed_launcher_bps"] });
+    }
+    if (!isDefaultSplit(split) && !v.split_reason) ctx.addIssue({ code: "custom", message: "Say why you want a different split.", path: ["split_reason"] });
+  });
+
 export const stepSchemas = {
-  1: z.object({
-    applicant_name: required("Your name", 120),
-    contact_email: z.email("Enter a valid email address."),
-    applicant_role: required("Your role", 200),
-    applicant_is_founder: z.enum(["yes", "no"], { error: "Tell us whether you're on the team." }),
-  }),
-  2: z.object({
-    project_name: required("Project name", 120),
-    project_summary: required("Project description", 4000),
-    website: httpsUrl("Website"),
-    x: httpsUrl("X account", ["x.com", "twitter.com"]),
-    github: httpsUrl("GitHub link", ["github.com"]),
-    docs: optionalUrl("Docs link"),
-    demo: optionalUrl("Demo link"),
-    other_social: optionalUrl("Other social link"),
-  }),
-  3: z.object({
-    founder_approval_statement: required("The builder's approval", 4000).min(40, "Add at least a sentence or two of approval from the builder."),
-    permitted_branding: required("Permitted branding", 2000),
-  }),
-  4: z
+  1: z
     .object({
-      token_name: required("Token name", 32),
-      ticker: z.string().trim().toUpperCase().regex(/^[A-Z0-9]{2,10}$/, "Ticker must be 2–10 letters or numbers."),
-      token_concept: required("Token concept", 4000),
-      community_plan: required("Community plan", 4000),
-      milestones: trimmed(4000),
+      project_name: required("Name", 32),
+      ticker: z.string().trim().toUpperCase().regex(/^[A-Z0-9]{2,10}$/, "Ticker is 2–10 letters or numbers."),
+      project_summary: required("Description", 1000),
+      website: optionalUrl("Website"),
+      x: optionalUrl("X link", ["x.com", "twitter.com"]),
+      github: optionalUrl("GitHub link", ["github.com"]),
+      telegram: optionalUrl("Telegram link", ["t.me", "telegram.me"]),
+      discord: optionalUrl("Discord link", ["discord.gg", "discord.com"]),
       quote_mint: z.union([z.literal(""), z.string().trim().regex(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/, "Pick a pair from the list.")]).default(""),
       ...pairFields,
     })
-    .superRefine(checkPair),
-  5: z
-    .object({
-      applicant_is_founder: z.enum(["yes", "no"]).optional(),
-      proposed_platform_bps: z.coerce.number().int(),
-      proposed_founder_bps: z.coerce.number().int(),
-      proposed_launcher_bps: z.coerce.number().int(),
-      proposed_community_bps: z.coerce.number().int(),
-      split_reason: trimmed(1000),
-    })
     .superRefine((v, ctx) => {
-      const split = { platformBps: v.proposed_platform_bps, founderBps: v.proposed_founder_bps, launcherBps: v.proposed_launcher_bps, communityBps: v.proposed_community_bps };
-      const r = validateSplit(split);
-      if (!r.ok) ctx.addIssue({ code: "custom", message: r.error, path: ["proposed_community_bps"] });
-      if (v.applicant_is_founder === "yes" && v.proposed_launcher_bps !== 0) {
-        ctx.addIssue({ code: "custom", message: "You're launching your own project, so there's no separate launcher share.", path: ["proposed_launcher_bps"] });
-      }
-      if (!isDefaultSplit(split) && !v.split_reason) ctx.addIssue({ code: "custom", message: "Explain why you're proposing a different split.", path: ["split_reason"] });
+      if (!v.website && !v.x && !v.github) ctx.addIssue({ code: "custom", message: "Add at least the website, X or GitHub.", path: ["website"] });
+      checkPair(v, ctx);
     }),
-  6: z.object({
-    insider_allocation_disclosure: required("Insider allocation disclosure", 4000),
-    ack_no_returns: z.literal("on", { error: "Confirm you won't promise price appreciation." }),
-    ack_not_ownership: z.literal("on", { error: "Confirm you understand the builder's approval doesn't make them the coin's owner." }),
-    ack_disclosure: z.literal("on", { error: "Confirm the disclosures will be published." }),
-    ack_accurate: z.literal("on", { error: "Confirm the application is accurate." }),
+  2: feeSplit,
+  3: z.object({
+    starter_buy_amount: z.preprocess((v) => (v === "" || v === undefined ? 0 : v), z.coerce.number().min(0, "Can't be negative.").max(MAX_STARTER_BUY, `Up to ${MAX_STARTER_BUY}.`)),
+    ack_terms: z.literal("on", { error: "Agree to the terms to submit." }),
   }),
 } satisfies Record<StepNumber, z.ZodType>;
 

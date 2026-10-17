@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
+import { Reveal } from "@/components/motion";
 import { ButtonLink, Container, FindingBadge } from "@/components/ui";
 import { FINDING_STATUSES, type FindingStatus } from "@/lib/domain/findings";
 import { DEFAULT_SPLIT, bpsToPercent } from "@/lib/domain/fees";
@@ -64,7 +65,8 @@ export default function Home() {
             </div>
           </div>
 
-          <ol aria-label="How a launch works" className="relative">
+          <Reveal className="self-center">
+          <ol aria-label="How a launch works" className="glass relative rounded-[28px] p-6 sm:p-7">
             {PIPELINE.map((p, i) => (
               <li key={p.step} className="relative grid grid-cols-[2.25rem_1fr] gap-4 pb-7 last:pb-0">
                 {i < PIPELINE.length - 1 ? (
@@ -81,6 +83,7 @@ export default function Home() {
               </li>
             ))}
           </ol>
+          </Reveal>
         </Container>
       </section>
 
@@ -93,7 +96,7 @@ export default function Home() {
               time we checked it.
             </p>
           </div>
-          <dl className="divide-y divide-line rounded-lg border border-line bg-surface">
+          <dl className="divide-y divide-line rounded-[18px] glass">
             {FINDING_STATUSES.map((s) => (
               <div key={s} className="flex flex-col gap-2 px-5 py-4 sm:flex-row sm:items-center sm:gap-6">
                 <dt className="sm:w-36"><FindingBadge status={s} /></dt>

@@ -29,7 +29,7 @@ export async function saveLaunchConfig(appId: string, _prev: ConfigState, formDa
 
   const supabase = await createClient();
   const { data: app } = await supabase.from("applications")
-    .select("id, public_ref, status, project_name, token_name, ticker, permitted_branding, applicant_is_founder, quote_mint").eq("id", appId).maybeSingle();
+    .select("id, public_ref, status, project_name, token_name, ticker, permitted_branding, applicant_is_founder, quote_mint, starter_buy_amount").eq("id", appId).maybeSingle();
   if (!app) return { errors: { _form: "Application not found." }, values };
   const quoteMint = app.quote_mint ?? "So11111111111111111111111111111111111111112";
   const { data: quote } = await supabase.from("quote_tokens").select("mint, symbol, enabled").eq("mint", quoteMint).maybeSingle();
@@ -74,6 +74,7 @@ export async function saveLaunchConfig(appId: string, _prev: ConfigState, formDa
     treasury: { isMultisig, threshold, signers, controlRules: v.treasury_rules },
     permittedBranding: app.permitted_branding ?? "",
     quote: { symbol: quote.symbol, mint: quote.mint },
+    starterBuy: { amount: String(Number(app.starter_buy_amount ?? 0)), symbol: quote.symbol, wallet: app.applicant_is_founder ? v.founder_wallet : v.launcher_wallet || null },
   });
   const termsSha = await sha256Hex(termsText);
 
@@ -83,6 +84,7 @@ export async function saveLaunchConfig(appId: string, _prev: ConfigState, formDa
     mint_authority_revoked: true, freeze_authority_revoked: true, insider_allocations: allocations,
     founder_wallet: v.founder_wallet, launcher_wallet: v.launcher_wallet || null, terms_text: termsText, terms_sha256: termsSha,
     quote_mint: quote.mint,
+    starter_buy_amount: Number(app.starter_buy_amount ?? 0),
   };
   const lr = existingLaunch
     ? await supabase.from("launches").update(launchRow).eq("id", existingLaunch.id)

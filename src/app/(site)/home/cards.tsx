@@ -1,3 +1,5 @@
+import { projectImageUrl } from "@/lib/project-image";
+import { Lift } from "@/components/motion";
 import Link from "next/link";
 import type { PublicProject } from "@/lib/data/public";
 import { DEFAULT_SPLIT, bpsToPercent } from "@/lib/domain/fees";
@@ -24,7 +26,7 @@ export function LaunchPathCard({ draft }: { draft: { id: string; name: string | 
   return (
     <section
       aria-labelledby="path-title"
-      className="relative overflow-hidden rounded-[22px] border border-line bg-surface p-6 shadow-raise sm:p-8"
+      className="relative overflow-hidden rounded-[22px] glass p-6 shadow-raise sm:p-8"
     >
       {/* faint grid, like a chart under the route */}
       <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.35] [background-image:linear-gradient(var(--line)_1px,transparent_1px),linear-gradient(90deg,var(--line)_1px,transparent_1px)] [background-size:44px_44px] [mask-image:linear-gradient(to_bottom,black,transparent_85%)]" />
@@ -97,12 +99,13 @@ export function LaunchPathCard({ draft }: { draft: { id: string; name: string | 
 export function ProjectCard({ p }: { p: PublicProject }) {
   return (
     <li>
+      <Lift className="h-full">
       <Link
         href={`/projects/${p.public_ref}`}
-        className="flex h-full flex-col gap-4 rounded-[18px] border border-line bg-surface p-5 shadow-raise-sm hover:border-line-strong"
+        className="flex h-full flex-col gap-4 rounded-[18px] glass p-5 shadow-raise-sm hover:border-line-strong"
       >
         <div className="flex items-start gap-3">
-          <TokenMark ticker={p.ticker} />
+          <TokenMark ticker={p.ticker} image={projectImageUrl(p.image_path)} />
           <div className="min-w-0 flex-1">
             <p className="truncate font-display text-[1.125rem] font-extrabold text-ink">{p.project_name}</p>
             <p className="font-mono text-[0.875rem] text-muted">${p.ticker}</p>
@@ -116,13 +119,18 @@ export function ProjectCard({ p }: { p: PublicProject }) {
           {p.network === "solana-devnet" ? <span className="rounded-full bg-review-soft px-2.5 py-0.5 text-[0.8125rem] font-semibold text-review">Devnet</span> : null}
         </div>
       </Link>
+      </Lift>
     </li>
   );
 }
 
 
 /** Monogram avatar with a stable hue per ticker — no network request, never a broken image. */
-export function TokenMark({ ticker, size = 48 }: { ticker: string; size?: number }) {
+export function TokenMark({ ticker, size = 48, image }: { ticker: string; size?: number; image?: string | null }) {
+  if (image) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={image} alt="" width={size} height={size} style={{ width: size, height: size }} className="shrink-0 rounded-[14px] object-cover shadow-raise-sm" />;
+  }
   let h = 0;
   for (const ch of ticker) h = (h * 31 + ch.charCodeAt(0)) % 360;
   return (

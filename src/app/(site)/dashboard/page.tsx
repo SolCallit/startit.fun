@@ -34,7 +34,7 @@ async function Applications() {
   return (
     <div className="flex flex-col gap-10">
     {launched.length ? <LauncherRewards refs={launched.map((a) => a.public_ref)} /> : null}
-    <ul className="divide-y divide-line rounded-lg border border-line bg-surface">
+    <ul className="divide-y divide-line rounded-[18px] glass">
       {apps.map((a) => (
         <li key={a.id}>
           <Link href={a.status === "draft" ? `/applications/${a.id}/edit?step=1` : `/applications/${a.id}`}
@@ -60,7 +60,7 @@ async function LauncherRewards({ refs }: { refs: string[] }) {
   const payouts = all.flatMap((r) => (r.connected ? r.payouts : [])).filter((p) => p.recipient === "launcher");
   const total = (st: string[]) => payouts.filter((p) => st.includes(p.status)).reduce((a, p) => a + BigInt(p.amount_raw), BigInt(0));
   return (
-    <section className="rounded-lg border border-line bg-surface p-5">
+    <section className="rounded-[18px] glass p-5">
       <h2 className="font-semibold text-ink">Launcher rewards</h2>
       <p className="mt-1 text-[0.9375rem] text-ink-soft">Your 5% of trading fees collected on projects you launched. Paid automatically from the Fee Router multisig.</p>
       <dl className="mt-4 grid grid-cols-3 gap-4">

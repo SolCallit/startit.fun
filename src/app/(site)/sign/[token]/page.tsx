@@ -37,7 +37,7 @@ async function Body({ params }: { params: PageProps<"/sign/[token]">["params"] }
         </Panel>
       </div>
 
-      <section className="mt-8 rounded-lg border border-line bg-surface p-5">
+      <section className="mt-8 rounded-[18px] glass p-5">
         <h2 className="mb-4 text-[1.125rem] font-semibold text-ink">Sign with your wallet</h2>
         <WalletSign token={token} role={r.role} publicRef={r.publicRef} termsSha256={r.termsSha256} expectedWallet={r.expectedWallet} />
       </section>

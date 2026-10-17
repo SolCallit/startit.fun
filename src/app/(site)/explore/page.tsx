@@ -37,7 +37,7 @@ async function ProjectList() {
     );
   }
   return (
-    <ul className="divide-y divide-line rounded-lg border border-line bg-surface">
+    <ul className="divide-y divide-line rounded-[18px] glass">
       {result.projects.map((p) => (
         <li key={p.public_ref}>
           <Link href={`/projects/${p.public_ref}`} className="grid gap-2 px-5 py-4 hover:bg-paper sm:grid-cols-[1fr_auto] sm:items-center">

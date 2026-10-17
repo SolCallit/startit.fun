@@ -56,3 +56,12 @@ describe("wallet signatures", () => {
     expect(isSolanaAddress("0OIl" + wallet.slice(4))).toBe(false);
   });
 });
+
+describe("starter's buy in the terms", () => {
+  it("discloses the amount, pair and wallet, or says none", () => {
+    const base = input;
+    expect(renderLaunchTerms({ ...base, starterBuy: { amount: "1.5", symbol: "SOL", wallet: "W1" } })).toContain("Starter's buy: up to 1.5 SOL");
+    expect(renderLaunchTerms({ ...base, starterBuy: { amount: "0", symbol: "SOL", wallet: null } })).toContain("Starter's buy: none.");
+    expect(renderLaunchTerms(base)).not.toContain("Starter's buy");
+  });
+});

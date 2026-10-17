@@ -28,7 +28,7 @@ export function FeeRecordLists({ claims, payouts, showProject }: { claims: Publi
     <div className="grid gap-6 lg:grid-cols-2">
       <section>
         <h3 className="mb-3 font-semibold text-ink">Collections</h3>
-        <ul className="divide-y divide-line rounded-lg border border-line bg-surface text-[0.9375rem]">
+        <ul className="divide-y divide-line rounded-[18px] glass text-[0.9375rem]">
           {claims.map((c) => (
             <li key={c.tx_signature + c.source} className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5">
               <span>{showProject ? <span className="font-semibold text-ink">{c.public_ref} · </span> : null}{SOURCE[c.source]}</span>
@@ -40,7 +40,7 @@ export function FeeRecordLists({ claims, payouts, showProject }: { claims: Publi
       </section>
       <section>
         <h3 className="mb-3 font-semibold text-ink">Payouts</h3>
-        <ul className="divide-y divide-line rounded-lg border border-line bg-surface text-[0.9375rem]">
+        <ul className="divide-y divide-line rounded-[18px] glass text-[0.9375rem]">
           {payouts.map((p, i) => (
             <li key={i} className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5">
               <span>{showProject ? <span className="font-semibold text-ink">{p.public_ref} · </span> : null}{RECIPIENT[p.recipient]} <Mono className="text-muted">{p.recipient_address.slice(0, 4)}…{p.recipient_address.slice(-4)}</Mono></span>

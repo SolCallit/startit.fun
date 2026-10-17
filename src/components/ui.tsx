@@ -78,7 +78,7 @@ export function PageHeader({ title, lede, actions }: { title: string; lede?: Rea
 
 export function Panel({ title, children, aside }: { title?: string; children: ReactNode; aside?: ReactNode }) {
   return (
-    <section className="rounded-lg border border-line bg-surface">
+    <section className="rounded-[18px] glass">
       {title ? (
         <div className="flex items-center justify-between border-b border-line px-5 py-3.5">
           <h2 className="text-[1rem] font-semibold text-ink">{title}</h2>

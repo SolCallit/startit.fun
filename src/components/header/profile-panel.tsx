@@ -61,7 +61,7 @@ export function ProfilePanel({ label, wallet, signOut }: { label: string; wallet
           </section>
 
           {wallet ? (
-            <section className="rounded-[16px] border border-line bg-surface p-4">
+            <section className="rounded-[16px] glass p-4">
               <div className="flex items-center justify-between gap-3">
                 <span className="text-[0.875rem] text-muted">Wallet</span>
                 <CopyButton value={wallet} />
@@ -87,7 +87,7 @@ export function ProfilePanel({ label, wallet, signOut }: { label: string; wallet
             ) : (
               <ul className="flex flex-col gap-2">
                 {me.launches.map((l) => (
-                  <li key={l.ref} className="flex items-center justify-between gap-3 rounded-[12px] border border-line bg-surface px-3 py-2.5">
+                  <li key={l.ref} className="flex items-center justify-between gap-3 rounded-[12px] glass px-3 py-2.5">
                     <Link href={`/projects/${l.ref}`} className="min-w-0 font-semibold hover:text-cobalt">
                       <span className="block truncate">{l.name}</span>
                       <span className="font-mono text-[0.8125rem] text-muted">${l.ticker}</span>

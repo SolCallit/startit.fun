@@ -7,6 +7,8 @@ import { requireUser } from "@/lib/auth";
 import { EDITABLE, getApplicationBundle } from "@/lib/applications/data";
 import { resubmitApplication, respondToEvidenceRequest } from "@/lib/applications/actions";
 import { bpsToPercent } from "@/lib/domain/fees";
+import { getPublicProject } from "@/lib/data/public";
+import { StarterBuy } from "./starter-buy";
 
 export default function ApplicationStatus(props: PageProps<"/applications/[id]">) {
   return (
@@ -47,6 +49,7 @@ async function Status({ params, searchParams }: PageProps<"/applications/[id]">)
 
       <div className="grid gap-8 lg:grid-cols-[1fr_20rem]">
         <div className="flex flex-col gap-6">
+          {app.status === "launched" && isOwner && Number(app.starter_buy_amount) > 0 ? <StarterBuyFor appRef={app.public_ref} appId={id} amount={Number(app.starter_buy_amount)} /> : null}
           {app.status === "evidence_requested" && isOwner ? (
             <Panel title="A reviewer needs more from you">
               <ul className="flex flex-col gap-5">
@@ -123,4 +126,9 @@ function Item({ label, children }: { label: string; children: React.ReactNode })
       <dd className="min-w-0 text-ink">{children || "—"}</dd>
     </div>
   );
+}
+
+async function StarterBuyFor({ appRef, appId, amount }: { appRef: string; appId: string; amount: number }) {
+  const pub = await getPublicProject(appRef);
+  return <StarterBuy appId={appId} amount={amount} symbol={pub?.project.quote_symbol ?? "SOL"} doneTx={pub?.project.starter_buy_tx ?? null} />;
 }

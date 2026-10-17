@@ -11,7 +11,7 @@ import { ProfilePanel } from "./header/profile-panel";
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-20 border-b border-line bg-paper/80 backdrop-blur-md">
+    <header className="sticky top-0 z-20 glass-bar">
       <Container className="flex h-16 items-center gap-3">
         <Suspense fallback={<span className="size-10" aria-hidden />}>
           <TrayButton />

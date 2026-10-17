@@ -1,341 +1,464 @@
 "use client";
 
-import { useActionState, useState } from "react";
-import { saveStep, uploadEvidence, type StepState, type UploadState } from "@/lib/applications/actions";
-import { PAIR_KINDS, PAIR_RELATIONSHIPS, type StepNumber } from "@/lib/applications/schema";
+import { useActionState, useRef, useState, useTransition } from "react";
+import Link from "next/link";
+import { AnimatePresence, motion } from "motion/react";
+import { saveStep, uploadEvidence, uploadProjectImage, type StepState } from "@/lib/applications/actions";
+import { MAX_STARTER_BUY, PAIR_KINDS, type StepNumber } from "@/lib/applications/schema";
 
+const SOL = "So11111111111111111111111111111111111111112";
 const inputCls =
-  "w-full rounded-md border bg-surface px-3 py-2.5 text-ink placeholder:text-muted focus:outline-none aria-[invalid=true]:border-flagged border-line-strong focus:border-cobalt";
+  "w-full rounded-[14px] border border-line-strong/80 bg-surface/70 px-3.5 py-3 text-ink placeholder:text-muted/80 transition-colors focus:border-cobalt focus:bg-surface focus:outline-none aria-[invalid=true]:border-flagged";
 
-type FieldProps = {
-  name: string;
-  label: string;
-  hint?: string;
-  defaultValue?: string;
-  errors?: Record<string, string>;
-  type?: string;
-  multiline?: boolean;
-  rows?: number;
-  placeholder?: string;
-  autoComplete?: string;
-};
+export type QuoteOption = { mint: string; symbol: string; name: string };
+type Errors = Record<string, string> | undefined;
 
-function Field({ name, label, hint, defaultValue, errors, type = "text", multiline, rows = 4, placeholder, autoComplete }: FieldProps) {
-  const err = errors?.[name];
-  const describedBy = [hint ? `${name}-hint` : null, err ? `${name}-err` : null].filter(Boolean).join(" ") || undefined;
+function Err({ msg, id }: { msg?: string; id?: string }) {
   return (
-    <div className="flex flex-col gap-1.5">
-      <label htmlFor={name} className="font-medium text-ink">{label}</label>
-      {hint ? <p id={`${name}-hint`} className="text-[0.875rem] text-muted">{hint}</p> : null}
+    <AnimatePresence initial={false}>
+      {msg ? (
+        <motion.p id={id} initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="text-[0.875rem] text-flagged">
+          {msg}
+        </motion.p>
+      ) : null}
+    </AnimatePresence>
+  );
+}
+
+function Field({ name, label, errors, defaultValue, multiline, placeholder, prefix, maxLength, className = "", hint }: {
+  name: string; label: string; errors: Errors; defaultValue?: string; multiline?: boolean; placeholder?: string;
+  prefix?: string; maxLength?: number; className?: string; hint?: string;
+}) {
+  const err = errors?.[name];
+  return (
+    <div className={`flex flex-col gap-1.5 ${className}`}>
+      <label htmlFor={name} className="text-[0.9375rem] font-semibold text-ink">{label}</label>
       {multiline ? (
-        <textarea id={name} name={name} rows={rows} defaultValue={defaultValue} placeholder={placeholder}
-          aria-invalid={!!err} aria-describedby={describedBy} className={inputCls} />
+        <textarea id={name} name={name} rows={4} defaultValue={defaultValue} placeholder={placeholder} maxLength={maxLength}
+          aria-invalid={!!err} aria-describedby={err ? `${name}-err` : undefined} className={inputCls} />
+      ) : prefix ? (
+        <div className="relative">
+          <span className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 font-semibold text-muted">{prefix}</span>
+          <input id={name} name={name} defaultValue={defaultValue} placeholder={placeholder} maxLength={maxLength}
+            aria-invalid={!!err} aria-describedby={err ? `${name}-err` : undefined} className={`${inputCls} pl-[1.65rem] uppercase`} />
+        </div>
       ) : (
-        <input id={name} name={name} type={type} defaultValue={defaultValue} placeholder={placeholder} autoComplete={autoComplete}
-          aria-invalid={!!err} aria-describedby={describedBy} className={inputCls} />
+        <input id={name} name={name} defaultValue={defaultValue} placeholder={placeholder} maxLength={maxLength}
+          aria-invalid={!!err} aria-describedby={err ? `${name}-err` : undefined} className={inputCls} />
       )}
-      {err ? <p id={`${name}-err`} className="text-[0.875rem] text-flagged">{err}</p> : null}
+      {hint && !err ? <p className="text-[0.8125rem] text-muted">{hint}</p> : null}
+      <Err msg={err} id={`${name}-err`} />
     </div>
   );
 }
 
-function Check({ name, label, errors, values }: { name: string; label: string; errors?: Record<string, string>; values?: Record<string, string> }) {
-  const err = errors?.[name];
+/** Toggle switch row. Posts `value` when on, `off` when off. */
+function Toggle({ name, label, sub, checked, onChange, value = "on", off = "" }: {
+  name: string; label: React.ReactNode; sub?: React.ReactNode; checked: boolean; onChange: (v: boolean) => void; value?: string; off?: string;
+}) {
   return (
-    <div>
-      <label className="flex cursor-pointer items-start justify-between gap-4 text-ink-soft">
-        <span>{label}</span>
-        <input type="checkbox" role="switch" name={name} defaultChecked={values?.[name] === "on"} className="switch mt-0.5" aria-invalid={!!err} />
-      </label>
-      {err ? <p className="mt-1 text-[0.875rem] text-flagged">{err}</p> : null}
-    </div>
+    <label className="flex cursor-pointer items-start justify-between gap-4">
+      <span>
+        <span className="font-semibold text-ink">{label}</span>
+        {sub ? <span className="mt-0.5 block text-[0.875rem] text-muted">{sub}</span> : null}
+      </span>
+      <input type="hidden" name={name} value={checked ? value : off} />
+      <input type="checkbox" role="switch" checked={checked} onChange={(e) => onChange(e.target.checked)} className="switch mt-0.5" aria-label={typeof label === "string" ? label : undefined} />
+    </label>
   );
 }
 
-/** Segmented toggle: radio inputs drawn as a row of toggle buttons. */
-function Segmented({ name, options, value, onChange }: { name: string; options: [string, string][]; value: string; onChange?: (v: string) => void }) {
+function Chips({ name, options, value, onChange }: { name: string; options: [string, string][]; value: string; onChange: (v: string) => void }) {
   return (
-    <div role="radiogroup" className="flex flex-wrap gap-1 rounded-full border-[1.5px] border-line-strong bg-surface p-1">
+    <div role="radiogroup" className="flex flex-wrap gap-2">
       {options.map(([v, l]) => (
-        <label key={v} className="cursor-pointer">
-          <input type="radio" name={name} value={v} checked={value === v} onChange={() => onChange?.(v)} className="peer sr-only" />
-          <span className="block rounded-full px-3.5 py-1.5 text-[0.9375rem] font-semibold text-ink-soft peer-checked:bg-surface-2 peer-checked:text-ink peer-checked:shadow-raise-sm peer-focus-visible:outline-2 peer-focus-visible:outline-cobalt">
+        <label key={v} className="relative cursor-pointer">
+          <input type="radio" name={name} value={v} checked={value === v} onChange={() => onChange(v)} className="peer sr-only" />
+          <span className="relative z-10 block rounded-full border border-line-strong/80 px-3.5 py-1.5 text-[0.9375rem] font-semibold text-ink-soft transition-colors peer-checked:border-transparent peer-checked:text-start-ink peer-focus-visible:outline-2 peer-focus-visible:outline-cobalt">
             {l}
           </span>
+          {value === v ? <motion.span layoutId={`chip-${name}`} className="absolute inset-0 rounded-full bg-start" transition={{ type: "spring", stiffness: 500, damping: 36 }} /> : null}
         </label>
       ))}
     </div>
   );
 }
 
-export type QuoteOption = { mint: string; symbol: string; name: string };
-
-export function StepForm({ appId, step, defaults, quotes = [] }: { appId: string; step: StepNumber; defaults: Record<string, string>; quotes?: QuoteOption[] }) {
+export function StepForm({ appId, step, defaults, quotes, imageUrl, proofs, quoteMint }: {
+  appId: string; step: StepNumber; defaults: Record<string, string>; quotes: QuoteOption[];
+  imageUrl: string | null; proofs: { id: string; kb: number; mime: string }[]; quoteMint: string | null;
+}) {
   const [state, action, pending] = useActionState<StepState, FormData>(saveStep.bind(null, appId, step), {});
   const e = state.errors;
   const d = { ...defaults, ...state.values };
+  const quoteSymbol = quotes.find((q) => q.mint === (quoteMint || SOL))?.symbol ?? "SOL";
 
   return (
-    <form action={action} className="flex flex-col gap-6" noValidate>
-      {e?._form ? <p role="alert" className="rounded-md border border-flagged/40 bg-flagged-soft px-4 py-3 text-flagged">{e._form}</p> : null}
+    <motion.form
+      action={action}
+      noValidate
+      initial={{ opacity: 0, y: 18, scale: 0.985 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ type: "spring", stiffness: 260, damping: 26 }}
+      className="glass flex flex-col gap-7 rounded-[28px] p-5 sm:p-8"
+    >
+      <AnimatePresence>
+        {e?._form ? (
+          <motion.p role="alert" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
+            className="rounded-[14px] border border-flagged/40 bg-flagged-soft px-4 py-3 text-flagged">{e._form}</motion.p>
+        ) : null}
+      </AnimatePresence>
 
-      {step === 1 && (
-        <>
-          <Field name="applicant_name" label="Your full name" defaultValue={d.applicant_name} errors={e} autoComplete="name" />
-          <Field name="contact_email" label="Contact email" type="email" defaultValue={d.contact_email} errors={e} autoComplete="email"
-            hint="An address on the product's domain helps if you have one. We only use it to reach you." />
-          <div className="flex flex-col gap-1.5">
-            <input type="hidden" name="applicant_is_founder" value="no" />
-            <label className="flex cursor-pointer items-start justify-between gap-4">
-              <span>
-                <span className="font-medium text-ink">I&apos;m on the team that builds this</span>
-                <span className="block text-[0.875rem] text-muted">
-                  Leave it off if you&apos;re backing someone else&apos;s product. You&apos;ll need the builder&apos;s written approval, and as the launcher you earn 5% of collected trading fees.
-                </span>
-              </span>
-              <input type="checkbox" role="switch" name="applicant_is_founder" value="yes" defaultChecked={d.applicant_is_founder === "yes"} className="switch mt-0.5" />
-            </label>
-            {e?.applicant_is_founder ? <p className="text-[0.875rem] text-flagged">{e.applicant_is_founder}</p> : null}
-          </div>
-          <Field name="applicant_role" label="Your role" defaultValue={d.applicant_role} errors={e}
-            placeholder="Longtime user, community mod, teammate…" hint="If you're not on the team, say how you know them and how they gave you the go-ahead." />
-        </>
-      )}
+      {step === 1 ? <CoinStep appId={appId} d={d} e={e} quotes={quotes} imageUrl={imageUrl} proofs={proofs} /> : null}
+      {step === 2 ? <FeeStep d={d} e={e} /> : null}
+      {step === 3 ? <StarterStep d={d} e={e} symbol={quoteSymbol} /> : null}
 
-      {step === 2 && (
-        <>
-          <Field name="project_name" label="Product or project name" defaultValue={d.project_name} errors={e} />
-          <Field name="project_summary" label="What does the product do?" multiline rows={5} defaultValue={d.project_summary} errors={e}
-            hint="Plain language. Who uses it, what it does, and what stage it's at." />
-          <Field name="website" label="Official website" type="url" defaultValue={d.website} errors={e} placeholder="https://" />
-          <Field name="x" label="Official X account" type="url" defaultValue={d.x} errors={e} placeholder="https://x.com/yourproject" />
-          <Field name="github" label="GitHub organization or repository" type="url" defaultValue={d.github} errors={e} placeholder="https://github.com/yourorg" />
-          <Field name="docs" label="Documentation (optional)" type="url" defaultValue={d.docs} errors={e} />
-          <Field name="demo" label="Demo or live product (optional)" type="url" defaultValue={d.demo} errors={e} />
-          <Field name="other_social" label="Other official account (optional)" type="url" defaultValue={d.other_social} errors={e}
-            hint="Discord, Telegram or anything else the team actually uses." />
-        </>
-      )}
-
-      {step === 3 && (
-        <>
-          <Field name="founder_approval_statement" label="The builder's approval" multiline rows={6} defaultValue={d.founder_approval_statement} errors={e}
-            hint="In the builder's own words: that they're in on a community coin for this product, its name and ticker, and Startit running the launch." />
-          <Field name="permitted_branding" label="Branding the coin may use" multiline rows={3} defaultValue={d.permitted_branding} errors={e}
-            hint="For example: the product name and logo, but not the legal entity's name." />
-        </>
-      )}
-
-      {step === 4 && (
-        <>
-          <div className="grid gap-6 sm:grid-cols-2">
-            <Field name="token_name" label="Token name" defaultValue={d.token_name} errors={e} />
-            <Field name="ticker" label="Ticker" defaultValue={d.ticker} errors={e} placeholder="FORGE" hint="2–10 letters or numbers." />
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <p className="font-medium text-ink">Blockchain</p>
-            <p className="rounded-md border border-line bg-paper px-3 py-2.5 text-ink-soft">Solana, launched through Raydium LaunchLab</p>
-          </div>
-          <Field name="token_concept" label="Token concept" multiline defaultValue={d.token_concept} errors={e}
-            hint="What the meme is and how it connects to the product. Don't describe expected price or returns." />
-          <Field name="milestones" label="Upcoming product milestones" multiline defaultValue={d.milestones} errors={e}
-            hint="One per line: model releases, features, integrations. These are shared as plans, not promises." />
-          <Field name="community_plan" label="How you'll work with the community" multiline defaultValue={d.community_plan} errors={e} />
-          <QuotePicker quotes={quotes} value={d.quote_mint} errors={e} />
-          <PairFields defaults={d} errors={e} />
-        </>
-      )}
-
-      {step === 5 && <FeeFields defaults={d} errors={e} />}
-
-      {step === 6 && (
-        <>
-          <Field name="insider_allocation_disclosure" label="Insider holdings and allocations" multiline rows={4} defaultValue={d.insider_allocation_disclosure} errors={e}
-            hint="Any coins the builder, team, advisors or Startit will hold or get at launch. Write “None” if there are none." />
-          <fieldset className="flex flex-col gap-3 rounded-lg border border-line p-5">
-            <legend className="px-1 font-medium text-ink">Before you submit</legend>
-            <Check name="ack_no_returns" errors={e} values={d} label="We won't promise or imply price appreciation, and milestones aren't guarantees of token returns." />
-            <Check name="ack_not_ownership" errors={e} values={d} label="I understand the builder's approval doesn't make them the coin's owner or controller." />
-            <Check name="ack_disclosure" errors={e} values={d} label="Supply, authorities, treasury controls, allocations and the fee split will be published before launch." />
-            <Check name="ack_accurate" errors={e} values={d} label="Everything in this application is accurate, and I'm authorized to submit it." />
-          </fieldset>
-        </>
-      )}
-
-      <div className="flex flex-wrap items-center gap-3 border-t border-line pt-6">
-        <button type="submit" name="$intent" value="continue" disabled={pending}
-          className="btn-start">
-          {step === 6 ? "Submit application" : "Save and continue"}
-        </button>
-        <button type="submit" name="$intent" value="draft" disabled={pending}
-          className="btn-chrome">
+      <div className="flex flex-wrap items-center gap-3 border-t border-line/70 pt-6">
+        {step > 1 ? (
+          <Link href={`/applications/${appId}/edit?step=${step - 1}`} className="btn-chrome">Back</Link>
+        ) : null}
+        <motion.button whileTap={{ scale: 0.96 }} type="submit" name="$intent" value="continue" disabled={pending} className="btn-start">
+          {pending ? "Saving…" : step === 3 ? "Submit for review" : "Next"}
+        </motion.button>
+        <button type="submit" name="$intent" value="draft" disabled={pending} className="ml-auto text-[0.9375rem] font-semibold text-muted hover:text-ink">
           Save draft
         </button>
-        <span role="status" className="text-[0.9375rem] text-verified">{pending ? "" : state.message}</span>
+        <span role="status" className="w-full text-right text-[0.875rem] text-verified sm:w-auto">{pending ? "" : state.message}</span>
       </div>
-    </form>
+    </motion.form>
   );
 }
 
-/** The on-chain pair: the token your bonding curve trades against. */
-function QuotePicker({ quotes, value, errors }: { quotes: QuoteOption[]; value?: string; errors?: Record<string, string> }) {
-  const sol = "So11111111111111111111111111111111111111112";
-  const [v, setV] = useState(value || sol);
-  const options: [string, string][] = (quotes.length ? quotes : [{ mint: sol, symbol: "SOL", name: "Solana" }]).map((q) => [q.mint, q.symbol]);
-  const picked = quotes.find((q) => q.mint === v);
-  return (
-    <div className="flex flex-col gap-2">
-      <p className="font-medium text-ink">Paired with</p>
-      <p className="text-[0.875rem] text-muted">
-        The token people buy yours with on the bonding curve. Graduation targets and trading fees are counted in it.
-      </p>
-      <Segmented name="quote_mint" value={v} onChange={setV} options={options} />
-      {picked && picked.mint !== sol ? <p className="text-[0.875rem] text-ink-soft">{picked.name}: fees for your token will be collected and paid in {picked.symbol}.</p> : null}
-      {errors?.quote_mint ? <p className="text-[0.875rem] text-flagged">{errors.quote_mint}</p> : null}
-    </div>
-  );
-}
+/* ───────────── Step 1: the coin ───────────── */
 
-function PairFields({ defaults, errors }: { defaults: Record<string, string>; errors?: Record<string, string> }) {
-  const [kind, setKind] = useState(defaults.pair_kind ?? "");
+function CoinStep({ appId, d, e, quotes, imageUrl, proofs }: {
+  appId: string; d: Record<string, string>; e: Errors; quotes: QuoteOption[]; imageUrl: string | null; proofs: { id: string; kb: number; mime: string }[];
+}) {
+  const [quote, setQuote] = useState(d.quote_mint || SOL);
+  const pairOptions: [string, string][] = (quotes.length ? quotes : [{ mint: SOL, symbol: "SOL", name: "Solana" }]).map((q) => [q.mint, q.symbol]);
   return (
-    <fieldset className="flex flex-col gap-5 rounded-[18px] border border-line bg-paper p-5">
-      <legend className="px-1 font-semibold text-ink">Inspired by <span className="font-normal text-muted">(optional)</span></legend>
-      <p className="-mt-2 text-[0.9375rem] text-ink-soft">
-        A token, project or person your product looks up to: the model it builds on, the lab behind it, someone whose work shaped it.
-        It shows as <span className="font-semibold text-ink">Inspired by …</span> on your project page. We check it like any other claim,
-        and it never implies their endorsement unless you mark it official and prove it.
-      </p>
-      <div className="flex flex-col gap-1.5">
-        <p className="font-medium text-ink">Inspired by</p>
-        <Segmented name="pair_kind" value={kind} onChange={setKind}
-          options={[["", "None"], ...Object.entries(PAIR_KINDS).map(([v, l]) => [v, l] as [string, string])]} />
+    <>
+      <div>
+        <h1 className="font-display text-[1.875rem] leading-tight font-extrabold tracking-[-0.02em] text-ink sm:text-[2.25rem]">Your coin</h1>
+        <p className="mt-1 text-ink-soft">The product you&apos;re backing, its coin, and proof the builder is in.</p>
       </div>
-      {kind ? (
-        <>
-          <Field name="pair_name" label={kind === "person" ? "Their name" : kind === "token" ? "Token name" : "Project name"}
-            defaultValue={defaults.pair_name} errors={errors} placeholder={kind === "person" ? "Andrej Karpathy" : kind === "token" ? "Jupiter (JUP)" : "Hugging Face"} />
-          {kind === "token" ? (
-            <Field name="pair_mint" label="Token mint address" defaultValue={defaults.pair_mint} errors={errors}
-              hint="The Solana mint, so people can check which token you mean." />
-          ) : (
-            <input type="hidden" name="pair_mint" value="" />
-          )}
-          <Field name="pair_url" label="Official link (optional)" type="url" defaultValue={defaults.pair_url} errors={errors} placeholder="https://" />
-          <div className="flex flex-col gap-1.5">
-            <input type="hidden" name="pair_relationship" value="inspired_by" />
-            <label className="flex cursor-pointer items-start justify-between gap-4">
-              <span>
-                <span className="font-medium text-ink">Official partner</span>
-                <span className="block text-[0.875rem] text-muted">
-                  {PAIR_RELATIONSHIPS.official}. Leave off for a reference: {PAIR_RELATIONSHIPS.inspired_by.toLowerCase()}.
-                </span>
-              </span>
-              <input type="checkbox" role="switch" name="pair_relationship" value="official" defaultChecked={defaults.pair_relationship === "official"} className="switch mt-0.5" />
-            </label>
-            {errors?.pair_relationship ? <p className="text-[0.875rem] text-flagged">{errors.pair_relationship}</p> : null}
+
+      <div className="grid gap-6 sm:grid-cols-[11rem_1fr]">
+        <ImagePicker appId={appId} initial={imageUrl} error={e?.image} />
+        <div className="flex flex-col gap-4">
+          <div className="grid grid-cols-[1fr_9rem] gap-3">
+            <Field name="project_name" label="Name" errors={e} defaultValue={d.project_name} placeholder="Forge" maxLength={32} />
+            <Field name="ticker" label="Ticker" errors={e} defaultValue={d.ticker} placeholder="FORGE" prefix="$" maxLength={10} />
           </div>
-          <Field name="pair_reason" label="Why this pairing?" multiline rows={3} defaultValue={defaults.pair_reason} errors={errors}
-            hint={kind === "person"
-              ? "How your product relates to their work. Don't use their name or image in your token's name, ticker or branding unless they've officially agreed."
-              : "How your product relates to it, in a sentence or two."} />
-        </>
-      ) : (
-        ["pair_name", "pair_mint", "pair_url", "pair_relationship", "pair_reason"].map((n) => <input key={n} type="hidden" name={n} value="" />)
-      )}
-    </fieldset>
-  );
-}
-
-function FeeFields({ defaults, errors }: { defaults: Record<string, string>; errors?: Record<string, string> }) {
-  const isFounder = defaults.applicant_is_founder === "yes";
-  const num = (v: string | undefined, fallback: number) => (v === undefined || v === "" ? fallback : Number(v));
-  const [p, setP] = useState(num(defaults.proposed_platform_bps, isFounder ? 2000 : 1500));
-  const [f, setF] = useState(num(defaults.proposed_founder_bps, 3000));
-  const [l, setL] = useState(isFounder ? 0 : num(defaults.proposed_launcher_bps, 500));
-  const [c, setC] = useState(num(defaults.proposed_community_bps, 5000));
-  const total = p + f + l + c;
-  const isDefault = isFounder ? p === 2000 && f === 3000 && l === 0 && c === 5000 : p === 1500 && f === 3000 && l === 500 && c === 5000;
-  const pct = (n: number) => (Number.isFinite(n) ? n / 100 : 0);
-
-  const row = (label: string, name: string, v: number, set: (n: number) => void, hint: string) => (
-    <div className="grid grid-cols-[1fr_7rem] items-center gap-4">
-      <label htmlFor={name}>
-        <span className="font-medium text-ink">{label}</span>
-        <span className="block text-[0.875rem] text-muted">{hint}</span>
-      </label>
-      <div className="flex items-center gap-1.5">
-        <input id={name} type="number" min={0} max={100} step={0.01} value={pct(v)}
-          onChange={(ev) => set(Math.round(Number(ev.target.value) * 100))}
-          className="w-full rounded-[12px] border-[1.5px] border-line-strong bg-surface px-3 py-2 text-right text-ink focus:border-cobalt focus:outline-none" />
-        <span className="text-muted">%</span>
-        <input type="hidden" name={name} value={v} />
-      </div>
-    </div>
-  );
-
-  return (
-    <div className="flex flex-col gap-5">
-      <input type="hidden" name="applicant_is_founder" value={defaults.applicant_is_founder ?? ""} />
-      <p className="text-ink-soft">
-        These shares apply to trading fees Startit actually collects, not to trading volume.{" "}
-        {isFounder
-          ? "You're on the team, so there's no separate launcher cut: the default is 50% community, 30% builder and 20% platform."
-          : "The default is 50% community, 30% builder, 5% to you as launcher and 15% platform."}{" "}
-        A different split needs a reason and must be approved before launch.
-      </p>
-      {row("Community treasury", "proposed_community_bps", c, setC, "Held in a published wallet with disclosed controls")}
-      {row("Founder", "proposed_founder_bps", f, setF, "Paid to the founder's wallet")}
-      {isFounder ? <input type="hidden" name="proposed_launcher_bps" value={0} /> :
-        row("Launcher (you)", "proposed_launcher_bps", l, setL, "Paid to your wallet after launch")}
-      {row("Platform", "proposed_platform_bps", p, setP, "Startit operations, screening and security")}
-      <p className={`text-[0.9375rem] font-semibold ${total === 10000 ? "text-verified" : "text-flagged"}`} aria-live="polite">
-        Total: {total / 100}%{total === 10000 ? "" : ". It must be exactly 100%."}
-      </p>
-      {errors?.proposed_community_bps ? <p className="text-[0.875rem] text-flagged">{errors.proposed_community_bps}</p> : null}
-      {errors?.proposed_launcher_bps ? <p className="text-[0.875rem] text-flagged">{errors.proposed_launcher_bps}</p> : null}
-      {!isDefault ? (
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="split_reason" className="font-medium text-ink">Why a different split?</label>
-          <textarea id="split_reason" name="split_reason" rows={3} defaultValue={defaults.split_reason}
-            className="w-full rounded-[12px] border-[1.5px] border-line-strong bg-surface px-3 py-2.5 text-ink focus:border-cobalt focus:outline-none" />
-          {errors?.split_reason ? <p className="text-[0.875rem] text-flagged">{errors.split_reason}</p> : null}
+          <Field name="project_summary" label="Description" errors={e} defaultValue={d.project_summary} multiline maxLength={1000}
+            placeholder="What the product does and why its community should care." />
         </div>
-      ) : (
-        <input type="hidden" name="split_reason" value="" />
-      )}
+      </div>
+
+      <section className="flex flex-col gap-3">
+        <div className="flex items-baseline justify-between gap-3">
+          <h2 className="font-semibold text-ink">Links</h2>
+          <p className="text-[0.8125rem] text-muted">Website, X or GitHub. At least one.</p>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <LinkInput name="website" label="Website" placeholder="https://forge.dev" d={d} e={e} />
+          <LinkInput name="x" label="X" placeholder="https://x.com/forge" d={d} e={e} />
+          <LinkInput name="github" label="GitHub" placeholder="https://github.com/forge" d={d} e={e} />
+          <LinkInput name="telegram" label="Telegram" placeholder="https://t.me/forge" d={d} e={e} />
+          <LinkInput name="discord" label="Discord" placeholder="https://discord.gg/forge" d={d} e={e} />
+        </div>
+      </section>
+
+      <ProofPicker appId={appId} proofs={proofs} error={e?.proof} />
+
+      <section className="flex flex-col gap-2">
+        <h2 className="font-semibold text-ink">Paired with</h2>
+        <Chips name="quote_mint" value={quote} onChange={setQuote} options={pairOptions} />
+        <p className="text-[0.8125rem] text-muted">What people buy your coin with on the bonding curve. Fees are counted in it too.</p>
+        <Err msg={e?.quote_mint} />
+      </section>
+
+      <InspiredBy d={d} e={e} />
+    </>
+  );
+}
+
+function LinkInput({ name, label, placeholder, d, e }: { name: string; label: string; placeholder: string; d: Record<string, string>; e: Errors }) {
+  const err = e?.[name];
+  return (
+    <div className="flex flex-col gap-1">
+      <div className="relative">
+        <label htmlFor={name} className="pointer-events-none absolute top-1/2 left-3.5 w-[4.75rem] -translate-y-1/2 text-[0.8125rem] font-semibold text-muted">{label}</label>
+        <input id={name} name={name} type="url" defaultValue={d[name]} placeholder={placeholder} aria-invalid={!!err}
+          className={`${inputCls} pl-[5.5rem] text-[0.9375rem]`} />
+      </div>
+      <Err msg={err} />
     </div>
   );
 }
 
-export function EvidenceUploader({ appId }: { appId: string }) {
-  const [state, action, pending] = useActionState<UploadState, FormData>(uploadEvidence.bind(null, appId), {});
+function ImagePicker({ appId, initial, error }: { appId: string; initial: string | null; error?: string }) {
+  const [url, setUrl] = useState(initial);
+  const [err, setErr] = useState<string | null>(null);
+  const [busy, start] = useTransition();
+  const input = useRef<HTMLInputElement>(null);
+  const pick = (file: File | undefined) => {
+    if (!file) return;
+    const local = URL.createObjectURL(file);
+    start(async () => {
+      setErr(null);
+      const fd = new FormData();
+      fd.set("file", file);
+      const r = await uploadProjectImage(appId, fd);
+      if (r.error) { setErr(r.error); URL.revokeObjectURL(local); } else setUrl(local);
+    });
+  };
+  const shown = err ?? error;
   return (
-    <form action={action} className="flex flex-col gap-4 rounded-lg border border-line bg-paper p-5">
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="kind" className="font-medium text-ink">What does this file show?</label>
-        <select id="kind" name="kind" defaultValue="authorization"
-          className="rounded-[12px] border-[1.5px] border-line-strong bg-surface px-3 py-2.5 text-ink focus:border-cobalt focus:outline-none">
-          <option value="authorization">Proof the builder gave me the go-ahead</option>
-          <option value="founder_approval">The builder&apos;s signed approval</option>
-          <option value="identity">Who the builder is</option>
-          <option value="other">Other supporting evidence</option>
-        </select>
+    <div className="flex w-40 flex-col gap-1.5 sm:w-auto">
+      <span className="text-[0.9375rem] font-semibold text-ink">Image</span>
+      <motion.button
+        type="button"
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.97 }}
+        onClick={() => input.current?.click()}
+        onDragOver={(ev) => ev.preventDefault()}
+        onDrop={(ev) => { ev.preventDefault(); pick(ev.dataTransfer.files[0]); }}
+        className={`relative grid aspect-square w-full place-items-center overflow-hidden rounded-[22px] border border-dashed ${shown ? "border-flagged" : "border-line-strong"} bg-surface/60 text-center`}
+        aria-label={url ? "Change image" : "Add image"}
+      >
+        {url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={url} alt="" className="absolute inset-0 size-full object-cover" />
+        ) : (
+          <span className="px-4 text-[0.875rem] text-muted">
+            <span className="mx-auto mb-2 grid size-10 place-items-center rounded-full bg-start text-[1.25rem] font-bold text-start-ink">+</span>
+            Drop or pick<br />PNG, JPG, GIF · 2 MB
+          </span>
+        )}
+        {busy ? <span className="absolute inset-0 grid place-items-center bg-paper/70 text-[0.875rem] font-semibold text-ink backdrop-blur-sm">Uploading…</span> : null}
+      </motion.button>
+      <input ref={input} type="file" accept="image/png,image/jpeg,image/webp,image/gif" className="sr-only" tabIndex={-1}
+        onChange={(ev) => pick(ev.target.files?.[0])} />
+      <Err msg={shown ?? undefined} />
+    </div>
+  );
+}
+
+function ProofPicker({ appId, proofs, error }: { appId: string; proofs: { id: string; kb: number; mime: string }[]; error?: string }) {
+  const [list, setList] = useState(proofs);
+  const [err, setErr] = useState<string | null>(null);
+  const [busy, start] = useTransition();
+  const input = useRef<HTMLInputElement>(null);
+  const pick = (file: File | undefined) => {
+    if (!file) return;
+    start(async () => {
+      setErr(null);
+      const fd = new FormData();
+      fd.set("kind", "authorization");
+      fd.set("file", file);
+      const r = await uploadEvidence(appId, {}, fd);
+      if (r.error) setErr(r.error);
+      else setList((l) => [...l, { id: crypto.randomUUID(), kb: Math.max(1, Math.round(file.size / 1024)), mime: file.type }]);
+    });
+  };
+  const shown = err ?? error;
+  return (
+    <section className="flex flex-col gap-2">
+      <div className="flex items-baseline justify-between gap-3">
+        <h2 className="font-semibold text-ink">Proof the builder is in</h2>
+        <p className="text-[0.8125rem] text-muted">Private. Only reviewers see it.</p>
       </div>
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="file" className="font-medium text-ink">File</label>
-        <input id="file" name="file" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.txt"
-          className="text-ink-soft file:mr-3 file:rounded-md file:border file:border-line-strong file:bg-surface file:px-3 file:py-1.5 file:font-semibold file:text-ink" />
-        <p className="text-[0.875rem] text-muted">PDF, image or text, up to 4 MB. Files are stored privately and only Startit reviewers can open them.</p>
-      </div>
-      <div className="flex items-center gap-3">
-        <button type="submit" disabled={pending}
-          className="btn-chrome">
-          {pending ? "Uploading…" : "Upload file"}
+      <motion.div
+        whileHover={{ y: -1 }}
+        onDragOver={(ev) => ev.preventDefault()}
+        onDrop={(ev) => { ev.preventDefault(); pick(ev.dataTransfer.files[0]); }}
+        className={`flex flex-wrap items-center gap-3 rounded-[18px] border border-dashed ${shown ? "border-flagged" : "border-line-strong"} bg-surface/50 p-4`}
+      >
+        <button type="button" disabled={busy} onClick={() => input.current?.click()} className="btn-chrome">
+          {busy ? "Uploading…" : list.length ? "Add another" : "Upload proof"}
         </button>
-        {state.error ? <p role="alert" className="text-[0.9375rem] text-flagged">{state.error}</p> : null}
-        {state.message ? <p role="status" className="text-[0.9375rem] text-verified">{state.message}</p> : null}
+        <p className="min-w-0 flex-1 text-[0.875rem] text-ink-soft">
+          A screenshot of the builder saying yes, a post from the project&apos;s account, or an email from their domain. PDF or image, 4 MB.
+        </p>
+        <input ref={input} type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.txt" className="sr-only" tabIndex={-1}
+          onChange={(ev) => { pick(ev.target.files?.[0]); ev.target.value = ""; }} />
+        <AnimatePresence initial={false}>
+          {list.map((p, i) => (
+            <motion.span key={p.id} initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }}
+              className="inline-flex items-center gap-1.5 rounded-full bg-verified-soft px-3 py-1 text-[0.8125rem] font-semibold text-verified">
+              ✓ Proof {i + 1} · {p.kb} KB
+            </motion.span>
+          ))}
+        </AnimatePresence>
+      </motion.div>
+      <Err msg={shown ?? undefined} />
+    </section>
+  );
+}
+
+function InspiredBy({ d, e }: { d: Record<string, string>; e: Errors }) {
+  const [kind, setKind] = useState(d.pair_kind ?? "");
+  const [open, setOpen] = useState(!!d.pair_kind);
+  const [official, setOfficial] = useState(d.pair_relationship === "official");
+  return (
+    <section className="rounded-[18px] border border-line/70 bg-surface/40 p-4">
+      <Toggle name="$inspired" label="Inspired by someone?" sub="Link a token, project or person your product looks up to. Shown on the project page."
+        checked={open} onChange={(v) => { setOpen(v); if (!v) setKind(""); else if (!kind) setKind("project"); }} />
+      <AnimatePresence initial={false}>
+        {open && kind ? (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+            <div className="flex flex-col gap-4 pt-4">
+              <Chips name="pair_kind" value={kind} onChange={setKind} options={Object.entries(PAIR_KINDS).map(([v, l]) => [v, l] as [string, string])} />
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Field name="pair_name" label={kind === "person" ? "Their name" : kind === "token" ? "Token" : "Project"} errors={e} defaultValue={d.pair_name}
+                  placeholder={kind === "person" ? "Andrej Karpathy" : kind === "token" ? "Jupiter (JUP)" : "Hugging Face"} />
+                {kind === "token" ? (
+                  <Field name="pair_mint" label="Mint address" errors={e} defaultValue={d.pair_mint} />
+                ) : (
+                  <><input type="hidden" name="pair_mint" value="" /><Field name="pair_url" label="Link (optional)" errors={e} defaultValue={d.pair_url} placeholder="https://" /></>
+                )}
+              </div>
+              {kind === "token" ? <input type="hidden" name="pair_url" value={d.pair_url ?? ""} /> : null}
+              <Field name="pair_reason" label="The connection" errors={e} defaultValue={d.pair_reason} placeholder="Built on their model, a fan project, …" />
+              <Toggle name="pair_relationship" value="official" off="inspired_by" checked={official} onChange={setOfficial}
+                label="Official partner" sub="Only if they agreed. You'll need to show proof. Otherwise it's shown as a reference, not an endorsement." />
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+      {!open || !kind ? ["pair_kind", "pair_name", "pair_mint", "pair_url", "pair_relationship", "pair_reason"].map((n) => <input key={n} type="hidden" name={n} value="" />) : null}
+    </section>
+  );
+}
+
+/* ───────────── Step 2: fees ───────────── */
+
+const SPLITS = {
+  backer: { c: 5000, f: 3000, l: 500, p: 1500 },
+  team: { c: 5000, f: 3000, l: 0, p: 2000 },
+};
+
+function FeeStep({ d, e }: { d: Record<string, string>; e: Errors }) {
+  const [team, setTeam] = useState(d.applicant_is_founder === "yes");
+  const preset = team ? SPLITS.team : SPLITS.backer;
+  const n = (v: string | undefined, fb: number) => (v === undefined || v === "" || Number.isNaN(Number(v)) ? fb : Number(v));
+  const [s, setS] = useState({ c: n(d.proposed_community_bps, preset.c), f: n(d.proposed_founder_bps, preset.f), l: n(d.proposed_launcher_bps, preset.l), p: n(d.proposed_platform_bps, preset.p) });
+  const isPreset = s.c === preset.c && s.f === preset.f && s.l === preset.l && s.p === preset.p;
+  const [custom, setCustom] = useState(!isPreset);
+  const total = s.c + s.f + s.l + s.p;
+
+  const setTeamAndReset = (v: boolean) => { setTeam(v); setCustom(false); setS(v ? SPLITS.team : SPLITS.backer); };
+  const parts = [
+    { k: "c" as const, label: "Community", sub: "Public treasury wallet", cls: "bg-cobalt text-cobalt-ink" },
+    { k: "f" as const, label: "Builder", sub: "The team behind the product", cls: "bg-start text-start-ink" },
+    { k: "l" as const, label: "You", sub: "For bringing it here", cls: "bg-review text-paper" },
+    { k: "p" as const, label: "Startit", sub: "Screening, security, ops", cls: "bg-line-strong text-ink" },
+  ].filter((x) => !(team && x.k === "l"));
+
+  return (
+    <>
+      <div>
+        <h1 className="font-display text-[1.875rem] leading-tight font-extrabold tracking-[-0.02em] text-ink sm:text-[2.25rem]">Fees</h1>
+        <p className="mt-1 text-ink-soft">How trading fees Startit actually collects get shared. Volume isn&apos;t revenue; only collected fees are split.</p>
       </div>
-    </form>
+
+      <Toggle name="applicant_is_founder" value="yes" off="no" checked={team} onChange={setTeamAndReset}
+        label="I'm on the builder's team" sub="Then there's no separate launcher cut, and Startit takes 20%." />
+
+      <div className="flex flex-col gap-4">
+        <div className="flex h-16 overflow-hidden rounded-[18px] text-[0.9375rem] font-bold shadow-raise" role="img"
+          aria-label={parts.map((x) => `${x.label} ${s[x.k] / 100}%`).join(", ")}>
+          {parts.map((x) => (
+            <motion.div key={x.k} layout className={`flex min-w-0 items-center overflow-hidden px-3 ${x.cls}`}
+              animate={{ flexGrow: Math.max(s[x.k], 1) }} style={{ flexBasis: 0 }} transition={{ type: "spring", stiffness: 220, damping: 28 }}>
+              <span className="truncate">{s[x.k] / 100}%</span>
+            </motion.div>
+          ))}
+        </div>
+        <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {parts.map((x) => (
+            <div key={x.k} className="rounded-[14px] bg-surface/50 p-3">
+              <dt className="flex items-center gap-2 font-semibold text-ink"><span className={`size-2.5 rounded-full ${x.cls.split(" ")[0]}`} />{x.label}</dt>
+              <dd className="mt-0.5 text-[0.8125rem] text-muted">{x.sub}</dd>
+              {custom ? (
+                <input type="number" min={0} max={100} step={0.5} value={s[x.k] / 100} aria-label={`${x.label} percent`}
+                  onChange={(ev) => setS((o) => ({ ...o, [x.k]: Math.round(Number(ev.target.value) * 100) }))}
+                  className="mt-2 w-full rounded-[10px] border border-line-strong bg-surface px-2 py-1.5 text-right text-ink focus:border-cobalt focus:outline-none" />
+              ) : null}
+            </div>
+          ))}
+        </dl>
+      </div>
+
+      <input type="hidden" name="proposed_community_bps" value={s.c} />
+      <input type="hidden" name="proposed_founder_bps" value={s.f} />
+      <input type="hidden" name="proposed_launcher_bps" value={team ? 0 : s.l} />
+      <input type="hidden" name="proposed_platform_bps" value={s.p} />
+
+      <Toggle name="$custom" label="Custom split" sub="Needs a reason, and a reviewer has to approve it before launch."
+        checked={custom} onChange={(v) => { setCustom(v); if (!v) setS(preset); }} />
+      <AnimatePresence initial={false}>
+        {custom ? (
+          <motion.div key="custom" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+            <div className="flex flex-col gap-3">
+              <p className={`font-semibold ${total === 10000 ? "text-verified" : "text-flagged"}`} aria-live="polite">
+                Total {total / 100}%{total === 10000 ? "" : ". Has to be exactly 100%."}
+              </p>
+              <Field name="split_reason" label="Why this split?" errors={e} defaultValue={d.split_reason} placeholder="The builder is funding liquidity, …" />
+            </div>
+          </motion.div>
+        ) : <input key="no-reason" type="hidden" name="split_reason" value="" />}
+      </AnimatePresence>
+      <Err msg={e?.proposed_community_bps ?? e?.proposed_launcher_bps} />
+    </>
+  );
+}
+
+/* ───────────── Step 3: starter's buy ───────────── */
+
+function StarterStep({ d, e, symbol }: { d: Record<string, string>; e: Errors; symbol: string }) {
+  const [amount, setAmount] = useState(d.starter_buy_amount ?? "");
+  const [agree, setAgree] = useState(d.ack_terms === "on");
+  const presets = ["0", "0.5", "1", "2", "5"];
+  return (
+    <>
+      <div>
+        <h1 className="font-display text-[1.875rem] leading-tight font-extrabold tracking-[-0.02em] text-ink sm:text-[2.25rem]">
+          Starter&apos;s buy <span className="text-[1rem] font-semibold text-muted">optional</span>
+        </h1>
+        <p className="mt-1 text-ink-soft">
+          Like a creator&apos;s buy: you get in right after launch, from your own wallet. It&apos;s shown on the project page so
+          everyone knows. Leave it at 0 to skip.
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <label htmlFor="starter_buy_amount" className="font-semibold text-ink">Amount</label>
+        <div className="relative max-w-xs">
+          <input id="starter_buy_amount" name="starter_buy_amount" inputMode="decimal" value={amount} placeholder="0"
+            onChange={(ev) => setAmount(ev.target.value.replace(/[^0-9.]/g, ""))} aria-invalid={!!e?.starter_buy_amount}
+            className={`${inputCls} pr-16 font-display text-[1.75rem] font-extrabold`} />
+          <span className="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 font-bold text-muted">{symbol}</span>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {presets.map((p) => (
+            <motion.button key={p} type="button" whileTap={{ scale: 0.92 }} onClick={() => setAmount(p === "0" ? "" : p)}
+              className={`rounded-full border px-3.5 py-1.5 text-[0.9375rem] font-semibold ${(amount || "0") === p ? "border-start bg-start text-start-ink" : "border-line-strong/80 text-ink-soft hover:text-ink"}`}>
+              {p === "0" ? "Skip" : `${p} ${symbol}`}
+            </motion.button>
+          ))}
+        </div>
+        <p className="text-[0.8125rem] text-muted">Up to {MAX_STARTER_BUY} {symbol}. It runs as its own transaction right after the launch confirms, so it isn&apos;t guaranteed to be the very first buy.</p>
+        <Err msg={e?.starter_buy_amount} />
+      </div>
+
+      <div className="rounded-[18px] border border-line/70 bg-surface/40 p-4">
+        <Toggle name="ack_terms" checked={agree} onChange={setAgree}
+          label="I agree to the terms"
+          sub={<>No price promises, the builder&apos;s approval doesn&apos;t make them the owner, everything gets published before launch, and what I sent is accurate. <Link href="/terms" className="font-semibold text-cobalt underline-offset-4 hover:underline" target="_blank">Read them</Link>.</>} />
+        <Err msg={e?.ack_terms} />
+      </div>
+    </>
   );
 }

@@ -52,7 +52,7 @@ async function Overview() {
         <Stat label="Payouts failed" value={c.failedPayouts} tone={c.failedPayouts ? "bad" : undefined} emphasis={c.failedPayouts > 0} />
       </section>
 
-      <section aria-label="Fees" className="rounded-lg border border-line bg-surface p-5">
+      <section aria-label="Fees" className="rounded-[18px] glass p-5">
         <h2 className="font-semibold text-ink">Trading fees</h2>
         {nothingCollected ? (
           <p className="mt-2 text-ink-soft">No fees have been collected yet. Figures appear here only from confirmed on-chain transactions.</p>
@@ -91,7 +91,7 @@ function Stat({ label, value, hint, emphasis, tone }: { label: string; value: nu
 
 function QueueTable({ rows }: { rows: QueueRow[] }) {
   return (
-    <ul className="divide-y divide-line rounded-lg border border-line bg-surface">
+    <ul className="divide-y divide-line rounded-[18px] glass">
       {rows.map((r) => (
         <li key={r.id}>
           <Link href={`/admin/applications/${r.id}`} className="grid gap-2 px-5 py-4 hover:bg-paper md:grid-cols-[1fr_auto] md:items-center">

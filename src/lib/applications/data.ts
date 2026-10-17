@@ -11,6 +11,8 @@ export type ApplicationRow = {
   status: ApplicationStatus;
   current_step: number;
   project_name: string | null;
+  image_path: string | null;
+  starter_buy_amount: number | string;
   quote_mint: string | null;
   pair_kind: "token" | "project" | "person" | null;
   pair_name: string | null;
@@ -99,36 +101,26 @@ export function stepDefaults(b: ApplicationBundle, step: number): Record<string,
   switch (step) {
     case 1:
       return {
-        applicant_name: s(b.applicantName), contact_email: s(a.contact_email), applicant_role: s(a.applicant_role),
-        applicant_is_founder: a.applicant_is_founder === null ? "" : a.applicant_is_founder ? "yes" : "no",
-      };
-    case 2:
-      return {
-        project_name: s(a.project_name), project_summary: s(a.project_summary),
-        website: link("website"), x: link("x"), github: link("github"),
-        docs: link("docs"), demo: link("demo"), other_social: link("other"),
-      };
-    case 3:
-      return { founder_approval_statement: s(a.founder_approval_statement), permitted_branding: s(a.permitted_branding) };
-    case 4:
-      return {
-        token_name: s(a.token_name), ticker: s(a.ticker), token_concept: s(a.token_concept),
-        community_plan: s(a.community_plan), milestones: b.milestones.map((m) => m.title).join("\n"),
+        project_name: s(a.project_name), ticker: s(a.ticker), project_summary: s(a.project_summary),
+        website: link("website"), x: link("x"), github: link("github"), telegram: link("telegram"), discord: link("discord"),
         quote_mint: s(a.quote_mint),
         pair_kind: s(a.pair_kind), pair_name: s(a.pair_name), pair_relationship: s(a.pair_relationship),
         pair_reason: s(a.pair_reason), pair_url: s(a.pair_url), pair_mint: s(a.pair_mint),
       };
-    case 5:
+    case 2:
       return {
-        applicant_is_founder: a.applicant_is_founder === null ? "" : a.applicant_is_founder ? "yes" : "no",
+        applicant_is_founder: a.applicant_is_founder ? "yes" : "no",
         proposed_platform_bps: String(a.proposed_platform_bps),
         proposed_founder_bps: String(a.proposed_founder_bps),
         proposed_launcher_bps: String(a.proposed_launcher_bps),
         proposed_community_bps: String(a.proposed_community_bps),
         split_reason: typeof a.draft_payload?.split_reason === "string" ? a.draft_payload.split_reason : "",
       };
-    case 6:
-      return { insider_allocation_disclosure: s(a.insider_allocation_disclosure) };
+    case 3:
+      return {
+        starter_buy_amount: Number(a.starter_buy_amount) > 0 ? String(Number(a.starter_buy_amount)) : "",
+        ack_terms: a.disclosures_acknowledged_at ? "on" : "",
+      };
     default:
       return {};
   }

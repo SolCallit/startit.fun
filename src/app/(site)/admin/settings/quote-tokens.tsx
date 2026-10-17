@@ -24,7 +24,7 @@ export function QuoteTokens({ rows, platformReady }: { rows: QuoteRow[]; platfor
         A launch can trade against any token here instead of SOL. Raydium has to have created a LaunchLab config for the token;
         we check that on-chain, then allow it on our platform with the admin wallet. Fees for these launches are collected in that token.
       </p>
-      <ul className="flex flex-col divide-y divide-line rounded-[16px] border border-line bg-surface">
+      <ul className="flex flex-col divide-y divide-line rounded-[16px] glass">
         {rows.map((q) => <Row key={q.mint} q={q} platformReady={platformReady} />)}
       </ul>
 

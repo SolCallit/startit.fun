@@ -169,3 +169,20 @@ export async function readMint(mint: PublicKey) {
   if (!parsed) throw new Error("Mint account not found or not a token mint.");
   return { supplyRaw: parsed.supply, decimals: parsed.decimals, mintAuthority: parsed.mintAuthority ?? null, freezeAuthority: parsed.freezeAuthority ?? null };
 }
+
+/** The launcher's starter's buy: a plain bonding-curve buy from their own wallet, built unsigned for them to sign. */
+export async function buildStarterBuyTx(p: { buyer: PublicKey; mint: PublicKey; quoteMint: PublicKey; amountRaw: string; slippageBps?: number }) {
+  const r = await raydium(p.buyer);
+  const res = await r.launchpad.buyToken({
+    programId: LAUNCHLAB_PROGRAM,
+    authProgramId: LAUNCHLAB_AUTH,
+    mintA: p.mint,
+    mintB: p.quoteMint,
+    buyAmount: new BN(p.amountRaw),
+    slippage: new BN(p.slippageBps ?? 300),
+    txVersion: TxVersion.V0,
+    feePayer: p.buyer,
+  });
+  if (!(res.transaction instanceof VersionedTransaction)) throw new Error("Expected a v0 buy transaction from the Raydium SDK.");
+  return res.transaction;
+}

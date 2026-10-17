@@ -7,7 +7,7 @@ import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { screenSoon } from "@/lib/screening/trigger";
 import { EDITABLE, getApplicationBundle, stepDefaults, type LinkKind } from "./data";
-import { EVIDENCE_MIME, MAX_EVIDENCE_BYTES, STEPS, parseStep, type FieldErrors, type StepNumber } from "./schema";
+import { EVIDENCE_MIME, IMAGE_MIME, MAX_EVIDENCE_BYTES, MAX_IMAGE_BYTES, STEPS, parseStep, type FieldErrors, type StepNumber } from "./schema";
 
 // `values` echoes what was submitted so React's automatic form reset doesn't wipe the user's input.
 export type StepState = { errors?: FieldErrors; message?: string; values?: Record<string, string> };
@@ -42,7 +42,7 @@ export async function saveStep(appId: string, step: StepNumber, _prev: StepState
   if (!parsed.ok) return { errors: parsed.errors, values };
 
   const supabase = await createClient();
-  const { data: app } = await supabase.from("applications").select("id, status, draft_payload, applicant_id, applicant_is_founder").eq("id", appId).maybeSingle();
+  const { data: app } = await supabase.from("applications").select("id, status, draft_payload, applicant_id, applicant_is_founder, quote_mint").eq("id", appId).maybeSingle();
   if (!app || app.applicant_id !== user.id) return { errors: { _form: "Application not found." } };
   if (!EDITABLE.includes(app.status)) return { errors: { _form: "This application is locked while it's being reviewed." } };
 
@@ -51,30 +51,24 @@ export async function saveStep(appId: string, step: StepNumber, _prev: StepState
 
   switch (step) {
     case 1: {
-      const name = orNull(values.applicant_name);
-      if (name) {
-        const r = await supabase.from("profiles").update({ display_name: name }).eq("id", user.id);
-        if (fail(r.error)) return fail(r.error)!;
-      }
-      update.contact_email = orNull(values.contact_email);
-      update.applicant_role = orNull(values.applicant_role);
-      if (values.applicant_is_founder === "yes" || values.applicant_is_founder === "no") {
-        const isFounder = values.applicant_is_founder === "yes";
-        update.applicant_is_founder = isFounder;
-        // When who's launching changes, reset to that case's default split (DB enforces no launcher share on self-launch).
-        if (app.applicant_is_founder !== isFounder) Object.assign(update, isFounder
-          ? { proposed_platform_bps: 2000, proposed_founder_bps: 3000, proposed_launcher_bps: 0, proposed_community_bps: 5000 }
-          : { proposed_platform_bps: 1500, proposed_founder_bps: 3000, proposed_launcher_bps: 500, proposed_community_bps: 5000 });
-      }
-      break;
-    }
-    case 2: {
-      update.project_name = orNull(values.project_name);
-      update.project_summary = orNull(values.project_summary);
-      const kinds: [string, LinkKind][] = [["website", "website"], ["x", "x"], ["github", "github"], ["docs", "docs"], ["demo", "demo"], ["other_social", "other"]];
+      const name = orNull(values.project_name);
+      const summary = orNull(values.project_summary);
+      // The coin is the project: same name, and the description doubles as the coin's description.
+      Object.assign(update, { project_name: name, token_name: name, project_summary: summary, token_concept: summary });
+      update.ticker = orNull(values.ticker)?.toUpperCase() ?? null;
+      update.quote_mint = orNull(values.quote_mint);
+      const kind = orNull(values.pair_kind);
+      update.pair_kind = kind;
+      update.pair_name = kind ? orNull(values.pair_name) : null;
+      update.pair_relationship = kind ? orNull(values.pair_relationship) : null;
+      update.pair_reason = kind ? orNull(values.pair_reason) : null;
+      update.pair_url = kind ? orNull(values.pair_url) : null;
+      update.pair_mint = kind === "token" ? orNull(values.pair_mint) : null;
+
+      const kinds: [string, LinkKind][] = [["website", "website"], ["x", "x"], ["github", "github"], ["telegram", "telegram"], ["discord", "discord"]];
       const seen = new Set<string>();
       const rows = kinds
-        .map(([field, kind]) => ({ application_id: appId, kind, url: orNull(values[field]) }))
+        .map(([field, k]) => ({ application_id: appId, kind: k, url: orNull(values[field]) }))
         .filter((r): r is { application_id: string; kind: LinkKind; url: string } => {
           if (!r.url || seen.has(r.url)) return false;
           seen.add(r.url);
@@ -88,60 +82,54 @@ export async function saveStep(appId: string, step: StepNumber, _prev: StepState
       }
       break;
     }
-    case 3:
-      update.founder_approval_statement = orNull(values.founder_approval_statement);
-      update.permitted_branding = orNull(values.permitted_branding);
-      break;
-    case 4: {
-      update.token_name = orNull(values.token_name);
-      update.ticker = orNull(values.ticker)?.toUpperCase() ?? null;
-      update.token_concept = orNull(values.token_concept);
-      update.community_plan = orNull(values.community_plan);
-      update.quote_mint = orNull(values.quote_mint);
-      // Inspired-by link: all-or-nothing on the kind; clearing the kind clears the rest.
-      const kind = orNull(values.pair_kind);
-      update.pair_kind = kind;
-      update.pair_name = kind ? orNull(values.pair_name) : null;
-      update.pair_relationship = kind ? orNull(values.pair_relationship) : null;
-      update.pair_reason = kind ? orNull(values.pair_reason) : null;
-      update.pair_url = kind ? orNull(values.pair_url) : null;
-      update.pair_mint = kind === "token" ? orNull(values.pair_mint) : null;
-      const titles = (values.milestones ?? "").split("\n").map((t) => t.trim()).filter(Boolean).slice(0, 20);
-      const del = await supabase.from("milestone_plans").delete().eq("application_id", appId);
-      if (fail(del.error)) return fail(del.error)!;
-      if (titles.length) {
-        const ins = await supabase.from("milestone_plans").insert(titles.map((title) => ({ application_id: appId, title: title.slice(0, 200) })));
-        if (fail(ins.error)) return fail(ins.error)!;
-      }
-      break;
-    }
-    case 5: {
+    case 2: {
+      const isFounder = values.applicant_is_founder === "yes";
+      update.applicant_is_founder = isFounder;
+      update.applicant_role = isFounder ? "On the team" : "Backer";
       const p = Number(values.proposed_platform_bps), f = Number(values.proposed_founder_bps);
       const l = Number(values.proposed_launcher_bps), c = Number(values.proposed_community_bps);
-      if ([p, f, l, c].every(Number.isInteger) && p + f + l + c === 10000) {
+      if ([p, f, l, c].every(Number.isInteger) && p + f + l + c === 10000 && !(isFounder && l !== 0)) {
         Object.assign(update, { proposed_platform_bps: p, proposed_founder_bps: f, proposed_launcher_bps: l, proposed_community_bps: c });
+      } else if (isFounder) {
+        // The database refuses a launcher share on a self-launch; fall back to the self-launch default.
+        Object.assign(update, { proposed_platform_bps: 2000, proposed_founder_bps: 3000, proposed_launcher_bps: 0, proposed_community_bps: 5000 });
       }
       update.draft_payload = { ...(app.draft_payload ?? {}), split_reason: orNull(values.split_reason) };
       break;
     }
-    case 6: {
-      update.insider_allocation_disclosure = orNull(values.insider_allocation_disclosure);
-      const allAck = ["ack_no_returns", "ack_not_ownership", "ack_disclosure", "ack_accurate"].every((k) => values[k] === "on");
-      update.disclosures_acknowledged_at = allAck ? new Date().toISOString() : null;
+    case 3: {
+      const amount = Number(values.starter_buy_amount || 0);
+      if (Number.isFinite(amount) && amount >= 0) update.starter_buy_amount = amount;
+      const { data: q } = await supabase.from("quote_tokens").select("symbol").eq("mint", app.quote_mint ?? "So11111111111111111111111111111111111111112").maybeSingle();
+      update.insider_allocation_disclosure = amount > 0
+        ? `Starter's buy: the launcher plans to spend ${amount} ${q?.symbol ?? "SOL"} on the coin right after launch, from their own wallet. No other team, launcher or Startit allocation.`
+        : "None. No builder, team, launcher or Startit allocation, and no starter's buy.";
+      update.disclosures_acknowledged_at = values.ack_terms === "on" ? new Date().toISOString() : null;
       break;
     }
   }
 
   const { error } = await supabase.from("applications").update(update).eq("id", appId);
   if (error) {
-    if (error.code === "23505") return { errors: { ticker: "Another active application already uses this ticker." }, values };
+    if (error.code === "23505") {
+      return /ticker/.test(error.message)
+        ? { errors: { ticker: "Another live coin already uses this ticker." }, values }
+        : { errors: { project_name: "You already have an application for this project." }, values };
+    }
     if (error.code === "23503" && /quote_mint/.test(error.message)) return { errors: { quote_mint: "That pair isn't available. Pick one from the list." }, values };
     return { errors: { _form: `Couldn't save: ${error.message}` }, values };
   }
 
   revalidatePath(`/applications/${appId}`);
   if (intent === "continue") {
-    if (step < 6) redirect(`/applications/${appId}/edit?step=${step + 1}`);
+    if (step === 1) {
+      const bundle = await getApplicationBundle(appId);
+      const missing: FieldErrors = {};
+      if (!bundle?.app.image_path) missing.image = "Add an image for the coin.";
+      if (!bundle?.evidence.some((e) => e.kind === "authorization" || e.kind === "founder_approval")) missing.proof = "Upload proof the builder is in.";
+      if (Object.keys(missing).length) return { errors: missing, values };
+    }
+    if (step < STEPS.length) redirect(`/applications/${appId}/edit?step=${step + 1}`);
     return { ...(await submitAfterFinalStep(appId)), values };
   }
   return { message: "Draft saved.", values };
@@ -152,15 +140,16 @@ async function submitAfterFinalStep(appId: string): Promise<StepState> {
   const bundle = await getApplicationBundle(appId);
   if (!bundle) return { errors: { _form: "Application not found." } };
 
-  for (const s of STEPS.slice(0, 5)) {
+  for (const s of STEPS.slice(0, -1)) {
     const r = parseStep(s.n, stepDefaults(bundle, s.n), true);
     if (!r.ok) {
-      const [field, msg] = Object.entries(r.errors)[0]!;
-      return { errors: { _form: `Step ${s.n} (${s.title}) is incomplete — ${msg}`, [`step_${s.n}`]: field } };
+      const [, msg] = Object.entries(r.errors)[0]!;
+      return { errors: { _form: `${s.title}: ${msg}` } };
     }
   }
-  if (!bundle.evidence.some((e) => e.kind === "authorization")) {
-    return { errors: { _form: "Step 3 isn't finished. Upload proof that the builder is in." } };
+  if (!bundle.app.image_path) return { errors: { _form: "Your coin: add an image." } };
+  if (!bundle.evidence.some((e) => e.kind === "authorization" || e.kind === "founder_approval")) {
+    return { errors: { _form: "Your coin: upload proof the builder is in." } };
   }
 
   const supabase = await createClient();
@@ -168,6 +157,30 @@ async function submitAfterFinalStep(appId: string): Promise<StepState> {
   if (error) return { errors: { _form: `Couldn't submit: ${error.message}` } };
   screenSoon();
   redirect(`/applications/${appId}?submitted=1`);
+}
+
+/** Uploads the coin's image to the public bucket and points the application at it. */
+export async function uploadProjectImage(appId: string, formData: FormData): Promise<{ error?: string; path?: string }> {
+  const user = await requireUser();
+  if (!isUuid(appId)) return { error: "Unknown application." };
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) return { error: "Choose an image." };
+  if (file.size > MAX_IMAGE_BYTES) return { error: "Images must be 2 MB or smaller." };
+  const ext = ({ "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp", "image/gif": "gif" } as Record<string, string>)[file.type];
+  if (!ext || !(IMAGE_MIME as readonly string[]).includes(file.type)) return { error: "Use a PNG, JPEG, WebP or GIF." };
+
+  const supabase = await createClient();
+  const { data: app } = await supabase.from("applications").select("applicant_id, status").eq("id", appId).maybeSingle();
+  if (!app || app.applicant_id !== user.id) return { error: "Application not found." };
+  if (!EDITABLE.includes(app.status)) return { error: "This application is locked while it's being reviewed." };
+
+  const path = `${user.id}/${appId}/${randomUUID()}.${ext}`;
+  const up = await supabase.storage.from("project-images").upload(path, Buffer.from(await file.arrayBuffer()), { contentType: file.type, upsert: false });
+  if (up.error) return { error: `Upload failed: ${up.error.message}` };
+  const { error } = await supabase.from("applications").update({ image_path: path }).eq("id", appId);
+  if (error) return { error: `Couldn't save the image: ${error.message}` };
+  revalidatePath(`/applications/${appId}/edit`);
+  return { path };
 }
 
 export type UploadState = { error?: string; message?: string };

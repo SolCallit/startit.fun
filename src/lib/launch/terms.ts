@@ -22,6 +22,8 @@ export type LaunchTermsInput = {
   permittedBranding: string;
   /** The on-chain pair (bonding-curve quote token). Omitted = SOL. */
   quote?: { symbol: string; mint: string };
+  /** Disclosed starter's buy by the applicant's wallet right after launch, in the pair token. Omitted = not part of these terms. */
+  starterBuy?: { amount: string; symbol: string; wallet: string | null };
 };
 
 const BASE58_PUBKEY = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
@@ -61,11 +63,16 @@ export function renderLaunchTerms(t: LaunchTermsInput): string {
     ...(t.insiderAllocations.length
       ? t.insiderAllocations.map((a) => `- ${a.holder}: ${a.amount} tokens — ${a.note}`)
       : [`- None. No builder, team, launcher or Startit allocation.`]),
+    ...(t.starterBuy
+      ? [Number(t.starterBuy.amount) > 0
+          ? `- Starter's buy: up to ${t.starterBuy.amount} ${t.starterBuy.symbol} of $${t.ticker}, bought on the bonding curve by ${t.starterBuy.wallet ?? "the applicant's wallet"} right after launch, as its own transaction.`
+          : `- Starter's buy: none.`]
+      : []),
     ``,
     `## Trading fees`,
     `Shares of trading fees Startit actually collects (not trading volume):`,
     `- Community treasury: ${bpsToPercent(s.communityBps)}`,
-    `- Founder: ${bpsToPercent(s.founderBps)}`,
+    `- Builder: ${bpsToPercent(s.founderBps)}`,
     `- Launcher: ${bpsToPercent(s.launcherBps)}`,
     `- Startit platform: ${bpsToPercent(s.platformBps)}`,
     ...(isDefaultSplit(s) ? [] : [`- Non-standard split, approved because: ${t.deviationReason ?? "(no reason recorded)"}`]),
@@ -73,7 +80,7 @@ export function renderLaunchTerms(t: LaunchTermsInput): string {
     `Raydium charges its own protocol fee separately; it is not part of this split.`,
     ``,
     `## Payout wallets`,
-    `- Founder: ${t.wallets.founder}`,
+    `- Builder: ${t.wallets.founder}`,
     `- Launcher: ${t.wallets.launcher ?? "none (the builder launched this themselves)"}`,
     `- Community treasury: ${t.wallets.communityTreasury}`,
     ``,

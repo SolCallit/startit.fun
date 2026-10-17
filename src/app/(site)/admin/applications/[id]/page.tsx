@@ -1,3 +1,4 @@
+import { projectImageUrl } from "@/lib/project-image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -126,9 +127,16 @@ async function ReviewBody({ params }: PageProps<"/admin/applications/[id]">) {
                   <li key={l.id}><span className="text-muted">{l.kind}: </span><a href={l.url} target="_blank" rel="noopener noreferrer nofollow" className="break-all text-cobalt hover:underline">{l.url}</a></li>
                 ))}</ul>
               </Item>
-              <Item label="Founder approval"><p className="whitespace-pre-wrap">{app.founder_approval_statement}</p></Item>
-              <Item label="Permitted branding">{app.permitted_branding}</Item>
-              <Item label="Token">{app.token_name} (${app.ticker}) — {app.token_concept}</Item>
+              {app.founder_approval_statement ? <Item label="Builder approval (written)"><p className="whitespace-pre-wrap">{app.founder_approval_statement}</p></Item> : null}
+              {app.permitted_branding ? <Item label="Permitted branding">{app.permitted_branding}</Item> : null}
+              <Item label="Coin">
+                <span className="flex items-center gap-3">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  {projectImageUrl(app.image_path) ? <img src={projectImageUrl(app.image_path)!} alt="" className="size-12 rounded-[12px] object-cover" /> : null}
+                  <span>{app.token_name} (${app.ticker})</span>
+                </span>
+              </Item>
+              <Item label="Starter's buy">{Number(app.starter_buy_amount) > 0 ? `${Number(app.starter_buy_amount)} in the pair token, right after launch` : "None"}</Item>
               <Item label="Paired with">
                 {app.pair_kind ? (
                   <div className="flex flex-col gap-1">
@@ -141,11 +149,11 @@ async function ReviewBody({ params }: PageProps<"/admin/applications/[id]">) {
                   </div>
                 ) : <span className="text-muted">Not paired</span>}
               </Item>
-              <Item label="Community plan"><p className="whitespace-pre-wrap">{app.community_plan}</p></Item>
+              {app.community_plan ? <Item label="Community plan"><p className="whitespace-pre-wrap">{app.community_plan}</p></Item> : null}
               <Item label="Milestones">{bundle.milestones.length ? <ul className="list-disc pl-5">{bundle.milestones.map((m) => <li key={m.id}>{m.title}</li>)}</ul> : null}</Item>
               <Item label="Insider allocations">{app.insider_allocation_disclosure}</Item>
               <Item label="Proposed split">
-                Community {bpsToPercent(split.communityBps)}, founder {bpsToPercent(split.founderBps)}, launcher {bpsToPercent(split.launcherBps)}, platform {bpsToPercent(split.platformBps)}
+                Community {bpsToPercent(split.communityBps)}, builder {bpsToPercent(split.founderBps)}, launcher {bpsToPercent(split.launcherBps)}, platform {bpsToPercent(split.platformBps)}
                 {!isDefaultSplit(split) ? (
                   <span className="mt-1 block text-review">Non-default split. Reason: {String(app.draft_payload?.split_reason ?? "none given")}</span>
                 ) : null}

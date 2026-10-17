@@ -38,6 +38,9 @@ export type PublicProject = {
   pair_url: string | null;
   pair_mint: string | null;
   pair_relationship: "inspired_by" | "official" | null;
+  image_path: string | null;
+  starter_buy_amount: number | string | null;
+  starter_buy_tx: string | null;
   created_at: string;
   quote_mint: string;
   quote_symbol: string;

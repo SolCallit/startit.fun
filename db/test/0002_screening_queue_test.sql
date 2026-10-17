@@ -48,6 +48,7 @@ select pg_temp.expect_fail($$select submit_application((select v from t2 where k
   'submit without founder approval blocked');
 
 update applications set founder_approval_statement = 'I, Ada, approve the $LATT launch.' where id = (select v from t2 where k='app');
+update applications set image_path = '00000000-0000-0000-0000-0000000000e1/' || (select v from t2 where k='app') || '/00000000-0000-0000-0000-000000000002.png' where id = (select v from t2 where k='app');
 select submit_application((select v from t2 where k='app'));
 
 select pg_temp.expect_fail($$select * from claim_next_screening('anthropic','m','v1')$$,

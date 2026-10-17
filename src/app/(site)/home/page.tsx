@@ -17,7 +17,7 @@ export default function HomePage({ searchParams }: PageProps<"/home">) {
       <h1 className="sr-only">Home</h1>
       <div className="mx-auto grid w-full max-w-6xl gap-7 px-4 py-8 sm:px-6 xl:grid-cols-[minmax(0,1fr)_300px]">
         <div className="flex min-w-0 flex-col gap-8">
-          <Suspense fallback={<div className="h-[22rem] rounded-[22px] border border-line bg-surface" />}>
+          <Suspense fallback={<div className="h-[22rem] rounded-[22px] glass" />}>
             <LaunchPath />
           </Suspense>
           <Suspense fallback={<p className="text-muted">Loading projects…</p>}>
@@ -25,7 +25,7 @@ export default function HomePage({ searchParams }: PageProps<"/home">) {
           </Suspense>
         </div>
         <aside className="flex flex-col gap-5 xl:sticky xl:top-24 xl:self-start">
-          <Suspense fallback={<div className="h-40 rounded-[18px] border border-line bg-surface" />}>
+          <Suspense fallback={<div className="h-40 rounded-[18px] glass" />}>
             <MyApplications />
           </Suspense>
           <FeeCard />
@@ -104,7 +104,7 @@ async function MyApplications() {
   const user = await requireUser("/home");
   const mine = await listMyApplications(user.id);
   return (
-    <section aria-labelledby="mine-title" className="rounded-[18px] border border-line bg-surface p-5">
+    <section aria-labelledby="mine-title" className="rounded-[18px] glass p-5">
       <div className="mb-3 flex items-baseline justify-between">
         <h2 id="mine-title" className="text-[1.125rem]">Your applications</h2>
         {mine.length ? <Link href="/dashboard" className="text-[0.875rem] font-semibold text-cobalt hover:underline">All</Link> : null}
@@ -134,7 +134,7 @@ async function MyApplications() {
 
 function FeeCard() {
   return (
-    <section aria-labelledby="fees-title" className="rounded-[18px] border border-line bg-surface p-5">
+    <section aria-labelledby="fees-title" className="rounded-[18px] glass p-5">
       <h2 id="fees-title" className="text-[1.125rem]">Backing a product you love?</h2>
       <p className="mt-2 text-[0.9375rem] leading-relaxed text-ink-soft">
         You don&apos;t have to be on the team. Bring the builder&apos;s written approval and launch it yourself. Launchers earn 5% of collected
