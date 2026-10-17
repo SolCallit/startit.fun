@@ -51,7 +51,7 @@ export default function Apply() {
 
 async function StartButton() {
   const user = await getCurrentUser();
-  if (!user) return <ButtonLink href="/signup?next=/apply">Create an account to start</ButtonLink>;
+  if (!user) return <ButtonLink href="/login?next=/apply">Connect wallet to start</ButtonLink>;
   return (
     <form action={startApplication}>
       <button type="submit" className="rounded-md bg-cobalt px-4 py-2.5 font-semibold text-cobalt-ink hover:opacity-90">

@@ -4,12 +4,15 @@ import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/env";
+import { walletOf } from "@/lib/wallet-identity";
 
 export type Role = "applicant" | "operator" | "admin" | "screening_service";
 
 export type CurrentUser = {
   id: string;
   email: string | null;
+  /** Solana address the user signed in with (null for email accounts). */
+  walletAddress: string | null;
   displayName: string;
   roles: Role[];
   isStaff: boolean;
@@ -33,10 +36,12 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
   ]);
 
   const roles = (roleRows ?? []).map((r) => r.role as Role);
+  const walletAddress = walletOf(data.user);
   return {
     id: data.user.id,
     email: data.user.email ?? null,
-    displayName: profile?.display_name ?? data.user.email ?? "Founder",
+    walletAddress,
+    displayName: profile?.display_name ?? data.user.email ?? (walletAddress ? `${walletAddress.slice(0, 4)}…${walletAddress.slice(-4)}` : "Founder"),
     roles,
     isStaff: roles.includes("operator") || roles.includes("admin"),
   };

@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { getCurrentUser } from "@/lib/auth";
 import { signOut } from "@/app/(auth)/actions";
 import { Container } from "./ui";
+import { WalletLogin } from "./wallet-login";
 
 export function SiteHeader() {
   return (
@@ -27,18 +28,20 @@ export function SiteHeader() {
 async function AccountNav() {
   const user = await getCurrentUser();
   if (!user) {
-    return (
-      <Link href="/login" className="rounded-md bg-ink px-3.5 py-2 text-[0.875rem] font-semibold text-paper hover:opacity-90">
-        Sign in
-      </Link>
-    );
+    return <WalletLogin variant="header" />;
   }
   return (
     <>
       {user.isStaff ? <Link href="/admin" className="hover:text-ink">Review queue</Link> : null}
       <Link href="/dashboard" className="hover:text-ink">My applications</Link>
+      <span
+        title={user.walletAddress ?? user.email ?? undefined}
+        className="hidden rounded-full border border-line-strong bg-surface px-3 py-1 font-mono text-[0.8125rem] text-ink sm:inline"
+      >
+        {user.walletAddress ? `${user.walletAddress.slice(0, 4)}…${user.walletAddress.slice(-4)}` : user.displayName}
+      </span>
       <form action={signOut}>
-        <button type="submit" className="text-muted hover:text-ink">Sign out</button>
+        <button type="submit" className="text-muted hover:text-ink">{user.walletAddress ? "Disconnect" : "Sign out"}</button>
       </form>
     </>
   );
