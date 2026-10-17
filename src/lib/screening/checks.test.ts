@@ -43,7 +43,7 @@ describe("runChecks", () => {
     expect(by(findings, "points back")?.status).toBe("VERIFIED");
     expect(by(findings, "Contact email")?.status).toBe("VERIFIED");
     // Authorization is never auto-verified.
-    expect(by(findings, "authorized by the founder")?.status).toBe("NEEDS_REVIEW");
+    expect(by(findings, "builder approved this launch")?.status).toBe("NEEDS_REVIEW");
   });
 
   it("flags a website pointing at different accounts (impersonation signal)", () => {

@@ -11,7 +11,7 @@ export default function Explore() {
     <Container className="py-14">
       <PageHeader
         title="Approved projects"
-        lede="Startups that passed screening and human review, with their verification reports, token details and fee records."
+        lede="Products that passed screening and human review, with their verification reports, coin details and fee records."
       />
       <Suspense fallback={<p className="text-muted">Loading projects…</p>}>
         <ProjectList />
@@ -32,7 +32,7 @@ async function ProjectList() {
   if (result.projects.length === 0) {
     return (
       <EmptyState title="No projects have been approved yet" action={<ButtonLink href="/apply">Apply to launch</ButtonLink>}>
-        The first approved startups will be listed here with their full verification reports.
+        The first approved projects will show up here with their full verification reports.
       </EmptyState>
     );
   }

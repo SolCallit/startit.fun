@@ -41,7 +41,7 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
     id: data.user.id,
     email: data.user.email || null,
     walletAddress,
-    displayName: profile?.display_name ?? data.user.email ?? (walletAddress ? `${walletAddress.slice(0, 4)}…${walletAddress.slice(-4)}` : "Founder"),
+    displayName: profile?.display_name ?? data.user.email ?? (walletAddress ? `${walletAddress.slice(0, 4)}…${walletAddress.slice(-4)}` : "Launcher"),
     roles,
     isStaff: roles.includes("operator") || roles.includes("admin"),
   };

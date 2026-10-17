@@ -12,7 +12,7 @@ export default function Page() {
       <div className="mx-auto max-w-lg">
         <h1 className="text-[2rem] font-bold tracking-[-0.02em] text-ink">Connect your wallet</h1>
         <p className="mt-2 mb-8 text-ink-soft">
-          Your Solana wallet is your Startit account. Founders use it to apply and track a launch; everyone else to follow projects.
+          Your Solana wallet is your Startit account. Use it to launch a coin for a product you back, or just to follow projects.
         </p>
         <Suspense>
           <LoginWallet />

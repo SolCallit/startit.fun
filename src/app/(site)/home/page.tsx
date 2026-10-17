@@ -84,7 +84,7 @@ async function Projects({ searchParams }: { searchParams: PageProps<"/home">["se
           </p>
           <p className="mx-auto mt-2 max-w-md text-ink-soft">
             {all.length === 0
-              ? "Approved startups appear here with their verification report, token details and fee records. Yours could be first."
+              ? "Approved projects show up here with their verification report, coin details and fee records. Yours could be first."
               : "Try another pairing, or see every project."}
           </p>
           <div className="mt-6 flex justify-center">
@@ -135,9 +135,9 @@ async function MyApplications() {
 function FeeCard() {
   return (
     <section aria-labelledby="fees-title" className="rounded-[18px] border border-line bg-surface p-5">
-      <h2 id="fees-title" className="text-[1.125rem]">Found a startup worth launching?</h2>
+      <h2 id="fees-title" className="text-[1.125rem]">Backing a product you love?</h2>
       <p className="mt-2 text-[0.9375rem] leading-relaxed text-ink-soft">
-        You can apply for a project you don&apos;t run, with the founder&apos;s written approval. Launchers earn 5% of collected
+        You don&apos;t have to be on the team. Bring the builder&apos;s written approval and launch it yourself. Launchers earn 5% of collected
         trading fees, paid out of the platform&apos;s share.
       </p>
       <Link href="/fees" className="mt-3 inline-block text-[0.9375rem] font-semibold text-cobalt hover:underline">See every fee record</Link>

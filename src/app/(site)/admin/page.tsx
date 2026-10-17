@@ -72,7 +72,7 @@ async function Overview() {
 
       <section>
         <h2 className="mb-4 text-[1.25rem] font-semibold text-ink">In progress</h2>
-        {inFlight.length ? <QueueTable rows={inFlight} /> : <p className="text-ink-soft">No applications are being screened or waiting on founders.</p>}
+        {inFlight.length ? <QueueTable rows={inFlight} /> : <p className="text-ink-soft">No applications are being screened or waiting on launchers.</p>}
       </section>
       <p className="text-[0.875rem] text-muted">{c.total} applications submitted in total.</p>
     </div>

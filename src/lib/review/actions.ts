@@ -21,9 +21,9 @@ export async function decide(appId: string, _prev: DecisionState, formData: Form
 
   if (to === "approved") {
     if (formData.get("confirm_identity") !== "on" || formData.get("confirm_authorization") !== "on") {
-      return { error: "Confirm you verified the founder's identity and their authorization before approving." };
+      return { error: "Confirm you verified who the builder is and that they approved this launch." };
     }
-    if (!reason) return { error: "Record how you verified the founder before approving." };
+    if (!reason) return { error: "Record how you verified the builder before approving." };
   }
   if (["rejected", "suspended", "evidence_requested"].includes(to) && !reason) {
     return { error: "Add a reason. It's stored in the decision history." };

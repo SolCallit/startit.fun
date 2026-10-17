@@ -86,7 +86,7 @@ export async function prepareLaunch(appId: string, operatorWallet: string, mintP
     if (!app || !launch) throw new Error("Launch configuration not found.");
     if (app.status !== "ready_for_deployment") throw new Error("The application must be ready for deployment.");
     if (launch.network !== "solana-devnet") throw new Error("Only devnet launches are enabled.");
-    if (!launch.founder_confirmed_at) throw new Error("The founder hasn't signed the terms.");
+    if (!launch.founder_confirmed_at) throw new Error("The builder hasn't signed the terms.");
     if (!["planned", "previewed", "operator_confirmed", "failed"].includes(launch.status)) throw new Error(`Launch is already ${launch.status}.`);
     // A failed launch can be retried only if the previous transaction itself failed. If a token was created but
     // didn't match the terms, launching again would create a second token: suspend and investigate instead.

@@ -160,7 +160,7 @@ async function submitAfterFinalStep(appId: string): Promise<StepState> {
     }
   }
   if (!bundle.evidence.some((e) => e.kind === "authorization")) {
-    return { errors: { _form: "Step 3 is incomplete — upload proof that you're authorized to represent the company." } };
+    return { errors: { _form: "Step 3 isn't finished. Upload proof that the builder is in." } };
   }
 
   const supabase = await createClient();

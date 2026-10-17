@@ -34,9 +34,9 @@ export const viewport: Viewport = {
 const THEME_INIT = `try{var t=localStorage.getItem("startit-theme");document.documentElement.dataset.theme=t==="light"?"light":"dark"}catch(e){document.documentElement.dataset.theme="dark"}`;
 
 export const metadata: Metadata = {
-  title: { default: "Startit: founder-approved token launches", template: "%s · Startit" },
+  title: { default: "Startit: memecoin money for real products", template: "%s · Startit" },
   description:
-    "Community tokens for real startups, launched only with founder approval, AI-assisted screening and human review. Every check is published.",
+    "Back a real product, get the builder's sign-off and launch its coin. Every launch is screened, reviewed by a person and paid out in public.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

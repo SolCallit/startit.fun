@@ -33,9 +33,9 @@ export async function saveLaunchConfig(appId: string, _prev: ConfigState, formDa
   if (!app) return { errors: { _form: "Application not found." }, values };
   const quoteMint = app.quote_mint ?? "So11111111111111111111111111111111111111112";
   const { data: quote } = await supabase.from("quote_tokens").select("mint, symbol, enabled").eq("mint", quoteMint).maybeSingle();
-  if (!quote?.enabled) return { errors: { _form: "The pair this application chose isn't enabled on the platform. Enable it in Platform settings or ask the founder to pick another." }, values };
+  if (!quote?.enabled) return { errors: { _form: "The pair this application chose isn't enabled on the platform. Enable it in Platform settings or ask the launcher to pick another." }, values };
   if (app.status !== "launch_config_pending") return { errors: { _form: "Launch settings can only change while configuration is pending." }, values };
-  if (app.applicant_is_founder && v.launcher_bps > 0) return { errors: { launcher_bps: "The founder submitted this project, so there's no launcher share." }, values };
+  if (app.applicant_is_founder && v.launcher_bps > 0) return { errors: { launcher_bps: "The builder submitted this themselves, so there's no launcher share." }, values };
 
   const { data: router } = await supabase.from("platform_settings").select("value").eq("key", "fee_router_address").maybeSingle();
   if (!router) return { errors: { _form: "An admin must set the Fee Router address in Platform settings first." }, values };

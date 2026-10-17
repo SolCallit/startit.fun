@@ -83,28 +83,28 @@ export function StepForm({ appId, step, defaults, quotes = [] }: { appId: string
         <>
           <Field name="applicant_name" label="Your full name" defaultValue={d.applicant_name} errors={e} autoComplete="name" />
           <Field name="contact_email" label="Contact email" type="email" defaultValue={d.contact_email} errors={e} autoComplete="email"
-            hint="Use an address on the company's domain if you can. It helps us verify you." />
+            hint="An address on the product's domain helps if you have one. We only use it to reach you." />
           <div className="flex flex-col gap-1.5">
             <input type="hidden" name="applicant_is_founder" value="no" />
             <label className="flex cursor-pointer items-start justify-between gap-4">
               <span>
-                <span className="font-medium text-ink">I&apos;m a founder of this startup</span>
+                <span className="font-medium text-ink">I&apos;m on the team that builds this</span>
                 <span className="block text-[0.875rem] text-muted">
-                  Switch off if you found the startup and are launching with the founder&apos;s written approval. Launchers earn 5% of collected trading fees.
+                  Leave it off if you&apos;re backing someone else&apos;s product. You&apos;ll need the builder&apos;s written approval, and as the launcher you earn 5% of collected trading fees.
                 </span>
               </span>
-              <input type="checkbox" role="switch" name="applicant_is_founder" value="yes" defaultChecked={d.applicant_is_founder !== "no"} className="switch mt-0.5" />
+              <input type="checkbox" role="switch" name="applicant_is_founder" value="yes" defaultChecked={d.applicant_is_founder === "yes"} className="switch mt-0.5" />
             </label>
             {e?.applicant_is_founder ? <p className="text-[0.875rem] text-flagged">{e.applicant_is_founder}</p> : null}
           </div>
           <Field name="applicant_role" label="Your role" defaultValue={d.applicant_role} errors={e}
-            placeholder="Co-founder and CEO" hint="If you aren't the founder, say how you know the team and how they authorized you." />
+            placeholder="Longtime user, community mod, teammate…" hint="If you're not on the team, say how you know them and how they gave you the go-ahead." />
         </>
       )}
 
       {step === 2 && (
         <>
-          <Field name="project_name" label="Project or startup name" defaultValue={d.project_name} errors={e} />
+          <Field name="project_name" label="Product or project name" defaultValue={d.project_name} errors={e} />
           <Field name="project_summary" label="What does the product do?" multiline rows={5} defaultValue={d.project_summary} errors={e}
             hint="Plain language. Who uses it, what it does, and what stage it's at." />
           <Field name="website" label="Official website" type="url" defaultValue={d.website} errors={e} placeholder="https://" />
@@ -113,16 +113,16 @@ export function StepForm({ appId, step, defaults, quotes = [] }: { appId: string
           <Field name="docs" label="Documentation (optional)" type="url" defaultValue={d.docs} errors={e} />
           <Field name="demo" label="Demo or live product (optional)" type="url" defaultValue={d.demo} errors={e} />
           <Field name="other_social" label="Other official account (optional)" type="url" defaultValue={d.other_social} errors={e}
-            hint="Discord, Telegram or LinkedIn, whichever the company uses most." />
+            hint="Discord, Telegram or anything else the team actually uses." />
         </>
       )}
 
       {step === 3 && (
         <>
-          <Field name="founder_approval_statement" label="Written approval from the founder" multiline rows={6} defaultValue={d.founder_approval_statement} errors={e}
-            hint="In the founder's own words: that they approve a community token for this product, its proposed name and ticker, and Startit's role." />
-          <Field name="permitted_branding" label="Branding the token may use" multiline rows={3} defaultValue={d.permitted_branding} errors={e}
-            hint="For example: the product name and logo, but not the company's legal name." />
+          <Field name="founder_approval_statement" label="The builder's approval" multiline rows={6} defaultValue={d.founder_approval_statement} errors={e}
+            hint="In the builder's own words: that they're in on a community coin for this product, its name and ticker, and Startit running the launch." />
+          <Field name="permitted_branding" label="Branding the coin may use" multiline rows={3} defaultValue={d.permitted_branding} errors={e}
+            hint="For example: the product name and logo, but not the legal entity's name." />
         </>
       )}
 
@@ -151,11 +151,11 @@ export function StepForm({ appId, step, defaults, quotes = [] }: { appId: string
       {step === 6 && (
         <>
           <Field name="insider_allocation_disclosure" label="Insider holdings and allocations" multiline rows={4} defaultValue={d.insider_allocation_disclosure} errors={e}
-            hint="Any tokens the founder, team, advisors or Startit will hold or receive at launch. Write “None” if there are none." />
+            hint="Any coins the builder, team, advisors or Startit will hold or get at launch. Write “None” if there are none." />
           <fieldset className="flex flex-col gap-3 rounded-lg border border-line p-5">
             <legend className="px-1 font-medium text-ink">Before you submit</legend>
             <Check name="ack_no_returns" errors={e} values={d} label="We won't promise or imply price appreciation, and milestones aren't guarantees of token returns." />
-            <Check name="ack_not_ownership" errors={e} values={d} label="I understand founder approval doesn't make the founder the token's owner or controller." />
+            <Check name="ack_not_ownership" errors={e} values={d} label="I understand the builder's approval doesn't make them the coin's owner or controller." />
             <Check name="ack_disclosure" errors={e} values={d} label="Supply, authorities, treasury controls, allocations and the fee split will be published before launch." />
             <Check name="ack_accurate" errors={e} values={d} label="Everything in this application is accurate, and I'm authorized to submit it." />
           </fieldset>
@@ -202,7 +202,7 @@ function PairFields({ defaults, errors }: { defaults: Record<string, string>; er
     <fieldset className="flex flex-col gap-5 rounded-[18px] border border-line bg-paper p-5">
       <legend className="px-1 font-semibold text-ink">Inspired by <span className="font-normal text-muted">(optional)</span></legend>
       <p className="-mt-2 text-[0.9375rem] text-ink-soft">
-        A token, project or person your product looks up to: the model it builds on, the lab behind it, a founder who shaped it.
+        A token, project or person your product looks up to: the model it builds on, the lab behind it, someone whose work shaped it.
         It shows as <span className="font-semibold text-ink">Inspired by …</span> on your project page. We check it like any other claim,
         and it never implies their endorsement unless you mark it official and prove it.
       </p>
@@ -213,7 +213,7 @@ function PairFields({ defaults, errors }: { defaults: Record<string, string>; er
       </div>
       {kind ? (
         <>
-          <Field name="pair_name" label={kind === "person" ? "Their name" : kind === "token" ? "Token name" : "Project or company name"}
+          <Field name="pair_name" label={kind === "person" ? "Their name" : kind === "token" ? "Token name" : "Project name"}
             defaultValue={defaults.pair_name} errors={errors} placeholder={kind === "person" ? "Andrej Karpathy" : kind === "token" ? "Jupiter (JUP)" : "Hugging Face"} />
           {kind === "token" ? (
             <Field name="pair_mint" label="Token mint address" defaultValue={defaults.pair_mint} errors={errors}
@@ -280,8 +280,8 @@ function FeeFields({ defaults, errors }: { defaults: Record<string, string>; err
       <p className="text-ink-soft">
         These shares apply to trading fees Startit actually collects, not to trading volume.{" "}
         {isFounder
-          ? "Because you're the founder, there's no separate launcher share: the default is 50% community, 30% founder and 20% platform."
-          : "The default is 50% community, 30% founder, 5% to you as launcher and 15% platform."}{" "}
+          ? "You're on the team, so there's no separate launcher cut: the default is 50% community, 30% builder and 20% platform."
+          : "The default is 50% community, 30% builder, 5% to you as launcher and 15% platform."}{" "}
         A different split needs a reason and must be approved before launch.
       </p>
       {row("Community treasury", "proposed_community_bps", c, setC, "Held in a published wallet with disclosed controls")}
@@ -316,9 +316,9 @@ export function EvidenceUploader({ appId }: { appId: string }) {
         <label htmlFor="kind" className="font-medium text-ink">What does this file show?</label>
         <select id="kind" name="kind" defaultValue="authorization"
           className="rounded-[12px] border-[1.5px] border-line-strong bg-surface px-3 py-2.5 text-ink focus:border-cobalt focus:outline-none">
-          <option value="authorization">Proof I&apos;m authorized to represent the company</option>
-          <option value="founder_approval">Signed founder approval letter</option>
-          <option value="identity">Founder identity</option>
+          <option value="authorization">Proof the builder gave me the go-ahead</option>
+          <option value="founder_approval">The builder&apos;s signed approval</option>
+          <option value="identity">Who the builder is</option>
           <option value="other">Other supporting evidence</option>
         </select>
       </div>

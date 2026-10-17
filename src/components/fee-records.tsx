@@ -4,7 +4,7 @@ import type { PublicFeeClaim, PublicPayout } from "@/lib/data/public";
 export const sol = (raw: string | number | bigint) => `${(Number(raw) / 1e9).toLocaleString("en-US", { maximumFractionDigits: 6 })} SOL`;
 const tx = (s: string, cluster = "devnet") => `https://explorer.solana.com/tx/${s}?cluster=${cluster}`;
 const SOURCE: Record<string, string> = { platform_fee: "Bonding-curve fees", lp_fee_key: "Pool LP fees", cpmm_creator_fee: "Pool creator fees" };
-const RECIPIENT: Record<string, string> = { community: "Community treasury", founder: "Founder", launcher: "Launcher", platform: "Startit" };
+const RECIPIENT: Record<string, string> = { community: "Community treasury", founder: "Builder", launcher: "Launcher", platform: "Startit" };
 
 export function FeeTotals({ claims, payouts }: { claims: PublicFeeClaim[]; payouts: PublicPayout[] }) {
   const sum = (xs: { amount_raw: string }[]) => xs.reduce((a, x) => a + BigInt(x.amount_raw), BigInt(0));
@@ -13,7 +13,7 @@ export function FeeTotals({ claims, payouts }: { claims: PublicFeeClaim[]; payou
   const awaiting = sum(payouts.filter((p) => p.status === "pending" || p.status === "submitted"));
   return (
     <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-3 lg:grid-cols-6">
-      {[["Collected", collected], ["Awaiting payout", awaiting], ["Paid to community", paid("community")], ["Paid to founders", paid("founder")], ["Paid to launchers", paid("launcher")], ["Paid to Startit", paid("platform")]].map(([label, v]) => (
+      {[["Collected", collected], ["Awaiting payout", awaiting], ["Paid to community", paid("community")], ["Paid to builders", paid("founder")], ["Paid to launchers", paid("launcher")], ["Paid to Startit", paid("platform")]].map(([label, v]) => (
         <div key={String(label)} className="bg-surface p-4"><dt className="text-[0.8125rem] text-muted">{label as string}</dt><dd className="mt-1 text-[1.125rem] font-bold text-ink">{sol(v as bigint)}</dd></div>
       ))}
     </dl>

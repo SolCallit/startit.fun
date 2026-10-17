@@ -50,7 +50,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
 
       <p className="text-[0.9375rem] text-ink-soft">
         {mode === "login" ? (
-          <>Founders: connect a wallet above to create an account.</>
+          <>Launching a coin? Connect a wallet above instead.</>
         ) : (
           <>Already have an account? <Link href={`/login?next=${encodeURIComponent(next)}`} className="font-semibold text-cobalt">Sign in</Link></>
         )}

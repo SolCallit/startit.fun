@@ -55,7 +55,7 @@ export function ProfilePanel({ label, wallet, signOut }: { label: string; wallet
             <div className="min-w-0">
               <p className="truncate font-display text-[1.25rem] font-extrabold">{wallet ? short(wallet) : label}</p>
               <p className="text-[0.875rem] text-muted">
-                {me ? (me.roles.includes("admin") ? "Admin" : me.roles.includes("operator") ? "Operator" : "Founder account") : " "}
+                {me ? (me.roles.includes("admin") ? "Admin" : me.roles.includes("operator") ? "Operator" : "Launcher") : " "}
               </p>
             </div>
           </section>
@@ -121,7 +121,7 @@ export function ProfilePanel({ label, wallet, signOut }: { label: string; wallet
 
           <Block title="Payouts and claims">
             {!me ? <Skeleton /> : me.payouts.length === 0 ? (
-              <Empty>No fee payouts to this wallet yet. Founder and launcher shares are paid here, in the token each launch trades against, after fees are collected.</Empty>
+              <Empty>No fee payouts to this wallet yet. Builder and launcher shares are paid here, in the token each launch trades against, after fees are collected.</Empty>
             ) : (
               <ul className="flex flex-col gap-2">
                 {me.payouts.map((p, i) => (

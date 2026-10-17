@@ -20,7 +20,7 @@ export default function EditApplication(props: PageProps<"/applications/[id]/edi
 const EVIDENCE_LABEL: Record<string, string> = {
   authorization: "Authorization proof",
   founder_approval: "Founder approval letter",
-  identity: "Founder identity",
+  identity: "Builder identity",
   other: "Supporting evidence",
 };
 
@@ -69,8 +69,8 @@ async function Editor({ params, searchParams }: PageProps<"/applications/[id]/ed
           <div className="mb-10 flex flex-col gap-4">
             <h2 className="text-[1.125rem] font-semibold text-ink">Proof of authorization</h2>
             <p className="text-ink-soft">
-              Upload something that shows you can act for the company: a signed letter from the founder, a company
-              registration listing you, or an email from the founder&apos;s company address. This is required to submit.
+              Upload something that shows the builder is in: a signed note or screenshot from them, a post from
+              the project&apos;s official account, or an email from the team&apos;s domain. This is required to submit.
             </p>
             {bundle.evidence.length ? (
               <ul className="divide-y divide-line rounded-lg border border-line bg-surface text-[0.9375rem]">

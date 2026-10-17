@@ -17,7 +17,7 @@ export const launchConfigSchema = z
     launcher_bps: z.coerce.number().int(),
     community_bps: z.coerce.number().int(),
     deviation_reason: z.string().trim().max(1000),
-    founder_wallet: address("Founder wallet"),
+    founder_wallet: address("Builder wallet"),
     launcher_wallet: optionalAddress("Launcher wallet"),
     treasury_address: address("Treasury address"),
     treasury_is_multisig: z.enum(["yes", "no"]),

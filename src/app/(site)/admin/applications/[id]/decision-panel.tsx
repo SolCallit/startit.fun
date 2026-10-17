@@ -38,18 +38,18 @@ export function DecisionPanel({ appId, actions }: { appId: string; actions: Acti
           {chosen.to === "approved" ? (
             <fieldset className="flex flex-col gap-2">
               <legend className="mb-1 font-medium text-ink">Before approving</legend>
-              <label className="flex gap-3 text-ink-soft"><input type="checkbox" role="switch" name="confirm_identity" className="switch shrink-0" />I verified the founder&apos;s identity myself, not only from the AI report.</label>
-              <label className="flex gap-3 text-ink-soft"><input type="checkbox" role="switch" name="confirm_authorization" className="switch shrink-0" />I confirmed the founder explicitly approved this token and its branding.</label>
+              <label className="flex gap-3 text-ink-soft"><input type="checkbox" role="switch" name="confirm_identity" className="switch shrink-0" />I verified the builder&apos;s identity myself, not only from the AI report.</label>
+              <label className="flex gap-3 text-ink-soft"><input type="checkbox" role="switch" name="confirm_authorization" className="switch shrink-0" />I confirmed the builder explicitly approved this token and its branding.</label>
             </fieldset>
           ) : null}
           <div className="flex flex-col gap-1.5">
             <label htmlFor="reason" className="font-medium text-ink">
-              {chosen.to === "evidence_requested" ? "What do you need from the applicant?" : chosen.to === "approved" ? "How did you verify the founder?" : "Reason"}
+              {chosen.to === "evidence_requested" ? "What do you need from the launcher?" : chosen.to === "approved" ? "How did you verify the builder?" : "Reason"}
               {chosen.needsReason ? "" : " (optional)"}
             </label>
             <textarea id="reason" name="reason" rows={3} required={chosen.needsReason}
               className="rounded-[12px] border-[1.5px] border-line-strong bg-surface px-3 py-2 text-ink focus:border-cobalt focus:outline-none" />
-            {chosen.to === "evidence_requested" ? <p className="text-[0.875rem] text-muted">The applicant sees this message.</p> : null}
+            {chosen.to === "evidence_requested" ? <p className="text-[0.875rem] text-muted">The launcher sees this message.</p> : null}
           </div>
           <div className="flex items-center gap-3">
             <button type="submit" disabled={pending}

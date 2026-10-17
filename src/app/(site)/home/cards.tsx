@@ -5,16 +5,16 @@ import { PairBadge, QuoteChip } from "@/components/pair-badge";
 import { ButtonLink, StatusBadge } from "@/components/ui";
 
 const PATH = [
-  { who: "You", title: "Apply", detail: "Product, links, founder approval and the token idea." },
+  { who: "You", title: "Apply", detail: "The product, its links, the builder's approval and the coin idea." },
   { who: "AI agent", title: "Screening", detail: "Checks every claim against public sources." },
   { who: "Startit", title: "Human review", detail: "A person approves, rejects or asks for more." },
-  { who: "Founder", title: "Signs terms", detail: "Supply, authorities and fee split, signed by wallet." },
+  { who: "Builder", title: "Signs terms", detail: "Supply, authorities and fee split, signed by wallet." },
   { who: "Startit", title: "Launch", detail: "Goes live on Raydium LaunchLab." },
 ];
 
 const SPLIT = [
   { label: "Community", bps: DEFAULT_SPLIT.communityBps, cls: "bg-verified" },
-  { label: "Founder", bps: DEFAULT_SPLIT.founderBps, cls: "bg-cobalt" },
+  { label: "Builder", bps: DEFAULT_SPLIT.founderBps, cls: "bg-cobalt" },
   { label: "Platform", bps: DEFAULT_SPLIT.platformBps, cls: "bg-unverified" },
   { label: "Launcher", bps: DEFAULT_SPLIT.launcherBps, cls: "bg-review" },
 ];
@@ -36,7 +36,7 @@ export function LaunchPathCard({ draft }: { draft: { id: string; name: string | 
               From real product to community token
             </h2>
             <p className="mt-3 text-[1.0625rem] leading-relaxed text-ink-soft">
-              Every launch takes the same route. Nothing goes on-chain until a person has reviewed it and the founder has signed.
+              Every launch takes the same route. Nothing goes on-chain until a person has reviewed it and the builder has signed.
             </p>
           </div>
           <div className="flex shrink-0 flex-wrap gap-3">

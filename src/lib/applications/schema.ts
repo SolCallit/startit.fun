@@ -3,12 +3,12 @@ import { isDefaultSplit, validateSplit } from "@/lib/domain/fees";
 
 /** Six screens covering the 12 required sections of the application. */
 export const STEPS = [
-  { n: 1, title: "About you", covers: "Applicant name and verified contact" },
-  { n: 2, title: "Project and links", covers: "Project, website, X and socials, GitHub, docs and demo" },
-  { n: 3, title: "Founder authorization", covers: "Proof you represent the company, written founder approval and branding" },
-  { n: 4, title: "Token and community", covers: "Token name, ticker, chain, concept, milestones and community plan" },
-  { n: 5, title: "Fee split", covers: "Platform, founder and community allocation" },
-  { n: 6, title: "Disclosures and submit", covers: "Insider allocations, required acknowledgements" },
+  { n: 1, title: "About you", covers: "Who you are, how to reach you, and whether you're on the team" },
+  { n: 2, title: "The product", covers: "What it does, its website, X, GitHub, docs and demo" },
+  { n: 3, title: "Builder sign-off", covers: "Proof the builder is in, their approval in their own words, and branding" },
+  { n: 4, title: "The coin", covers: "Name, ticker, pair, idea, what ships next and the community plan" },
+  { n: 5, title: "Fee split", covers: "How collected trading fees are shared" },
+  { n: 6, title: "Disclosures and submit", covers: "Insider holdings and the things you agree to" },
 ] as const;
 export type StepNumber = (typeof STEPS)[number]["n"];
 
@@ -40,7 +40,7 @@ export function httpsUrl(label: string, hosts?: string[]) {
 const optionalUrl = (label: string, hosts?: string[]) => z.union([z.literal(""), httpsUrl(label, hosts)]);
 
 /** "Paired with" — optional link to a related token, project or person. Informational; screened like any claim. */
-export const PAIR_KINDS = { token: "A Solana token", project: "A project or company", person: "A person" } as const;
+export const PAIR_KINDS = { token: "A Solana token", project: "A project or team", person: "A person" } as const;
 export const PAIR_RELATIONSHIPS = {
   inspired_by: "Inspired by / related to — no affiliation or endorsement",
   official: "Official partner — they've agreed, and I'll upload proof",
@@ -68,7 +68,7 @@ export const stepSchemas = {
     applicant_name: required("Your name", 120),
     contact_email: z.email("Enter a valid email address."),
     applicant_role: required("Your role", 200),
-    applicant_is_founder: z.enum(["yes", "no"], { error: "Tell us whether you're the founder." }),
+    applicant_is_founder: z.enum(["yes", "no"], { error: "Tell us whether you're on the team." }),
   }),
   2: z.object({
     project_name: required("Project name", 120),
@@ -81,7 +81,7 @@ export const stepSchemas = {
     other_social: optionalUrl("Other social link"),
   }),
   3: z.object({
-    founder_approval_statement: required("Written founder approval", 4000).min(40, "Write at least a sentence or two of approval from the founder."),
+    founder_approval_statement: required("The builder's approval", 4000).min(40, "Add at least a sentence or two of approval from the builder."),
     permitted_branding: required("Permitted branding", 2000),
   }),
   4: z
@@ -116,7 +116,7 @@ export const stepSchemas = {
   6: z.object({
     insider_allocation_disclosure: required("Insider allocation disclosure", 4000),
     ack_no_returns: z.literal("on", { error: "Confirm you won't promise price appreciation." }),
-    ack_not_ownership: z.literal("on", { error: "Confirm you understand founder approval doesn't grant token ownership." }),
+    ack_not_ownership: z.literal("on", { error: "Confirm you understand the builder's approval doesn't make them the coin's owner." }),
     ack_disclosure: z.literal("on", { error: "Confirm the disclosures will be published." }),
     ack_accurate: z.literal("on", { error: "Confirm the application is accurate." }),
   }),

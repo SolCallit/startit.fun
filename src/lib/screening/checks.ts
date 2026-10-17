@@ -52,7 +52,7 @@ export function runChecks(input: CheckInput): { findings: Finding[]; limitations
   const now = input.now ?? new Date();
   const findings: Finding[] = [];
   const limitations: string[] = [
-    "Founder identity and authorization cannot be established from public sources and must be verified by a person.",
+    "Who the builder is, and whether they approved this launch, can't be established from public sources. A person has to verify it.",
     "X (Twitter) content was not fetched; X accounts are checked only through links to and from the website and GitHub.",
     "Token tickers on other launchpads and exchanges were not checked for collisions.",
   ];
@@ -156,16 +156,16 @@ export function runChecks(input: CheckInput): { findings: Finding[]; limitations
   const emailDomain = input.contactEmail?.split("@")[1]?.toLowerCase() ?? null;
   if (emailDomain && siteDomain) {
     if (FREE_MAIL.has(emailDomain)) {
-      findings.push({ category: "identity", claim: "Contact email belongs to the company", status: "NEEDS_REVIEW", detail: `The contact email uses a free mail provider (${emailDomain}).`, severity: 2, sources: [] });
+      findings.push({ category: "identity", claim: "Contact email is on the project's domain", status: "NEEDS_REVIEW", detail: `The contact email uses a free mail provider (${emailDomain}).`, severity: 2, sources: [] });
     } else if (baseDomain(emailDomain) === siteDomain) {
-      findings.push({ category: "identity", claim: "Contact email belongs to the company", status: "VERIFIED", detail: `The contact email is on the website's domain (${siteDomain}). Ownership of the inbox was confirmed at sign-up.`, severity: 1, sources: [] });
+      findings.push({ category: "identity", claim: "Contact email is on the project's domain", status: "VERIFIED", detail: `The contact email is on the website's domain (${siteDomain}). Ownership of the inbox was confirmed at sign-up.`, severity: 1, sources: [] });
     } else {
-      findings.push({ category: "identity", claim: "Contact email belongs to the company", status: "NEEDS_REVIEW", detail: `The contact email domain (${emailDomain}) differs from the website (${siteDomain}).`, severity: 3, sources: [] });
+      findings.push({ category: "identity", claim: "Contact email is on the project's domain", status: "NEEDS_REVIEW", detail: `The contact email domain (${emailDomain}) differs from the website (${siteDomain}).`, severity: 3, sources: [] });
     }
   }
 
-  findings.push({ category: "identity", claim: "Applicant is authorized by the founder", status: "NEEDS_REVIEW",
-    detail: "Uploaded authorization and the founder's written approval must be checked by a reviewer. The AI does not read private evidence files.", severity: 3, sources: [] });
+  findings.push({ category: "identity", claim: "The builder approved this launch", status: "NEEDS_REVIEW",
+    detail: "The uploaded proof and the builder's written approval have to be checked by a reviewer. The AI doesn't read private evidence files.", severity: 3, sources: [] });
 
   return { findings, limitations };
 }
