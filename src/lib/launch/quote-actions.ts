@@ -95,3 +95,81 @@ export async function setQuoteEnabled(mint: string, enabled: boolean): Promise<R
     return { ok: true };
   } catch (e) { return fail(e); }
 }
+
+/**
+ * Pulls every quote token Raydium has a LaunchLab config for on this network and lists it for applicants.
+ * Listing doesn't allow it on our platform: that still takes the admin's allow transaction before a launch.
+ */
+export async function syncPairs(): Promise<Result<{ found: number; added: number; updated: number; delisted: number }>> {
+  try {
+    const user = await requireAdmin();
+    const { buildCatalog } = await import("./pair-catalog");
+    const catalog = await buildCatalog();
+    const conn = connection();
+
+    // Decimals and token program from the chain where Jupiter didn't know the token.
+    const missing = catalog.filter((c) => c.decimals === null || !c.tokenProgram);
+    for (let i = 0; i < missing.length; i += 100) {
+      const batch = missing.slice(i, i + 100);
+      const infos = await conn.getMultipleParsedAccounts(batch.map((c) => new PublicKey(c.mint)));
+      infos.value.forEach((info, k) => {
+        const parsed = (info?.data as { parsed?: { info?: { decimals?: number } } } | undefined)?.parsed;
+        if (parsed?.info?.decimals !== undefined) batch[k]!.decimals = parsed.info.decimals;
+        if (info) batch[k]!.tokenProgram = info.owner.toBase58();
+      });
+    }
+
+    const supabase = await createClient();
+    const { data: existing } = await supabase.from("quote_tokens").select("mint, listed");
+    const known = new Map((existing ?? []).map((r) => [r.mint as string, r.listed as boolean]));
+    const now = new Date().toISOString();
+    const rows = catalog
+      .filter((c) => c.decimals !== null && c.decimals <= 12)
+      .map((c) => ({
+        mint: c.mint,
+        symbol: c.symbol.replace(/[^A-Za-z0-9.]/g, "").slice(0, 12) || c.mint.slice(0, 4),
+        name: c.name.trim().slice(0, 60) || c.mint.slice(0, 8),
+        decimals: c.decimals!,
+        network: "solana-devnet",
+        launchlab_config_id: c.configId,
+        category: c.category,
+        logo_url: c.logoUrl,
+        token_program: c.tokenProgram,
+        listed: true,
+        synced_at: now,
+      }));
+    let added = 0, updated = 0;
+    for (let i = 0; i < rows.length; i += 200) {
+      const chunk = rows.slice(i, i + 200);
+      added += chunk.filter((r) => !known.has(r.mint)).length;
+      updated += chunk.filter((r) => known.has(r.mint)).length;
+      // New rows start disabled (not allow-listed); existing rows keep their enabled / allow state.
+      const { error } = await supabase.from("quote_tokens").upsert(
+        chunk.map((r) => (known.has(r.mint) ? r : { ...r, enabled: false, added_by: user.id })),
+        { onConflict: "mint" },
+      );
+      if (error) throw new Error(error.message);
+    }
+    // Configs that disappeared on-chain stop being offered.
+    const live = new Set(rows.map((r) => r.mint));
+    const gone = [...known.keys()].filter((m) => !live.has(m) && m !== SOL_MINT && known.get(m));
+    if (gone.length) await supabase.from("quote_tokens").update({ listed: false }).in("mint", gone);
+
+    revalidatePath("/admin/settings");
+    revalidatePath("/home");
+    return { ok: true, found: catalog.length, added, updated, delisted: gone.length };
+  } catch (e) { return fail(e); }
+}
+
+/** Show or hide a listed pair for applicants. */
+export async function setQuoteListed(mint: string, listed: boolean): Promise<Result<object>> {
+  try {
+    await requireAdmin();
+    if (mint === SOL_MINT && !listed) throw new Error("SOL is the default pair and stays listed.");
+    const supabase = await createClient();
+    const { error } = await supabase.from("quote_tokens").update({ listed }).eq("mint", mint);
+    if (error) throw new Error(error.message);
+    revalidatePath("/admin/settings");
+    return { ok: true };
+  } catch (e) { return fail(e); }
+}

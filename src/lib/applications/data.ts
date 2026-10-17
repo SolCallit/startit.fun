@@ -126,9 +126,14 @@ export function stepDefaults(b: ApplicationBundle, step: number): Record<string,
   }
 }
 
-/** Tokens a launch can be paired with on-chain (enabled quote tokens). SOL first. */
-export async function listQuoteOptions(): Promise<{ mint: string; symbol: string; name: string }[]> {
+export type QuoteOption = { mint: string; symbol: string; name: string; category: string; logo_url: string | null };
+
+/** Pairs an applicant can pick: every listed LaunchLab quote token. SOL first. */
+export async function listQuoteOptions(): Promise<QuoteOption[]> {
   const supabase = await createClient();
-  const { data } = await supabase.from("quote_tokens").select("mint, symbol, name").eq("enabled", true).order("created_at");
-  return data ?? [];
+  const { data } = await supabase.from("quote_tokens").select("mint, symbol, name, category, logo_url")
+    .or("listed.eq.true,enabled.eq.true").order("symbol").limit(2000);
+  const rows = (data ?? []) as QuoteOption[];
+  const sol = "So11111111111111111111111111111111111111112";
+  return [...rows.filter((q) => q.mint === sol), ...rows.filter((q) => q.mint !== sol)];
 }

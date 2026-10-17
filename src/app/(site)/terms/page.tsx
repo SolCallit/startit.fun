@@ -1,18 +1,20 @@
 import type { Metadata } from "next";
-import { Container, Notice, PageHeader } from "@/components/ui";
+import { Container, PageHeader } from "@/components/ui";
+import { TermsBody } from "@/components/legal/terms-body";
+import { TERMS_UPDATED } from "@/lib/legal/terms-of-use";
 
 export const metadata: Metadata = { title: "Terms and risks" };
 
 export default function Terms() {
   return (
     <Container className="py-14">
-      <PageHeader title="Terms and risk disclosures" lede="Read this before buying any token launched through Startit." />
-      <div className="mb-8 max-w-[68ch]">
-        <Notice tone="warn">
-          Draft for legal review. These disclosures describe how the platform works; they have not yet been reviewed by
-          counsel and are not final terms of service.
-        </Notice>
-      </div>
+      <PageHeader title="Terms and risks" lede="The terms every wallet accepts, and the risks to read before buying any token launched through Startit." />
+      <section className="glass mb-12 max-w-[72ch] rounded-[20px] p-5 sm:p-7">
+        <h2 className="text-[1.5rem] text-ink">Website Terms of Use</h2>
+        <p className="mt-1 text-[0.875rem] text-muted">Last updated: {TERMS_UPDATED}</p>
+        <TermsBody className="mt-5" />
+      </section>
+      <h2 className="mb-2 text-[1.5rem] text-ink">Risk disclosures</h2>
       <article className="prose-ledger">
         <h2>Tokens are speculative</h2>
         <p>

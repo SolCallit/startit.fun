@@ -4,13 +4,14 @@ import { useActionState, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { saveStep, uploadEvidence, uploadProjectImage, type StepState } from "@/lib/applications/actions";
+import { PairPicker, type PairOption } from "./pair-picker";
 import { MAX_STARTER_BUY, PAIR_KINDS, type StepNumber } from "@/lib/applications/schema";
 
 const SOL = "So11111111111111111111111111111111111111112";
 const inputCls =
   "w-full rounded-[14px] border border-line-strong/80 bg-surface/70 px-3.5 py-3 text-ink placeholder:text-muted/80 transition-colors focus:border-cobalt focus:bg-surface focus:outline-none aria-[invalid=true]:border-flagged";
 
-export type QuoteOption = { mint: string; symbol: string; name: string };
+export type QuoteOption = PairOption;
 type Errors = Record<string, string> | undefined;
 
 function Err({ msg, id }: { msg?: string; id?: string }) {
@@ -316,10 +317,10 @@ function InspiredBy({ d, e, quotes, quote, setQuote, pairOptions }: {
             <div className="flex flex-col gap-4 pt-4">
               <div className="flex flex-col gap-2">
                 <span className="text-[0.9375rem] font-semibold text-ink">Pair with</span>
-                <Chips name="quote_mint" value={quote} onChange={pickQuote} options={pairOptions} />
+                <PairPicker options={quotes.length ? quotes : [{ mint: SOL, symbol: "SOL", name: "Solana", category: "solana" }]} value={quote} onChange={pickQuote} />
                 <p className="text-[0.8125rem] text-muted">
                   What people buy your coin with on the bonding curve; fees are counted in it too.
-                  {pairOptions.length <= 1 ? " More stock and coin pairs show up here as Startit switches them on." : ""}
+                  {pairOptions.length <= 1 ? " More stock and coin pairs show up here as Raydium opens them." : ""}
                 </p>
                 <Err msg={e?.quote_mint} />
               </div>

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { requireUser } from "@/lib/auth";
-import { listMyApplications, listQuoteOptions, EDITABLE } from "@/lib/applications/data";
+import { listMyApplications, EDITABLE } from "@/lib/applications/data";
 import { listPublicProjects } from "@/lib/data/public";
 import { STATUS_LABEL } from "@/lib/domain/status";
 import { ButtonLink } from "@/components/ui";
@@ -51,10 +51,10 @@ async function LaunchPath() {
 
 async function Projects({ searchParams }: { searchParams: PageProps<"/home">["searchParams"] }) {
   const sp = await searchParams;
-  const [res, quotes] = await Promise.all([listPublicProjects(), listQuoteOptions()]);
+  const res = await listPublicProjects();
   const all = res.connected ? res.projects : [];
   // Filter chips: every enabled pair, plus any pair a listed project already uses.
-  const symbols = [...new Set([...quotes.map((q) => q.symbol), ...all.map((p) => p.quote_symbol)])];
+  const symbols = [...new Set(["SOL", ...all.map((p) => p.quote_symbol)])];
   const FILTERS = [{ key: "all", label: "All" }, ...symbols.map((s) => ({ key: s, label: s }))];
   const raw = typeof sp.pair === "string" ? sp.pair : "all";
   const filter = FILTERS.some((f) => f.key === raw) ? raw : "all";

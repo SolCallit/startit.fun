@@ -183,6 +183,24 @@ html {
   0%, 100% { transform: translate3d(0, 0, 0) scaleY(1); }
   50% { transform: translate3d(0, calc(var(--amp) * -1), 0) scaleY(1.04); }
 }
+/* One composited layer for the whole field: the backdrop never repaints with the page. */
+.backdrop-root { contain: strict; transform: translateZ(0); }
+@keyframes field-drift {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -14px, 0); }
+}
+
+/* Phones and wallet in-app browsers: per-column animation and stacked backdrop blurs make the page flicker while
+   scrolling. There the field is static columns drifting as a single layer, and glass is tinted instead of blurred. */
+@media (max-width: 767px), (pointer: coarse) {
+  .pillar { animation: none !important; will-change: auto !important; }
+  .field-drift { animation: field-drift 9s ease-in-out infinite; will-change: transform; }
+  .glass, .glass-bar, .start-panel { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+  .glass { background: color-mix(in oklab, var(--surface) 90%, transparent); }
+  .glass-bar { background: color-mix(in oklab, var(--paper) 92%, transparent); }
+  .start-panel { background: linear-gradient(180deg, #ffffff1a, transparent 40%), linear-gradient(135deg, #8e1019e6, #4a0810eb 60%, #26050af0); }
+}
+
 .pillar {
   position: absolute;
   transform-origin: 50% 0;

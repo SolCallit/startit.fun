@@ -26,7 +26,7 @@ async function Body() {
   const get = (k: string) => rows?.find((r) => r.key === k);
   const data = get("fee_router_address");
   const { data: quotes } = await supabase.from("quote_tokens")
-    .select("mint, symbol, name, decimals, launchlab_config_id, platform_allowed_at, enabled").order("created_at");
+    .select("mint, symbol, name, decimals, launchlab_config_id, platform_allowed_at, enabled, listed, category, logo_url").order("created_at").limit(3000);
   return (
     <div className="max-w-2xl">
       {!user.roles.includes("admin") ? <div className="mb-6"><Notice tone="warn">Only admins can change these. You can view them.</Notice></div> : null}

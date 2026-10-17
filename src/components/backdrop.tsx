@@ -61,7 +61,7 @@ export function Backdrop() {
   }, [reduce, px, py]);
 
   return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-paper">
+    <div aria-hidden className="backdrop-root pointer-events-none fixed inset-x-0 top-0 -z-10 h-lvh overflow-hidden bg-paper">
       <svg width="0" height="0" className="absolute">
         <defs>
           <linearGradient id="pf-right" x1="0" y1="0" x2="0" y2="1">
@@ -89,8 +89,9 @@ export function Backdrop() {
 
       <motion.div
         style={{ x, y }}
-        className="absolute top-0 left-1/2 aspect-[1440/900] w-[max(100vw,160vh)] -translate-x-1/2 opacity-[var(--field-opacity)]"
+        className="absolute top-0 left-1/2 aspect-[1440/900] w-[max(100vw,160lvh)] -translate-x-1/2 opacity-[var(--field-opacity)]"
       >
+        <div className="field-drift absolute inset-0">
         {PILLARS.map((p, k) => (
           <div
             key={k}
@@ -108,6 +109,7 @@ export function Backdrop() {
             <Column len={p.len} />
           </div>
         ))}
+        </div>
       </motion.div>
 
       {/* Settle the field into the page: darker toward the bottom, a soft veil behind the content column. */}
