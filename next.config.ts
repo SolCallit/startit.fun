@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
     return [{ source: "/signup", destination: "/login", permanent: false }];
   },
   experimental: {
+    // The persistent build cache served stale CSS after globals.css changed (Tailwind loader output
+    // wasn't invalidated), locally and on Vercel. Builds start cold instead.
+    turbopackFileSystemCacheForBuild: false,
     // Evidence uploads go through server actions; Vercel caps request bodies at 4.5 MB.
     serverActions: { bodySizeLimit: "4.4mb" },
   },
