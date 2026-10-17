@@ -6,7 +6,8 @@ import { listMyApplications, listQuoteOptions, EDITABLE } from "@/lib/applicatio
 import { listPublicProjects } from "@/lib/data/public";
 import { STATUS_LABEL } from "@/lib/domain/status";
 import { ButtonLink } from "@/components/ui";
-import { LaunchPathCard, ProjectCard } from "./cards";
+import { ProjectCard } from "./cards";
+import { StartPanel } from "@/components/start-panel";
 
 export const metadata: Metadata = { title: "Home" };
 
@@ -39,7 +40,13 @@ async function LaunchPath() {
   const user = await requireUser("/home");
   const mine = await listMyApplications(user.id);
   const draft = mine.find((a) => EDITABLE.includes(a.status));
-  return <LaunchPathCard draft={draft ? { id: draft.id, name: draft.project_name } : null} />;
+  return (
+    <StartPanel
+      as="h2"
+      primary={draft ? { href: `/applications/${draft.id}/edit`, label: "Continue launch" } : { href: "/apply", label: "Launch token" }}
+      secondary={{ href: "/explore", label: "Browse market" }}
+    />
+  );
 }
 
 async function Projects({ searchParams }: { searchParams: PageProps<"/home">["searchParams"] }) {

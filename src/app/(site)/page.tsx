@@ -1,38 +1,11 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { Reveal } from "@/components/motion";
+import { StartPanel } from "@/components/start-panel";
 import { ButtonLink, Container, FindingBadge } from "@/components/ui";
 import { FINDING_STATUSES, type FindingStatus } from "@/lib/domain/findings";
 import { DEFAULT_SPLIT, bpsToPercent } from "@/lib/domain/fees";
 
-const PIPELINE: { actor: string; step: string; detail: string }[] = [
-  {
-    actor: "You, or anyone who backs the product",
-    step: "Bring a product",
-    detail: "Its site, GitHub and socials, plus proof the builder is in: their approval of the coin, its name and its branding, in their own words.",
-  },
-  {
-    actor: "AI agent",
-    step: "Checks the receipts",
-    detail: "Reads public sources and matches them to the application. Every finding comes with a source and a timestamp. It can flag things. It can't approve.",
-  },
-  {
-    actor: "Startit team",
-    step: "Human review",
-    detail: "A person confirms the builder really signed off, reads the evidence, then approves, rejects or asks for more.",
-  },
-  {
-    actor: "Builder",
-    step: "Signs the terms",
-    detail: "Supply, authorities, treasury and fee split are published and signed with their wallet before anything goes on-chain.",
-  },
-  {
-    actor: "Startit team",
-    step: "Launches on Raydium",
-    detail: "The transaction is previewed, confirmed and sent, then the addresses are checked on-chain and published.",
-  },
-];
 
 const FINDING_MEANING: Record<FindingStatus, string> = {
   VERIFIED: "Confirmed against a public source we link to.",
@@ -47,43 +20,13 @@ export default function Home() {
       <Suspense>
         <SignedInGoesHome />
       </Suspense>
-      <section className="border-b border-line">
-        <Container className="grid gap-14 py-16 sm:py-24 lg:grid-cols-[1.05fr_1fr] lg:gap-20">
-          <div className="flex flex-col justify-center">
-            <h1 className="text-[2.75rem] leading-[1.02] font-bold tracking-[-0.035em] text-ink sm:text-[4rem]">
-              Memecoin money
-              <br />
-              for real products.
-            </h1>
-            <p className="mt-6 max-w-[34rem] text-[1.1875rem] leading-relaxed text-ink-soft">
-              Memecoins have the crowd and the capital. Plenty of good products have neither. Back one you believe in, get
-              the builder&apos;s sign-off and launch its coin here. Half of every trading fee goes to the community.
-            </p>
-            <div className="mt-9 flex flex-wrap gap-3">
-              <ButtonLink href="/apply">Launch a coin</ButtonLink>
-              <ButtonLink href="/explore" intent="neutral">Browse projects</ButtonLink>
-            </div>
-          </div>
-
-          <Reveal className="self-center">
-          <ol aria-label="How a launch works" className="glass relative rounded-[28px] p-6 sm:p-7">
-            {PIPELINE.map((p, i) => (
-              <li key={p.step} className="relative grid grid-cols-[2.25rem_1fr] gap-4 pb-7 last:pb-0">
-                {i < PIPELINE.length - 1 ? (
-                  <span aria-hidden className="absolute top-9 left-[1.0625rem] h-[calc(100%-2.25rem)] w-px bg-line-strong" />
-                ) : null}
-                <span className="flex size-9 items-center justify-center rounded-full border border-line-strong bg-surface font-mono text-[0.8125rem] font-semibold text-ink">
-                  {i + 1}
-                </span>
-                <div className="pt-1">
-                  <p className="text-[0.875rem] font-medium text-muted">{p.actor}</p>
-                  <p className="text-[1.0625rem] font-semibold text-ink">{p.step}</p>
-                  <p className="mt-1 text-[0.9375rem] leading-relaxed text-ink-soft">{p.detail}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
-          </Reveal>
+      <section>
+        <Container className="pt-8 pb-16 sm:pt-14 sm:pb-24">
+          <StartPanel primary={{ href: "/apply", label: "Launch token" }} secondary={{ href: "/explore", label: "Browse market" }} />
+          <p className="mx-auto mt-8 max-w-2xl text-center text-[1.0625rem] leading-relaxed text-ink-soft">
+            Memecoins have the crowd and the capital. Plenty of good products have neither. Back one you believe in, get the
+            builder&apos;s sign-off and launch its coin here. Half of every trading fee goes to the community.
+          </p>
         </Container>
       </section>
 

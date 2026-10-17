@@ -16,6 +16,13 @@ const schibsted = localFont({
   weight: "400 900",
   display: "swap",
 });
+const serif = localFont({
+  src: "./fonts/instrument-serif-latin-400-italic.woff2",
+  variable: "--font-serif",
+  weight: "400",
+  style: "italic",
+  display: "swap",
+});
 const jetbrains = localFont({
   src: "./fonts/jetbrains-mono-latin-wght-normal.woff2",
   variable: "--font-jetbrains",
@@ -41,7 +48,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" data-theme="dark" suppressHydrationWarning className={`${bricolage.variable} ${schibsted.variable} ${jetbrains.variable} antialiased`}>
+    <html lang="en" data-theme="dark" suppressHydrationWarning className={`${bricolage.variable} ${schibsted.variable} ${jetbrains.variable} ${serif.variable} antialiased`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
       </head>
