@@ -25,12 +25,25 @@ const screeningSchema = z.object({
   SCREENING_SERVICE_PASSWORD: z.string().min(12),
 });
 
+/**
+ * The Supabase↔Vercel integration may set the newer key names
+ * (NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY / SUPABASE_SECRET_KEY). Accept either.
+ */
+function source(): Record<string, string | undefined> {
+  const e = process.env;
+  return {
+    ...e,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: e.NEXT_PUBLIC_SUPABASE_ANON_KEY || e.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    SUPABASE_SERVICE_ROLE_KEY: e.SUPABASE_SERVICE_ROLE_KEY || e.SUPABASE_SECRET_KEY,
+  };
+}
+
 export function isSupabaseConfigured(): boolean {
-  return publicSchema.safeParse(process.env).success;
+  return publicSchema.safeParse(source()).success;
 }
 
 export function supabasePublicEnv() {
-  const parsed = publicSchema.safeParse(process.env);
+  const parsed = publicSchema.safeParse(source());
   if (!parsed.success) {
     throw new Error(
       "Supabase is not configured. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.",
@@ -40,7 +53,7 @@ export function supabasePublicEnv() {
 }
 
 function parseOrExplain<T extends z.ZodType>(schema: T, what: string): z.infer<T> {
-  const r = schema.safeParse(process.env);
+  const r = schema.safeParse(source());
   if (r.success) return r.data;
   const keys = [...new Set(r.error.issues.map((i) => String(i.path[0])))].join(", ");
   throw new Error(`${what} is not configured. Missing or invalid: ${keys}. See .env.example.`);
