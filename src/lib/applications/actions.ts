@@ -25,7 +25,7 @@ export async function startApplication() {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("applications")
-    .insert({ applicant_id: user.id, contact_email: user.email })
+    .insert({ applicant_id: user.id, contact_email: user.email || null })
     .select("id")
     .single();
   if (error) throw new Error(`Couldn't start an application: ${error.message}`);

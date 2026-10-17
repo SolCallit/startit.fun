@@ -39,7 +39,7 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
   const walletAddress = walletOf(data.user);
   return {
     id: data.user.id,
-    email: data.user.email ?? null,
+    email: data.user.email || null,
     walletAddress,
     displayName: profile?.display_name ?? data.user.email ?? (walletAddress ? `${walletAddress.slice(0, 4)}…${walletAddress.slice(-4)}` : "Founder"),
     roles,
