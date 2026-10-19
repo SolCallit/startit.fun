@@ -1,5 +1,6 @@
 import "server-only";
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { supabasePublicEnv } from "@/lib/env";
 
@@ -7,6 +8,8 @@ import { supabasePublicEnv } from "@/lib/env";
 export async function createClient() {
   const env = supabasePublicEnv();
   const cookieStore = await cookies();
+  // Supabase reads the clock while loading the session; keep it out of runtime prefetch prerenders.
+  await connection();
 
   return createServerClient(env.NEXT_PUBLIC_SUPABASE_URL, env.NEXT_PUBLIC_SUPABASE_ANON_KEY, {
     cookies: {
