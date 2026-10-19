@@ -25,7 +25,8 @@ export async function decide(appId: string, _prev: DecisionState, formData: Form
     }
     if (!reason) return { error: "Record how you verified the builder before approving." };
   }
-  if (["rejected", "suspended", "evidence_requested"].includes(to) && !reason) {
+  if (to === "awaiting_review" && !staff.roles.includes("admin")) return { error: "Only admins can skip AI screening." };
+  if (["rejected", "suspended", "evidence_requested", "awaiting_review"].includes(to) && !reason) {
     return { error: "Add a reason. It's stored in the decision history." };
   }
 

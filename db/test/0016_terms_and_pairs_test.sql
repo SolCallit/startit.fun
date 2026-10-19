@@ -45,3 +45,9 @@ end $$;
 select pg_temp.expect_fail($$insert into quote_tokens (mint, symbol, name, decimals, network, launchlab_config_id, category) values ('So11111111111111111111111111111111111111113','X','X',6,'solana-devnet','7ZR4zD7PYfY2XxoG1Gxcy2EgEeGYrpxrwzPuwdUBssEt','nope')$$,
   'applicants cannot add pairs');
 reset role;
+
+do $$ begin
+  assert exists (select 1 from status_transition_rules where from_status = 'submitted' and to_status = 'awaiting_review' and actor = 'admin'), 'admin manual review rule';
+  assert not exists (select 1 from status_transition_rules where from_status = 'submitted' and to_status = 'awaiting_review' and actor = 'operator'), 'operators cannot skip screening';
+  raise notice 'PASS  only admins can skip AI screening';
+end $$;

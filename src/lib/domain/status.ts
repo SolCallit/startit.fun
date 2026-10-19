@@ -67,6 +67,7 @@ export const OPERATOR_ACTIONS: Partial<
     { to: "ai_screening", label: "Re-run AI screening", needsReason: false, intent: "neutral" },
     { to: "rejected", label: "Reject", needsReason: true, intent: "danger" },
   ],
+  submitted: [{ to: "awaiting_review", label: "Skip AI, review manually", needsReason: true, intent: "neutral" }],
   approved: [{ to: "launch_config_pending", label: "Start launch configuration", needsReason: false, intent: "primary" }],
 };
 

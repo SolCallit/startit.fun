@@ -1,5 +1,5 @@
 -- Startit: full database setup for a NEW Supabase project.
--- Paste into Supabase → SQL Editor → Run, once. Generated from db/migrations/0001–0016.
+-- Paste into Supabase → SQL Editor → Run, once. Generated from db/migrations/0001–0017.
 
 -- ===== 0001_init.sql =====
 -- startit.fun — initial schema
@@ -1785,3 +1785,9 @@ do $$ begin
     execute 'grant usage on sequence terms_acceptances_id_seq to authenticated';
   end if;
 end $$;
+
+-- ===== 0017_manual_review.sql =====
+-- Until AI screening is switched on, an admin can send a submitted application straight to human review.
+-- The reason is required and stored in the decision history, so it's on record that screening was skipped.
+insert into status_transition_rules (from_status, to_status, actor) values ('submitted', 'awaiting_review', 'admin')
+on conflict do nothing;
