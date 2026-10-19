@@ -1776,15 +1776,8 @@ alter table quote_tokens
 
 update quote_tokens set listed = true, category = 'solana' where mint = 'So11111111111111111111111111111111111111112';
 
-drop policy if exists quote_tokens_read on quote_tokens;
-do $$
-declare p record;
-begin
-  for p in select policyname from pg_policies where tablename = 'quote_tokens' and cmd = 'SELECT' loop
-    execute format('drop policy %I on quote_tokens', p.policyname);
-  end loop;
-end $$;
-create policy quote_tokens_read on quote_tokens for select using (enabled or listed or is_staff());
+-- Listed pairs are readable too (permissive policies OR together with the existing enabled-or-staff rule).
+create policy quote_tokens_read_listed on quote_tokens for select using (listed);
 
 do $$ begin
   if exists (select 1 from pg_roles where rolname = 'authenticated') then
