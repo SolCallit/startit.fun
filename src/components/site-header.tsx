@@ -66,7 +66,7 @@ async function SignedInLinks() {
   return (
     <>
       <NavA href="/dashboard">My applications</NavA>
-      {user.isStaff ? <NavA href="/admin">Review queue</NavA> : null}
+      {user.isStaff ? <NavA href="/admin">Admin</NavA> : null}
     </>
   );
 }
