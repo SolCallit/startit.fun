@@ -1,8 +1,11 @@
 import "server-only";
 import { cacheLife } from "next/cache";
-import { PublicKey } from "@solana/web3.js";
+import { Connection, PublicKey, clusterApiUrl } from "@solana/web3.js";
 import { LaunchpadPool } from "@raydium-io/raydium-sdk-v2";
-import { connection } from "@/lib/launch/launchlab";
+
+/** Reads fail fast on rate limits instead of retrying for seconds; the page shows what it has. */
+const connection = () => new Connection(process.env.SOLANA_RPC_URL || clusterApiUrl("devnet"), { commitment: "confirmed", disableRetryOnRateLimit: true });
+const MARKET_CACHE = { stale: 15, revalidate: 20, expire: 600 };
 
 /**
  * Market data for a launched coin, read straight from the chain: the LaunchLab pool for price and curve progress,
@@ -32,7 +35,7 @@ const num = (bn: { toString(): string }) => Number(bn.toString());
 
 export async function getPoolState(pool: string): Promise<PoolState | null> {
   "use cache";
-  cacheLife("seconds");
+  cacheLife(MARKET_CACHE);
   const info = await connection().getAccountInfo(new PublicKey(pool), "confirmed");
   if (!info) return null;
   const p = LaunchpadPool.decode(info.data);
@@ -54,16 +57,27 @@ export async function getPoolState(pool: string): Promise<PoolState | null> {
 
 type TokenBal = { accountIndex: number; uiTokenAmount: { amount: string } };
 
-/** Every buy and sell on the curve, newest first, from the pool's vault balance changes. */
+/**
+ * Recent buys and sells on the curve, newest first, from the pool's vault balance changes.
+ * Public RPCs rate-limit transaction reads hard, so this reads the latest 120 in small sequential batches
+ * and returns whatever it got if the RPC pushes back.
+ */
 export async function getTrades(pool: string, vaultA: string, vaultB: string, decA: number, decB: number): Promise<Trade[]> {
   "use cache";
-  cacheLife("seconds");
+  cacheLife(MARKET_CACHE);
   const conn = connection();
-  const sigs = await conn.getSignaturesForAddress(new PublicKey(pool), { limit: 400 }, "confirmed");
+  const sigs = await conn.getSignaturesForAddress(new PublicKey(pool), { limit: 120 }, "confirmed");
   const ok = sigs.filter((s) => !s.err);
   const out: Trade[] = [];
-  for (let i = 0; i < ok.length; i += 50) {
-    const txs = await conn.getParsedTransactions(ok.slice(i, i + 50).map((s) => s.signature), { maxSupportedTransactionVersion: 0, commitment: "confirmed" });
+  const BATCH = 10;
+  for (let i = 0; i < ok.length; i += BATCH) {
+    let txs;
+    try {
+      txs = await conn.getParsedTransactions(ok.slice(i, i + BATCH).map((s) => s.signature), { maxSupportedTransactionVersion: 0, commitment: "confirmed" });
+    } catch {
+      if (i === 0) throw new Error("trades unavailable");
+      break;
+    }
     txs.forEach((tx, k) => {
       if (!tx?.meta || !tx.blockTime) return;
       const keys = tx.transaction.message.accountKeys.map((a) => a.pubkey.toBase58());
