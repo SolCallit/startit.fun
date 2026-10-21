@@ -7,7 +7,8 @@ import { getApplicationBundle } from "@/lib/applications/data";
 import { getLaunchConfigBundle } from "@/lib/launch/data";
 import { defaultSplitFor } from "@/lib/domain/fees";
 import { LaunchConfigForm, ReadyButton, SigningLinkButton } from "./launch-forms";
-import { LaunchRunner } from "./launch-runner";
+import { ApproveLaunch } from "./approve-launch";
+import { launchParamsFor } from "@/lib/launch/self-launch";
 
 export default function LaunchConfig(props: PageProps<"/admin/applications/[id]/launch">) {
   return (
@@ -77,7 +78,7 @@ async function Body({ params }: PageProps<"/admin/applications/[id]/launch">) {
               {app.status === "launched" ? (
                 <p className="text-verified">Launched and verified. Mint <Mono>{String(cfg.launch?.mint_address)}</Mono>.</p>
               ) : (
-                <LaunchRunner appId={id} ticker={app.ticker ?? ""} initialStatus={String(cfg.launch?.status ?? "planned")} existingSignature={(cfg.launch?.tx_signature as string | null) ?? null} />
+                <ApproveFor appId={id} status={String(cfg.launch?.status ?? "planned")} signature={(cfg.launch?.tx_signature as string | null) ?? null} />
               )}
             </Panel>
           ) : null}
@@ -123,4 +124,9 @@ async function Body({ params }: PageProps<"/admin/applications/[id]/launch">) {
       </div>
     </>
   );
+}
+
+async function ApproveFor({ appId, status, signature }: { appId: string; status: string; signature: string | null }) {
+  const r = await launchParamsFor(appId);
+  return <ApproveLaunch appId={appId} params={r.ok ? r.params : null} approved={r.ok ? r.approved : false} status={status} signature={signature} />;
 }

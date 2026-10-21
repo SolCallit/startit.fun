@@ -129,12 +129,18 @@ export async function buildRedirectCpCreatorTx(p: { admin: PublicKey; feeRouter:
   return { txBase64: toBase64(transaction) };
 }
 
-/** Builds the unsigned token launch. The mint's keypair stays in the operator's browser; only its public key comes here. */
+/**
+ * Builds the unsigned token launch. The mint's keypair stays in the signer's browser; only its public key comes here.
+ * With a starter's buy, the same transaction creates the coin and makes the buy, so nobody can trade in between.
+ */
 export async function buildLaunchTx(p: {
   operator: PublicKey; mint: PublicKey; platformId: PublicKey; name: string; symbol: string; uri: string; decimals: number; supplyRaw: string;
   /** The on-chain pair. Defaults to SOL. */
   quoteMint?: PublicKey;
+  /** Starter's buy in raw quote units, paid by the signer. "0" or absent = create only. */
+  buyAmountRaw?: string;
 }) {
+  const buy = new BN(p.buyAmountRaw ?? "0");
   const quote = p.quoteMint ?? NATIVE_MINT;
   const isSol = quote.equals(NATIVE_MINT);
   const r = await raydium(p.operator);
@@ -152,13 +158,17 @@ export async function buildLaunchTx(p: {
     symbol: p.symbol,
     uri: p.uri,
     migrateType: "cpmm",
-    buyAmount: new BN(0),
-    createOnly: true,
+    buyAmount: buy,
+    createOnly: buy.lten(0),
+    // The first buy on a brand-new curve can't be front-run inside one transaction; 1% covers rounding.
+    slippage: new BN(100),
     txVersion: TxVersion.V0,
     feePayer: p.operator,
   });
   const txs = res.transactions as unknown[];
-  if (txs.length !== 1 || !(txs[0] instanceof VersionedTransaction)) throw new Error(`Expected one v0 launch transaction, SDK built ${txs.length}.`);
+  if (txs.length !== 1 || !(txs[0] instanceof VersionedTransaction)) {
+    throw new Error(`Expected one launch transaction but the Raydium SDK split it into ${txs.length}; launch and starter's buy must be atomic.`);
+  }
   return { tx: txs[0], poolId: res.extInfo.address.poolId.toBase58() };
 }
 

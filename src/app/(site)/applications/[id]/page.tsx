@@ -9,6 +9,8 @@ import { resubmitApplication, respondToEvidenceRequest } from "@/lib/application
 import { bpsToPercent } from "@/lib/domain/fees";
 import { getPublicProject } from "@/lib/data/public";
 import { StarterBuy } from "./starter-buy";
+import { LaunchMine } from "./launch-mine";
+import { createClient } from "@/lib/supabase/server";
 
 export default function ApplicationStatus(props: PageProps<"/applications/[id]">) {
   return (
@@ -50,6 +52,7 @@ async function Status({ params, searchParams }: PageProps<"/applications/[id]">)
 
       <div className="grid gap-8 lg:grid-cols-[1fr_20rem]">
         <div className="flex flex-col gap-6">
+          {app.status === "ready_for_deployment" && isOwner ? <LaunchMineFor appId={id} publicRef={app.public_ref} ticker={app.ticker ?? ""} /> : null}
           {app.status === "launched" && isOwner && Number(app.starter_buy_amount) > 0 ? <StarterBuyFor appRef={app.public_ref} appId={id} amount={Number(app.starter_buy_amount)} /> : null}
           {app.status === "evidence_requested" && isOwner ? (
             <Panel title="A reviewer needs more from you">
@@ -132,4 +135,15 @@ function Item({ label, children }: { label: string; children: React.ReactNode })
 async function StarterBuyFor({ appRef, appId, amount }: { appRef: string; appId: string; amount: number }) {
   const pub = await getPublicProject(appRef);
   return <StarterBuy appId={appId} amount={amount} symbol={pub?.project.quote_symbol ?? "SOL"} doneTx={pub?.project.starter_buy_tx ?? null} />;
+}
+
+async function LaunchMineFor({ appId, publicRef, ticker }: { appId: string; publicRef: string; ticker: string }) {
+  const supabase = await createClient();
+  const { data: l } = await supabase.from("launches").select("status, verification, launch_signer, starter_buy_amount, quote_mint").eq("application_id", appId).maybeSingle();
+  if (!l) return null;
+  const { data: q } = l.quote_mint ? await supabase.from("quote_tokens").select("symbol").eq("mint", l.quote_mint).maybeSingle() : { data: null };
+  const retry = l.status === "failed" && !!(l.verification as { txErr?: unknown } | null)?.txErr;
+  const approved = l.status === "operator_confirmed" || l.status === "submitted" || retry;
+  return <LaunchMine appId={appId} publicRef={publicRef} ticker={ticker} approved={approved} initialStatus={l.status}
+    signer={l.launch_signer ?? null} starterBuy={Number(l.starter_buy_amount ?? 0)} quoteSymbol={q?.symbol ?? "SOL"} />;
 }
