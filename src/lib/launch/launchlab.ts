@@ -186,3 +186,14 @@ export async function buildStarterBuyTx(p: { buyer: PublicKey; mint: PublicKey; 
   if (!(res.transaction instanceof VersionedTransaction)) throw new Error("Expected a v0 buy transaction from the Raydium SDK.");
   return res.transaction;
 }
+
+/** Any wallet's buy or sell on a LaunchLab curve, built unsigned for that wallet to sign. Amounts are raw units. */
+export async function buildTradeTx(p: { wallet: PublicKey; mint: PublicKey; quoteMint: PublicKey; side: "buy" | "sell"; amountRaw: string; slippageBps?: number }) {
+  const r = await raydium(p.wallet);
+  const common = { programId: LAUNCHLAB_PROGRAM, authProgramId: LAUNCHLAB_AUTH, mintA: p.mint, mintB: p.quoteMint, slippage: new BN(p.slippageBps ?? 300), txVersion: TxVersion.V0, feePayer: p.wallet };
+  const res = p.side === "buy"
+    ? await r.launchpad.buyToken({ ...common, buyAmount: new BN(p.amountRaw) })
+    : await r.launchpad.sellToken({ ...common, sellAmount: new BN(p.amountRaw) });
+  if (!(res.transaction instanceof VersionedTransaction)) throw new Error("Expected a v0 transaction from the Raydium SDK.");
+  return res.transaction;
+}

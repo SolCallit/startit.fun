@@ -26,6 +26,7 @@
     "@wallet-standard/features": "^1.1.1",
     "bn.js": "^5.2.5",
     "bs58": "^6.0.0",
+    "lightweight-charts": "5.2.1",
     "motion": "14.0.0",
     "next": "16.4.2",
     "react": "19.3.0",
