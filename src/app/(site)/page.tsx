@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { StartPanel } from "@/components/start-panel";
+import { WelcomeChips } from "@/components/welcome-chips";
 import { ButtonLink, Container, FindingBadge } from "@/components/ui";
 import { FINDING_STATUSES, type FindingStatus } from "@/lib/domain/findings";
 import { DEFAULT_SPLIT, bpsToPercent } from "@/lib/domain/fees";
@@ -24,9 +25,10 @@ export default function Home() {
         <Container className="pt-8 pb-16 sm:pt-14 sm:pb-24">
           <StartPanel primary={{ href: "/apply", label: "Launch token" }} secondary={{ href: "/explore", label: "Browse market" }} />
           <p className="mx-auto mt-8 max-w-2xl text-center text-[1.0625rem] leading-relaxed text-ink-soft">
-            Memecoins have the crowd and the capital. Plenty of good products have neither. Back one you believe in, get the
-            builder&apos;s sign-off and launch its coin here. Half of every trading fee goes to the community.
+            Launch a native meme for a promising, undervalued product or brand: crypto or web2, viral or not yet, solo or team.
+            Memecoins have the crowd and the capital; plenty of good products have neither. Half of every trading fee goes to the community.
           </p>
+          <WelcomeChips className="mt-5 justify-center" />
         </Container>
       </section>
 

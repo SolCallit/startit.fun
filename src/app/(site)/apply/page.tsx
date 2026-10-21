@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { ButtonLink, Container, PageHeader } from "@/components/ui";
+import { ButtonLink, Container } from "@/components/ui";
+import { WelcomeChips } from "@/components/welcome-chips";
 import { getCurrentUser } from "@/lib/auth";
 import { startApplication } from "@/lib/applications/actions";
 
 export const metadata: Metadata = { title: "Launch a coin" };
 
 const NEEDS = [
-  "A name, ticker and a line or two about the product",
+  "The product, a meme name and ticker for its coin, and a line or two about it",
   "Its website, X or GitHub (Telegram and Discord if it has them)",
   "Proof the builder is in: a screenshot, a post or an email from them",
   "An image for the coin",
@@ -17,10 +18,17 @@ const NEEDS = [
 export default function Apply() {
   return (
     <Container className="py-14">
-      <PageHeader
-        title="Launch a coin for a product you back"
-        lede="You don't have to be on the team, you just need the builder's sign-off. Three quick screens: your coin, the fee split, and an optional starter's buy."
-      />
+      <section className="start-panel mb-10 px-5 py-6 sm:px-8 sm:py-8">
+        <h1 className="serif-title text-[2.1rem] leading-[1.05] text-white sm:text-[3.25rem]">
+          Launch a native meme for a promising, undervalued product
+        </h1>
+        <p className="mt-3 max-w-2xl text-[1.0625rem] leading-relaxed text-white/85">
+          Any product or brand, crypto or web2, viral or not yet, solo or team. Give it a meme name like{" "}
+          <span className="font-bold text-[#d8ff3c]">$PREDAINU</span> or <span className="font-bold text-[#2ee5ff]">$CALLCAT</span>: the
+          product&apos;s real name looks too corporate on a chart. You don&apos;t have to be on the team, just bring the builder&apos;s sign-off.
+        </p>
+        <WelcomeChips className="mt-5" />
+      </section>
       <div className="grid gap-12 lg:grid-cols-[1.3fr_1fr]">
         <section className="glass rounded-[22px] p-6">
           <h2 className="text-[1.25rem] font-semibold text-ink">Have these ready</h2>

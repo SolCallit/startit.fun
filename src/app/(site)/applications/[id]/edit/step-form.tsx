@@ -141,16 +141,13 @@ function CoinStep({ appId, d, e, quotes, imageUrl, proofs }: {
     <>
       <div>
         <h1 className="font-display text-[1.875rem] leading-tight font-extrabold tracking-[-0.02em] text-ink sm:text-[2.25rem]">Your coin</h1>
-        <p className="mt-1 text-ink-soft">The product you&apos;re backing, its coin, and proof the builder is in.</p>
+        <p className="mt-1 text-ink-soft">A native meme for a product you believe in, plus proof the builder is in.</p>
       </div>
 
       <div className="grid gap-6 sm:grid-cols-[11rem_1fr]">
         <ImagePicker appId={appId} initial={imageUrl} error={e?.image} />
         <div className="flex flex-col gap-4">
-          <div className="grid grid-cols-[1fr_9rem] gap-3">
-            <Field name="project_name" label="Name" errors={e} defaultValue={d.project_name} placeholder="Forge" maxLength={32} />
-            <Field name="ticker" label="Ticker" errors={e} defaultValue={d.ticker} placeholder="FORGE" prefix="$" maxLength={10} />
-          </div>
+          <MemeNamer d={d} e={e} />
           <Field name="project_summary" label="Description" errors={e} defaultValue={d.project_summary} multiline maxLength={1000}
             placeholder="What the product does and why its community should care." />
         </div>
@@ -352,6 +349,75 @@ function InspiredBy({ d, e, quotes, quote, setQuote, pairOptions }: {
         </>
       ) : null}
     </section>
+  );
+}
+
+/* ───────────── Meme names ───────────── */
+
+const MEME_SUFFIX = [
+  { t: "INU", n: "Inu" }, { t: "CAT", n: "Cat" }, { t: "PEPE", n: "Pepe" }, { t: "WIF", n: "Wif Hat" },
+  { t: "APE", n: "Ape" }, { t: "FROG", n: "Frog" }, { t: "DOGE", n: "Doge" }, { t: "BONK", n: "Bonk" },
+];
+
+/** Product name, coin name and ticker, with one-tap meme versions so the coin doesn't look like a corporate token. */
+function MemeNamer({ d, e }: { d: Record<string, string>; e: Errors }) {
+  const [product, setProduct] = useState(d.project_name ?? "");
+  const [coin, setCoin] = useState(d.token_name || d.project_name || "");
+  const [ticker, setTicker] = useState(d.ticker ?? "");
+  const [coinTouched, setCoinTouched] = useState(!!d.token_name && d.token_name !== d.project_name);
+  const word = product.trim().split(/\s+/)[0] ?? "";
+  const base = word.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  const pretty = word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  const ideas = base.length >= 2
+    ? MEME_SUFFIX.map((m) => {
+        const stem = base.slice(0, Math.min(5, 10 - m.t.length));
+        return { ticker: stem + m.t, name: `${pretty.slice(0, stem.length)} ${m.n}`.slice(0, 32) };
+      })
+    : [];
+  const input = (name: string, value: string, set: (v: string) => void, extra: Partial<React.InputHTMLAttributes<HTMLInputElement>> = {}) => (
+    <input id={name} name={name} value={value} onChange={(ev) => set(ev.target.value)} aria-invalid={!!e?.[name]} className={inputCls} {...extra} />
+  );
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="project_name" className="text-[0.9375rem] font-semibold text-ink">Product or brand</label>
+        {input("project_name", product, (v) => { setProduct(v); if (!coinTouched) setCoin(v); }, { placeholder: "Predarena", maxLength: 32 })}
+        <Err msg={e?.project_name} />
+      </div>
+      <div className="grid grid-cols-[1fr_8.5rem] gap-3">
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="token_name" className="text-[0.9375rem] font-semibold text-ink">Coin name</label>
+          {input("token_name", coin, (v) => { setCoin(v); setCoinTouched(true); }, { placeholder: "Preda Inu", maxLength: 32 })}
+          <Err msg={e?.token_name} />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="ticker" className="text-[0.9375rem] font-semibold text-ink">Ticker</label>
+          <div className="relative">
+            <span className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 font-semibold text-muted">$</span>
+            {input("ticker", ticker, (v) => setTicker(v.toUpperCase().replace(/[^A-Z0-9]/g, "")), { placeholder: "PREDAINU", maxLength: 10, className: `${inputCls} pl-[1.65rem] uppercase` })}
+          </div>
+          <Err msg={e?.ticker} />
+        </div>
+      </div>
+      <AnimatePresence initial={false}>
+        {ideas.length ? (
+          <motion.div key="ideas" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+            <div className="rounded-[16px] border border-dashed border-start/50 bg-start/5 p-3">
+              <p className="text-[0.8125rem] font-semibold text-ink">Make it memeable <span className="font-normal text-muted">· tap one, or keep your own</span></p>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {ideas.map((i) => (
+                  <motion.button key={i.ticker} type="button" whileTap={{ scale: 0.9 }} whileHover={{ y: -2 }}
+                    onClick={() => { setTicker(i.ticker); setCoin(i.name); setCoinTouched(true); }}
+                    className={`rounded-full border px-3 py-1 text-[0.8125rem] font-bold ${ticker === i.ticker ? "border-start bg-start text-start-ink" : "border-line-strong/80 bg-surface/60 text-ink-soft hover:text-ink"}`}>
+                    ${i.ticker}
+                  </motion.button>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+    </div>
   );
 }
 

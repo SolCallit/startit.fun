@@ -84,7 +84,8 @@ const feeSplit = z
 export const stepSchemas = {
   1: z
     .object({
-      project_name: required("Name", 32),
+      project_name: required("Product or brand", 32),
+      token_name: trimmed(32).default(""),
       ticker: z.string().trim().toUpperCase().regex(/^[A-Z0-9]{2,10}$/, "Ticker is 2–10 letters or numbers."),
       project_summary: required("Description", 1000),
       website: optionalUrl("Website"),

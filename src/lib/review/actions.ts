@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { requireStaff } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { APPLICATION_STATUSES, type ApplicationStatus } from "@/lib/domain/status";
@@ -19,28 +20,29 @@ export async function decide(appId: string, _prev: DecisionState, formData: Form
   const reason = String(formData.get("reason") ?? "").trim().slice(0, 2000);
   if (!isUuid(appId) || !APPLICATION_STATUSES.includes(to)) return { error: "Unknown action." };
 
-  if (to === "approved") {
-    if (formData.get("confirm_identity") !== "on" || formData.get("confirm_authorization") !== "on") {
-      return { error: "Confirm you verified who the builder is and that they approved this launch." };
-    }
-    if (!reason) return { error: "Record how you verified the builder before approving." };
+  if (to === "approved" && formData.get("confirm_builder") !== "on") {
+    return { error: "Switch on the check that the builder approved this launch." };
   }
   if (to === "awaiting_review" && !staff.roles.includes("admin")) return { error: "Only admins can skip AI screening." };
-  if (["rejected", "suspended", "evidence_requested", "awaiting_review"].includes(to) && !reason) {
+  if (["rejected", "suspended", "evidence_requested"].includes(to) && !reason) {
     return { error: "Add a reason. It's stored in the decision history." };
   }
 
   const supabase = await createClient();
+  // A double tap lands here after the first one already moved it: treat that as done.
+  const { data: current } = await supabase.from("applications").select("status").eq("id", appId).maybeSingle();
+  if (current?.status === to) redirect(to === "launch_config_pending" ? `/admin/applications/${appId}/launch` : `/admin/applications/${appId}`);
+  const defaultReason = to === "awaiting_review" ? "AI screening not switched on yet; reviewed manually." : to === "approved" ? "Builder approval checked against the uploaded proof." : "";
   if (to === "evidence_requested") {
     const { error } = await supabase.from("evidence_requests").insert({ application_id: appId, requested_by: staff.id, message: reason });
     if (error) return { error: `Couldn't record the request: ${error.message}` };
   }
-  const { error } = await supabase.rpc("transition_application", { p_app: appId, p_to: to, p_reason: reason || null });
+  const { error } = await supabase.rpc("transition_application", { p_app: appId, p_to: to, p_reason: reason || defaultReason || null });
   if (error) return { error: error.message };
 
   revalidatePath(`/admin/applications/${appId}`);
   revalidatePath("/admin");
-  return { message: "Decision recorded." };
+  redirect(to === "launch_config_pending" ? `/admin/applications/${appId}/launch` : `/admin/applications/${appId}`);
 }
 
 export async function addNote(appId: string, formData: FormData) {

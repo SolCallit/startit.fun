@@ -53,10 +53,14 @@ export async function saveStep(appId: string, step: StepNumber, _prev: StepState
     case 1: {
       const name = orNull(values.project_name);
       const summary = orNull(values.project_summary);
-      // The coin is the project: same name, and the description doubles as the coin's description.
-      Object.assign(update, { project_name: name, token_name: name, project_summary: summary, token_concept: summary });
+      // The coin can carry a meme name ($PREDAINU); it defaults to the product's name. The description is shared.
+      Object.assign(update, { project_name: name, token_name: orNull(values.token_name) ?? name, project_summary: summary, token_concept: summary });
       update.ticker = orNull(values.ticker)?.toUpperCase() ?? null;
       update.quote_mint = orNull(values.quote_mint);
+      if (update.quote_mint) {
+        const { data: q } = await supabase.from("quote_tokens").select("network").eq("mint", update.quote_mint as string).maybeSingle();
+        if (q && q.network !== "solana-devnet") return { errors: { quote_mint: "That pair unlocks when Startit moves to mainnet. Pick one without the Mainnet tag." }, values };
+      }
       const kind = orNull(values.pair_kind);
       update.pair_kind = kind;
       update.pair_name = kind ? orNull(values.pair_name) : null;

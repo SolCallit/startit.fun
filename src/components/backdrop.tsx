@@ -91,11 +91,11 @@ export function Backdrop() {
         style={{ x, y }}
         className="absolute top-0 left-1/2 aspect-[1440/900] w-[max(100vw,160lvh)] -translate-x-1/2 opacity-[var(--field-opacity)]"
       >
-        <div className="field-drift absolute inset-0">
+        <div className="absolute inset-0">
         {PILLARS.map((p, k) => (
           <div
             key={k}
-            className="pillar"
+            className={`pillar${Math.abs(p.x + HALF - W / 2) < W * 0.2 ? " pillar-core" : ""}`}
             style={{
               left: `${(p.x / W) * 100}%`,
               top: `${(p.y / H) * 100}%`,

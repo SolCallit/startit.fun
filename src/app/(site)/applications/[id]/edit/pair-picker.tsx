@@ -3,7 +3,8 @@
 import { useMemo, useState } from "react";
 import { motion } from "motion/react";
 
-export type PairOption = { mint: string; symbol: string; name: string; category?: string; logo_url?: string | null };
+export type PairOption = { mint: string; symbol: string; name: string; category?: string; logo_url?: string | null; network?: string };
+const LIVE_NETWORK = "solana-devnet";
 
 const LABEL: Record<string, string> = {
   xstocks: "xStocks", prestocks: "PreStocks", currencies: "Currencies", solana: "Solana", majors: "Majors", custom: "Custom",
@@ -47,9 +48,12 @@ export function PairPicker({ options, value, onChange }: { options: PairOption[]
       <div role="radiogroup" aria-label="Pair with" className="grid grid-cols-2 gap-2 sm:grid-cols-3">
         {list.slice(0, shown).map((o) => {
           const on = o.mint === value;
+          const soon = !!o.network && o.network !== LIVE_NETWORK;
           return (
-            <motion.button key={o.mint} type="button" role="radio" aria-checked={on} whileTap={{ scale: 0.96 }} onClick={() => onChange(o.mint)}
-              className={`flex min-w-0 items-center gap-2.5 rounded-[12px] border px-2.5 py-2 text-left transition-colors ${on ? "border-start bg-start/15" : "border-line/70 bg-surface/50 hover:border-line-strong"}`}>
+            <motion.button key={o.mint} type="button" role="radio" aria-checked={on} aria-disabled={soon} whileTap={soon ? undefined : { scale: 0.96 }}
+              onClick={() => { if (!soon) onChange(o.mint); }} title={soon ? "Available when Startit moves to mainnet" : undefined}
+              className={`relative flex min-w-0 items-center gap-2.5 rounded-[12px] border px-2.5 py-2 text-left transition-colors ${soon ? "cursor-not-allowed border-line/50 bg-surface/30 opacity-60" : on ? "border-start bg-start/15" : "border-line/70 bg-surface/50 hover:border-line-strong"}`}>
+              {soon ? <span className="absolute top-1 right-1.5 rounded-full bg-review-soft px-1.5 text-[0.625rem] font-bold text-review">Mainnet</span> : null}
               {o.logo_url
                 // eslint-disable-next-line @next/next/no-img-element
                 ? <img src={o.logo_url} alt="" width={28} height={28} loading="lazy" className="size-7 shrink-0 rounded-full bg-surface-2 object-cover" />
@@ -63,6 +67,9 @@ export function PairPicker({ options, value, onChange }: { options: PairOption[]
         })}
       </div>
       {list.length === 0 ? <p className="text-[0.875rem] text-muted">No pairs match.</p> : null}
+      {options.some((o) => o.network && o.network !== LIVE_NETWORK) ? (
+        <p className="text-[0.8125rem] text-muted">Pairs marked Mainnet are Raydium&apos;s live list. They unlock when Startit launches on mainnet; on devnet you can pick the others.</p>
+      ) : null}
       {list.length > shown ? (
         <button type="button" onClick={() => setShown((n) => n + 30)} className="self-center text-[0.875rem] font-semibold text-cobalt hover:underline">
           Show {Math.min(30, list.length - shown)} more <span className="text-muted">({shown} of {list.length})</span>

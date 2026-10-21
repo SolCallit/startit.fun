@@ -191,10 +191,10 @@ html {
 }
 
 /* Phones and wallet in-app browsers: per-column animation and stacked backdrop blurs make the page flicker while
-   scrolling. There the field is static columns drifting as a single layer, and glass is tinted instead of blurred. */
+   scrolling. There only the on-screen columns animate, and glass is tinted instead of blurred. */
 @media (max-width: 767px), (pointer: coarse) {
-  .pillar { animation: none !important; will-change: auto !important; }
-  .field-drift { animation: field-drift 9s ease-in-out infinite; will-change: transform; }
+  /* Only the columns a phone can actually see keep their wave; off-screen ones sit still. */
+  .pillar:not(.pillar-core) { animation: none !important; will-change: auto !important; }
   .glass, .glass-bar, .start-panel { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
   .glass { background: color-mix(in oklab, var(--surface) 90%, transparent); }
   .glass-bar { background: color-mix(in oklab, var(--paper) 92%, transparent); }

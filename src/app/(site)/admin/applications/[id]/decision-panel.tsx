@@ -36,23 +36,19 @@ export function DecisionPanel({ appId, actions }: { appId: string; actions: Acti
             Moves the application to <strong>{STATUS_LABEL[chosen.to]}</strong>. This is recorded permanently with your name.
           </p>
           {chosen.to === "approved" ? (
-            <fieldset className="flex flex-col gap-2">
-              <legend className="mb-1 font-medium text-ink">Before approving</legend>
-              <label className="flex gap-3 text-ink-soft"><input type="checkbox" role="switch" name="confirm_identity" className="switch shrink-0" />I verified the builder&apos;s identity myself, not only from the AI report.</label>
-              <label className="flex gap-3 text-ink-soft"><input type="checkbox" role="switch" name="confirm_authorization" className="switch shrink-0" />I confirmed the builder explicitly approved this token and its branding.</label>
-            </fieldset>
+            <label className="flex items-center gap-3 text-ink-soft"><input type="checkbox" role="switch" name="confirm_builder" className="switch shrink-0" />I checked the proof: the builder approved this launch.</label>
           ) : null}
           <div className="flex flex-col gap-1.5">
             <label htmlFor="reason" className="font-medium text-ink">
-              {chosen.to === "evidence_requested" ? "What do you need from the launcher?" : chosen.to === "approved" ? "How did you verify the builder?" : "Reason"}
+              {chosen.to === "evidence_requested" ? "What do you need from the launcher?" : chosen.to === "approved" ? "Note" : "Reason"}
               {chosen.needsReason ? "" : " (optional)"}
             </label>
-            <textarea id="reason" name="reason" rows={3} required={chosen.needsReason}
+            <textarea id="reason" name="reason" rows={chosen.needsReason ? 3 : 2} required={chosen.needsReason}
               className="rounded-[12px] border-[1.5px] border-line-strong bg-surface px-3 py-2 text-ink focus:border-cobalt focus:outline-none" />
             {chosen.to === "evidence_requested" ? <p className="text-[0.875rem] text-muted">The launcher sees this message.</p> : null}
           </div>
           <div className="flex items-center gap-3">
-            <button type="submit" disabled={pending}
+            <button type="submit" disabled={pending} aria-busy={pending}
               className={`rounded-md border px-4 py-2 font-semibold disabled:opacity-50 ${intentCls[chosen.intent]}`}>
               {pending ? "Recording…" : `Confirm: ${chosen.label}`}
             </button>

@@ -100,12 +100,14 @@ export async function setQuoteEnabled(mint: string, enabled: boolean): Promise<R
  * Pulls every quote token Raydium has a LaunchLab config for on this network and lists it for applicants.
  * Listing doesn't allow it on our platform: that still takes the admin's allow transaction before a launch.
  */
-export async function syncPairs(): Promise<Result<{ found: number; added: number; updated: number; delisted: number }>> {
+export async function syncPairs(network: "devnet" | "mainnet" = "devnet"): Promise<Result<{ found: number; added: number; updated: number; delisted: number }>> {
   try {
     const user = await requireAdmin();
     const { buildCatalog } = await import("./pair-catalog");
-    const catalog = await buildCatalog();
-    const conn = connection();
+    const catalog = await buildCatalog(network);
+    const net = network === "devnet" ? "solana-devnet" : "solana-mainnet";
+    const { Connection, clusterApiUrl } = await import("@solana/web3.js");
+    const conn = network === "devnet" ? connection() : new Connection(process.env.SOLANA_MAINNET_RPC_URL || clusterApiUrl("mainnet-beta"), "confirmed");
 
     // Decimals and token program from the chain where Jupiter didn't know the token.
     const missing = catalog.filter((c) => c.decimals === null || !c.tokenProgram);
@@ -120,17 +122,19 @@ export async function syncPairs(): Promise<Result<{ found: number; added: number
     }
 
     const supabase = await createClient();
-    const { data: existing } = await supabase.from("quote_tokens").select("mint, listed");
-    const known = new Map((existing ?? []).map((r) => [r.mint as string, r.listed as boolean]));
+    const { data: existing } = await supabase.from("quote_tokens").select("mint, listed, network");
+    // A mint already stored for the other network keeps its row (e.g. SOL).
+    const otherNet = new Set((existing ?? []).filter((r) => r.network !== net).map((r) => r.mint as string));
+    const known = new Map((existing ?? []).filter((r) => r.network === net).map((r) => [r.mint as string, r.listed as boolean]));
     const now = new Date().toISOString();
     const rows = catalog
-      .filter((c) => c.decimals !== null && c.decimals <= 12)
+      .filter((c) => c.decimals !== null && c.decimals <= 12 && !otherNet.has(c.mint))
       .map((c) => ({
         mint: c.mint,
         symbol: c.symbol.replace(/[^A-Za-z0-9.]/g, "").slice(0, 12) || c.mint.slice(0, 4),
         name: c.name.trim().slice(0, 60) || c.mint.slice(0, 8),
         decimals: c.decimals!,
-        network: "solana-devnet",
+        network: net,
         launchlab_config_id: c.configId,
         category: c.category,
         logo_url: c.logoUrl,

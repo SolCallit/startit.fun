@@ -32,11 +32,13 @@ export function QuoteTokens({ rows, platformReady }: { rows: QuoteRow[]; platfor
         applicants, named from Jupiter&apos;s token list. Before a launch can use a pair, allow it on our platform with the admin wallet and switch it on.
       </p>
       <div className="flex flex-wrap items-center gap-3 rounded-[16px] border border-line bg-surface/60 p-4">
-        <button type="button" className="btn-start" disabled={syncing} onClick={() => startSync(async () => {
-          setSyncMsg(null);
-          const r = await syncPairs();
-          setSyncMsg(r.ok ? { ok: true, text: `Found ${r.found} configs: ${r.added} new, ${r.updated} updated, ${r.delisted} delisted.` } : { ok: false, text: r.error });
-        })}>{syncing ? "Reading Raydium…" : "Sync pairs from Raydium"}</button>
+        {(["devnet", "mainnet"] as const).map((n) => (
+          <button key={n} type="button" className={n === "devnet" ? "btn-start" : "btn-chrome"} disabled={syncing} onClick={() => startSync(async () => {
+            setSyncMsg(null);
+            const r = await syncPairs(n);
+            setSyncMsg(r.ok ? { ok: true, text: `${n}: found ${r.found} configs, ${r.added} new, ${r.updated} updated, ${r.delisted} delisted.` } : { ok: false, text: r.error });
+          })}>{syncing ? "Reading Raydium…" : n === "devnet" ? "Sync devnet pairs" : "Sync mainnet catalog (preview)"}</button>
+        ))}
         <span className="text-[0.875rem] text-muted">{listed} listed for applicants · {rows.filter((r) => r.enabled).length} switched on for launches</span>
         {syncMsg ? <p role={syncMsg.ok ? "status" : "alert"} className={`w-full text-[0.875rem] ${syncMsg.ok ? "text-verified" : "text-flagged"}`}>{syncMsg.text}</p> : null}
       </div>

@@ -62,12 +62,12 @@ export const OPERATOR_ACTIONS: Partial<
   Record<ApplicationStatus, { to: ApplicationStatus; label: string; needsReason: boolean; intent: "primary" | "neutral" | "danger" }[]>
 > = {
   awaiting_review: [
-    { to: "approved", label: "Approve for launch", needsReason: true, intent: "primary" },
+    { to: "approved", label: "Approve for launch", needsReason: false, intent: "primary" },
     { to: "evidence_requested", label: "Request more evidence", needsReason: true, intent: "neutral" },
     { to: "ai_screening", label: "Re-run AI screening", needsReason: false, intent: "neutral" },
     { to: "rejected", label: "Reject", needsReason: true, intent: "danger" },
   ],
-  submitted: [{ to: "awaiting_review", label: "Skip AI, review manually", needsReason: true, intent: "neutral" }],
+  submitted: [{ to: "awaiting_review", label: "Skip AI, review manually", needsReason: false, intent: "primary" }],
   approved: [{ to: "launch_config_pending", label: "Start launch configuration", needsReason: false, intent: "primary" }],
 };
 

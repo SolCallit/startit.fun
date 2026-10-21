@@ -101,7 +101,7 @@ export function stepDefaults(b: ApplicationBundle, step: number): Record<string,
   switch (step) {
     case 1:
       return {
-        project_name: s(a.project_name), ticker: s(a.ticker), project_summary: s(a.project_summary),
+        project_name: s(a.project_name), token_name: s(a.token_name), ticker: s(a.ticker), project_summary: s(a.project_summary),
         website: link("website"), x: link("x"), github: link("github"), telegram: link("telegram"), discord: link("discord"),
         quote_mint: s(a.quote_mint),
         pair_kind: s(a.pair_kind), pair_name: s(a.pair_name), pair_relationship: s(a.pair_relationship),
@@ -126,12 +126,12 @@ export function stepDefaults(b: ApplicationBundle, step: number): Record<string,
   }
 }
 
-export type QuoteOption = { mint: string; symbol: string; name: string; category: string; logo_url: string | null };
+export type QuoteOption = { mint: string; symbol: string; name: string; category: string; logo_url: string | null; network: string };
 
 /** Pairs an applicant can pick: every listed LaunchLab quote token. SOL first. */
 export async function listQuoteOptions(): Promise<QuoteOption[]> {
   const supabase = await createClient();
-  const { data } = await supabase.from("quote_tokens").select("mint, symbol, name, category, logo_url")
+  const { data } = await supabase.from("quote_tokens").select("mint, symbol, name, category, logo_url, network")
     .or("listed.eq.true,enabled.eq.true").order("symbol").limit(2000);
   const rows = (data ?? []) as QuoteOption[];
   const sol = "So11111111111111111111111111111111111111112";
