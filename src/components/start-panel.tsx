@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { DEFAULT_SPLIT, bpsToPercent } from "@/lib/domain/fees";
 import { Reveal } from "@/components/motion";
 import { StartButton } from "@/components/start-button";
@@ -18,38 +17,31 @@ const SPLIT = [
   { label: "Launcher", bps: DEFAULT_SPLIT.launcherBps, cls: "bg-[#d8ff3c]" },
 ];
 
-type Action = { href: string; label: string };
-
-/** The brand card: a press-me START button, the slogan, the route and the split, in one slim glass strip. */
-export function StartPanel({ primary, secondary, as: Tag = "h1" }: { primary: Action; secondary: Action; as?: "h1" | "h2" }) {
+/** The hero board: one centered START button that opens (or continues) your application, on red-black glass. */
+export function StartPanel({ href, label, hint, action, as: Tag = "h1" }: { href: string; label: string; hint: string; action?: () => Promise<void>; as?: "h1" | "h2" }) {
   return (
     <Reveal>
-      <section aria-labelledby="start-title" className="start-panel px-4 py-4 sm:px-6 sm:py-5">
-        <div className="flex items-center gap-4 sm:gap-6">
-          <StartButton href={primary.href} label={primary.label} />
-          <div className="min-w-0 flex-1">
-            <Tag id="start-title" className="serif-title text-[1.6rem] leading-[1.05] text-white sm:text-[2.5rem]">
-              Scaling undervalued products through meme community
-            </Tag>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <Link href={primary.href} className="btn-panel">{primary.label}<span aria-hidden>›</span></Link>
-              <Link href={secondary.href} className="btn-panel ghost">{secondary.label}<span aria-hidden>›</span></Link>
-            </div>
-          </div>
+      <section aria-labelledby="start-title" className="ignite-board relative overflow-hidden px-5 pt-7 pb-5 text-center sm:px-10 sm:pt-10">
+        <Tag id="start-title" className="serif-title mx-auto max-w-3xl text-[1.75rem] leading-[1.05] text-white sm:text-[2.75rem]">
+          Scaling undervalued products through meme community
+        </Tag>
+
+        <div className="mt-7 sm:mt-9">
+          <StartButton href={href} label={label} hint={hint} action={action} />
         </div>
 
-        <ol className="mt-4 flex gap-1.5 overflow-x-auto pb-1 text-[0.8125rem] [scrollbar-width:none] sm:flex-wrap">
+        <ol className="mx-auto mt-7 flex max-w-3xl justify-start gap-1.5 overflow-x-auto pb-1 text-[0.8125rem] [scrollbar-width:none] sm:flex-wrap sm:justify-center">
           {STEPS.map((s, i) => (
             <li key={s.title} title={`${s.who}: ${s.detail}`}
-              className="flex shrink-0 items-center gap-1.5 rounded-full bg-white/10 py-1 pr-3 pl-1 ring-1 ring-white/15">
-              <span className="grid size-5 place-items-center rounded-full bg-white/90 text-[0.6875rem] font-extrabold text-[#5a0a10]">{i + 1}</span>
-              <span className="font-semibold whitespace-nowrap text-white">{s.short}</span>
+              className="flex shrink-0 items-center gap-1.5 rounded-full bg-white/[0.07] py-1 pr-3 pl-1 ring-1 ring-white/10">
+              <span className="grid size-5 place-items-center rounded-full bg-[#e3232e] text-[0.6875rem] font-extrabold text-white">{i + 1}</span>
+              <span className="font-semibold whitespace-nowrap text-white/90">{s.short}</span>
             </li>
           ))}
         </ol>
 
-        <div className="mt-3 flex items-center gap-3 text-[0.75rem] text-white/80">
-          <span className="flex h-1.5 w-24 shrink-0 overflow-hidden rounded-full sm:w-40" role="img" aria-label={SPLIT.map((s) => `${s.label} ${bpsToPercent(s.bps)}`).join(", ")}>
+        <div className="mx-auto mt-3 flex max-w-xl items-center justify-center gap-3 text-[0.75rem] text-white/70">
+          <span className="flex h-1.5 w-20 shrink-0 overflow-hidden rounded-full sm:w-32" role="img" aria-label={SPLIT.map((s) => `${s.label} ${bpsToPercent(s.bps)}`).join(", ")}>
             {SPLIT.map((s) => <span key={s.label} className={s.cls} style={{ width: `${s.bps / 100}%` }} />)}
           </span>
           <span className="truncate">Fees: {SPLIT.map((s) => `${bpsToPercent(s.bps)} ${s.label === "Startit" ? s.label : s.label.toLowerCase()}`).join(" · ")}</span>

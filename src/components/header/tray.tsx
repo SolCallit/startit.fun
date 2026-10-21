@@ -21,7 +21,7 @@ export function Tray({ signedIn, isStaff }: { signedIn: boolean; isStaff: boolea
     { href: "/explore", label: "Projects" },
     { href: "/apply", label: "Apply to launch" },
     ...(signedIn ? [{ href: "/dashboard", label: "My applications" }] : []),
-    ...(isStaff ? [{ href: "/admin", label: "Admin · Review queue" }, { href: "/admin/settings", label: "Admin · Platform settings" }] : []),
+    ...(isStaff ? [{ href: "/admin", label: "Admin" }, { href: "/admin/settings", label: "Admin settings" }] : []),
   ];
   const more: Item[] = [
     { href: "/about", label: "About us" },

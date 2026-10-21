@@ -148,11 +148,17 @@ export async function syncPairs(network: "devnet" | "mainnet" = "devnet"): Promi
       added += chunk.filter((r) => !known.has(r.mint)).length;
       updated += chunk.filter((r) => known.has(r.mint)).length;
       // New rows start disabled (not allow-listed); existing rows keep their enabled / allow state.
-      const { error } = await supabase.from("quote_tokens").upsert(
-        chunk.map((r) => (known.has(r.mint) ? r : { ...r, enabled: false, added_by: user.id })),
-        { onConflict: "mint" },
-      );
-      if (error) throw new Error(error.message);
+      // Two calls so every row in a batch has the same columns (mixed rows send NULL for the missing ones).
+      const fresh = chunk.filter((r) => !known.has(r.mint)).map((r) => ({ ...r, enabled: false, added_by: user.id }));
+      const seen = chunk.filter((r) => known.has(r.mint));
+      if (fresh.length) {
+        const { error } = await supabase.from("quote_tokens").insert(fresh);
+        if (error) throw new Error(error.message);
+      }
+      if (seen.length) {
+        const { error } = await supabase.from("quote_tokens").upsert(seen, { onConflict: "mint" });
+        if (error) throw new Error(error.message);
+      }
     }
     // Configs that disappeared on-chain stop being offered.
     const live = new Set(rows.map((r) => r.mint));

@@ -35,19 +35,24 @@ async function Body() {
         {data ? <p className="mt-4 text-[0.8125rem] text-muted">Last changed {new Date(data.updated_at).toLocaleString()}.</p> : null}
       </Panel>
       <div className="mt-6">
-        <Panel title="Payouts">
-          {user.roles.includes("admin") ? (
-            <PayoutSettingsForm multisig={get("fee_router_multisig")?.value ?? null} platform={get("platform_treasury_address")?.value ?? null} />
-          ) : <p className="text-ink-soft">Multisig {get("fee_router_multisig")?.value ?? "not set"}; platform wallet {get("platform_treasury_address")?.value ?? "not set"}.</p>}
-        </Panel>
-      </div>
-      <div className="mt-6">
         <Panel title="Raydium LaunchLab platform (devnet)">
           {!data ? <p className="text-ink-soft">Set the Fee Router first.</p> : !user.roles.includes("admin") ? (
             <p className="text-ink-soft">{get("launchlab_platform_id") ? `Platform ${get("launchlab_platform_id")!.value}` : "Not set up yet. An admin must do this."}</p>
           ) : (
             <PlatformSetup platformId={get("launchlab_platform_id")?.value ?? null} redirected={!!get("launchlab_cp_creator_redirected")} />
           )}
+        </Panel>
+      </div>
+      <div className="mt-6">
+        <Panel title="Payouts (not needed to launch)">
+          <p className="mb-4 text-[0.9375rem] text-ink-soft">
+            Only needed once a coin has collected fees and you want to pay them out. Payouts are signed from a Squads multisig
+            (a shared wallet that needs several approvals). Create one at squads.so, set the Fee Router above to the
+            multisig&apos;s vault address, then paste the multisig account here. For a test launch, leave this empty.
+          </p>
+          {user.roles.includes("admin") ? (
+            <PayoutSettingsForm multisig={get("fee_router_multisig")?.value ?? null} platform={get("platform_treasury_address")?.value ?? null} />
+          ) : <p className="text-ink-soft">Multisig {get("fee_router_multisig")?.value ?? "not set"}; platform wallet {get("platform_treasury_address")?.value ?? "not set"}.</p>}
         </Panel>
       </div>
       <div className="mt-6">

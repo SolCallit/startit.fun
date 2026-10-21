@@ -8,6 +8,7 @@ import { STATUS_LABEL } from "@/lib/domain/status";
 import { ButtonLink } from "@/components/ui";
 import { ProjectCard } from "./cards";
 import { StartPanel } from "@/components/start-panel";
+import { startApplication } from "@/lib/applications/actions";
 
 export const metadata: Metadata = { title: "Home" };
 
@@ -41,11 +42,11 @@ async function LaunchPath() {
   const mine = await listMyApplications(user.id);
   const draft = mine.find((a) => EDITABLE.includes(a.status));
   return (
-    <StartPanel
-      as="h2"
-      primary={draft ? { href: `/applications/${draft.id}/edit`, label: "Continue launch" } : { href: "/apply", label: "Launch token" }}
-      secondary={{ href: "/explore", label: "Browse market" }}
-    />
+    draft ? (
+      <StartPanel as="h2" href={`/applications/${draft.id}/edit`} label="Press START to continue" hint={`Pick up ${draft.project_name ?? "your launch"} where you left it.`} />
+    ) : (
+      <StartPanel as="h2" href="/apply" action={startApplication} label="Press START to launch" hint="Your coin, the fee split, done in three screens." />
+    )
   );
 }
 

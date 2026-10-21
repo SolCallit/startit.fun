@@ -18,13 +18,13 @@ export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
 export const STATUS_LABEL: Record<ApplicationStatus, string> = {
   draft: "Draft",
   submitted: "Submitted",
-  ai_screening: "AI screening in progress",
-  evidence_requested: "Additional evidence requested",
-  awaiting_review: "Awaiting human review",
-  approved: "Approved for launch",
-  launch_config_pending: "Launch configuration pending",
-  ready_for_deployment: "Ready for deployment",
-  launched: "Launched",
+  ai_screening: "AI is checking it",
+  evidence_requested: "Waiting on launcher",
+  awaiting_review: "Needs review",
+  approved: "Approved",
+  launch_config_pending: "Setting up launch",
+  ready_for_deployment: "Ready to launch",
+  launched: "Live",
   rejected: "Rejected",
   suspended: "Suspended",
 };
@@ -68,7 +68,7 @@ export const OPERATOR_ACTIONS: Partial<
     { to: "rejected", label: "Reject", needsReason: true, intent: "danger" },
   ],
   submitted: [{ to: "awaiting_review", label: "Skip AI, review manually", needsReason: false, intent: "primary" }],
-  approved: [{ to: "launch_config_pending", label: "Start launch configuration", needsReason: false, intent: "primary" }],
+  approved: [{ to: "launch_config_pending", label: "Start launch setup", needsReason: false, intent: "primary" }],
 };
 
 export const SUSPENDABLE: ApplicationStatus[] = APPLICATION_STATUSES.filter(

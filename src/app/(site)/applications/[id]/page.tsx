@@ -40,8 +40,9 @@ async function Status({ params, searchParams }: PageProps<"/applications/[id]">)
         <h1 className="mt-4 text-[2.25rem] leading-tight font-bold tracking-[-0.02em] text-ink">
           {app.project_name ?? "Untitled application"} {app.ticker ? <span className="text-muted">${app.ticker}</span> : null}
         </h1>
-        {user.isStaff && !isOwner ? (
-          <p className="mt-3"><Link href={`/admin/applications/${id}`} className="font-semibold text-cobalt">Open in review queue</Link></p>
+        <p className="mt-2 text-[0.875rem] text-muted">This is the launcher&apos;s view of the application.</p>
+        {user.isStaff ? (
+          <p className="mt-3"><Link href={`/admin/applications/${id}`} className="btn-start">Open admin view</Link></p>
         ) : null}
       </header>
 
@@ -99,7 +100,7 @@ async function Status({ params, searchParams }: PageProps<"/applications/[id]">)
               </Item>
               <Item label="Token">{app.token_name} {app.ticker ? `($${app.ticker})` : ""} on Solana</Item>
               <Item label="Fee split">
-                Community {bpsToPercent(app.proposed_community_bps)}, founder {bpsToPercent(app.proposed_founder_bps)}, launcher {bpsToPercent(app.proposed_launcher_bps)}, platform {bpsToPercent(app.proposed_platform_bps)}
+                Community {bpsToPercent(app.proposed_community_bps)}, builder {bpsToPercent(app.proposed_founder_bps)}, launcher {bpsToPercent(app.proposed_launcher_bps)}, Startit {bpsToPercent(app.proposed_platform_bps)}
               </Item>
               <Item label="Evidence files">{bundle.evidence.length} uploaded</Item>
             </dl>

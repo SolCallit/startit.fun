@@ -188,7 +188,7 @@ function LinkInput({ name, label, placeholder, d, e }: { name: string; label: st
   );
 }
 
-function ImagePicker({ appId, initial, error }: { appId: string; initial: string | null; error?: string }) {
+export function ImagePicker({ appId, initial, error }: { appId: string; initial: string | null; error?: string }) {
   const [url, setUrl] = useState(initial);
   const [err, setErr] = useState<string | null>(null);
   const [busy, start] = useTransition();
@@ -236,7 +236,7 @@ function ImagePicker({ appId, initial, error }: { appId: string; initial: string
   );
 }
 
-function ProofPicker({ appId, proofs, error }: { appId: string; proofs: { id: string; kb: number; mime: string }[]; error?: string }) {
+export function ProofPicker({ appId, proofs, error }: { appId: string; proofs: { id: string; kb: number; mime: string }[]; error?: string }) {
   const [list, setList] = useState(proofs);
   const [err, setErr] = useState<string | null>(null);
   const [busy, start] = useTransition();

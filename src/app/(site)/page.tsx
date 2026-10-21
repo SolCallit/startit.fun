@@ -23,7 +23,7 @@ export default function Home() {
       </Suspense>
       <section>
         <Container className="pt-8 pb-16 sm:pt-14 sm:pb-24">
-          <StartPanel primary={{ href: "/apply", label: "Launch token" }} secondary={{ href: "/explore", label: "Browse market" }} />
+          <StartPanel href="/apply" label="Press START to launch" hint="Your coin, the fee split, done." />
           <p className="mx-auto mt-8 max-w-2xl text-center text-[1.0625rem] leading-relaxed text-ink-soft">
             Launch a native meme for a promising, undervalued product or brand: crypto or web2, viral or not yet, solo or team.
             Memecoins have the crowd and the capital; plenty of good products have neither. Half of every trading fee goes to the community.

@@ -7,6 +7,8 @@ import { EDITABLE, getApplicationBundle, listQuoteOptions, stepDefaults } from "
 import { STEPS, type StepNumber } from "@/lib/applications/schema";
 import { projectImageUrl } from "@/lib/project-image";
 import { StepForm } from "./step-form";
+import { ChatApply } from "./chat-apply";
+import { chatAvailable, type ChatMsg } from "@/lib/applications/chat";
 
 export default function EditApplication(props: PageProps<"/applications/[id]/edit">) {
   return (
@@ -28,6 +30,7 @@ async function Editor({ params, searchParams }: PageProps<"/applications/[id]/ed
 
   const requested = Number(sp.step);
   const step = (STEPS.some((s) => s.n === requested) ? requested : 1) as StepNumber;
+  const mode = sp.mode === "chat" ? "chat" : "form";
   const quotes = await listQuoteOptions();
   const proofs = bundle.evidence
     .filter((e) => e.kind === "authorization" || e.kind === "founder_approval")
@@ -53,6 +56,22 @@ async function Editor({ params, searchParams }: PageProps<"/applications/[id]/ed
         <div className="mb-6"><Notice tone="warn">A reviewer asked for more. Update what they asked about, then resubmit from the application page.</Notice></div>
       ) : null}
 
+      {step === 1 ? (
+        <div role="tablist" aria-label="How do you want to apply?" className="mb-4 grid grid-cols-2 gap-1 rounded-full glass p-1">
+          {([["form", "Fill it in"], ["chat", "Chat with AI"]] as const).map(([m, l]) => (
+            <Link key={m} role="tab" aria-selected={mode === m} href={`/applications/${id}/edit?step=1&mode=${m}`}
+              className={`rounded-full px-4 py-2 text-center text-[0.9375rem] font-bold transition-colors ${mode === m ? "bg-start text-start-ink" : "text-ink-soft hover:text-ink"}`}>
+              {l}
+            </Link>
+          ))}
+        </div>
+      ) : null}
+
+      {step === 1 && mode === "chat" ? (
+        <ChatApply appId={id} available={await chatAvailable()} saved={stepDefaults(bundle, 1)}
+          initialChat={Array.isArray(bundle.app.draft_payload?.chat) ? (bundle.app.draft_payload.chat as ChatMsg[]) : []}
+          imageUrl={projectImageUrl(bundle.app.image_path)} proofs={proofs} />
+      ) : (
       <StepForm
         key={step}
         appId={id}
@@ -63,6 +82,7 @@ async function Editor({ params, searchParams }: PageProps<"/applications/[id]/ed
         proofs={proofs}
         quoteMint={bundle.app.quote_mint}
       />
+      )}
     </div>
   );
 }

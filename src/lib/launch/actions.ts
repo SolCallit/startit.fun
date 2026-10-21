@@ -210,5 +210,5 @@ export async function markReadyForDeployment(appId: string, _prev: ConfigState):
   const { error } = await supabase.rpc("transition_application", { p_app: appId, p_to: "ready_for_deployment", p_reason: null });
   if (error) return { errors: { _form: error.message } };
   revalidatePath(`/admin/applications/${appId}/launch`);
-  return { message: "Ready for deployment. The fee split and signed terms are now public." };
+  return { message: "Ready to launch. The fee split and signed terms are now public." };
 }

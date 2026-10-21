@@ -50,7 +50,7 @@ async function ReviewBody({ params }: PageProps<"/admin/applications/[id]">) {
 
   return (
     <>
-      <p className="mb-6"><Link href="/admin" className="text-cobalt hover:underline">Back to queue</Link></p>
+      <p className="mb-6"><Link href="/admin" className="text-cobalt hover:underline">Back to admin</Link></p>
       <header className="mb-10 border-b border-line pb-8">
         <div className="flex flex-wrap items-center gap-3">
           <StatusBadge status={app.status} />

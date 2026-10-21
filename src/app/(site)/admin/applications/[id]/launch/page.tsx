@@ -59,7 +59,7 @@ async function Body({ params }: PageProps<"/admin/applications/[id]/launch">) {
 
       {!cfg.feeRouter ? <div className="mb-6"><Notice tone="warn">No Fee Router address is set. An admin must add it in <Link href="/admin/settings" className="font-semibold text-cobalt">Platform settings</Link> first.</Notice></div> : null}
       {!editable && app.status !== "ready_for_deployment" && app.status !== "launched" ? (
-        <div className="mb-6"><Notice tone="warn">Launch settings open once the application is in “Launch configuration pending”.</Notice></div>
+        <div className="mb-6"><Notice tone="warn">Launch settings open once the application is approved and you tap “Start launch setup”.</Notice></div>
       ) : null}
 
       <div className="grid gap-8 xl:grid-cols-[1fr_24rem]">
@@ -108,7 +108,7 @@ async function Body({ params }: PageProps<"/admin/applications/[id]/launch">) {
             </ul>
           </Panel>
 
-          <Panel title="Ready for deployment?">
+          <Panel title="Ready to launch?">
             {cfg.blockers.length ? (
               <ul className="mb-4 flex flex-col gap-1.5 text-[0.9375rem]">
                 {cfg.blockers.map((b) => <li key={b} className="flex gap-2 text-ink-soft"><span aria-hidden className="text-flagged">✕</span>{b}</li>)}

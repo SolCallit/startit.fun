@@ -1,117 +1,103 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { Container, EmptyState, Mono, PageHeader, StatusBadge } from "@/components/ui";
+import { Container, EmptyState, StatusBadge } from "@/components/ui";
 import { requireStaff } from "@/lib/auth";
 import { getDashboardCounts, getQueue, type QueueRow } from "@/lib/review/data";
+import type { ApplicationStatus } from "@/lib/domain/status";
 
-export const metadata: Metadata = { title: "Review queue" };
+export const metadata: Metadata = { title: "Admin" };
 
-export default function Admin() {
+/** What the admin does next for each status, and where that happens. */
+const NEXT: Partial<Record<ApplicationStatus, { label: string; to: "review" | "launch" }>> = {
+  submitted: { label: "Review it", to: "review" },
+  awaiting_review: { label: "Review it", to: "review" },
+  approved: { label: "Start launch setup", to: "review" },
+  launch_config_pending: { label: "Set up launch", to: "launch" },
+  ready_for_deployment: { label: "Launch it", to: "launch" },
+};
+
+const TABS = [
+  { key: "todo", label: "To do", statuses: ["submitted", "awaiting_review", "approved", "launch_config_pending", "ready_for_deployment"] },
+  { key: "waiting", label: "Waiting", statuses: ["ai_screening", "evidence_requested"] },
+  { key: "live", label: "Live", statuses: ["launched"] },
+  { key: "closed", label: "Closed", statuses: ["rejected", "suspended"] },
+] as const satisfies readonly { key: string; label: string; statuses: readonly ApplicationStatus[] }[];
+
+export default function Admin(props: PageProps<"/admin">) {
   return (
-    <Container className="py-12">
-      <PageHeader title="Review queue" lede="Applications waiting on a decision, and the state of every launch and payout."
-        actions={<>
+    <Container className="py-10">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-[2rem] text-ink">Admin</h1>
+        <div className="flex gap-2">
           <Link href="/admin/payouts" className="btn-chrome">Payouts</Link>
-          <Link href="/admin/settings" className="btn-chrome">Platform settings</Link>
-        </>} />
+          <Link href="/admin/settings" className="btn-chrome">Settings</Link>
+        </div>
+      </div>
       <Suspense fallback={<p className="text-muted">Loading…</p>}>
-        <Overview />
+        <Board {...props} />
       </Suspense>
     </Container>
   );
 }
 
-const lamportsToSol = (v: bigint) => `${(Number(v) / 1e9).toLocaleString("en-US", { maximumFractionDigits: 4 })} SOL`;
-
-const REC_LABEL: Record<string, string> = {
-  proceed_to_human_review: "AI: proceed to review",
-  request_evidence: "AI: request evidence",
-  recommend_rejection: "AI: recommends rejection",
-};
-
-async function Overview() {
+async function Board({ searchParams }: PageProps<"/admin">) {
   await requireStaff();
-  const [c, awaiting, inFlight] = await Promise.all([
-    getDashboardCounts(),
-    getQueue(["awaiting_review"]),
-    getQueue(["submitted", "ai_screening", "evidence_requested"]),
-  ]);
-  const nothingCollected = c.feesCollectedRaw === BigInt(0);
+  const sp = await searchParams;
+  const tab = TABS.find((t) => t.key === sp.tab) ?? TABS[0];
+  const [all, c] = await Promise.all([getQueue(TABS.flatMap((t) => [...t.statuses])), getDashboardCounts()]);
+  const count = (k: (typeof TABS)[number]) => all.filter((r) => (k.statuses as readonly string[]).includes(r.status)).length;
+  const rows = all.filter((r) => (tab.statuses as readonly string[]).includes(r.status));
 
   return (
-    <div className="flex flex-col gap-10">
-      <section aria-label="Totals" className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-4">
-        <Stat label="Awaiting review" value={c.awaiting} emphasis={c.awaiting > 0} />
-        <Stat label="Need attention" value={c.flaggedFindings} hint="Flagged findings or AI recommends rejection" emphasis={c.flaggedFindings > 0} tone="bad" />
-        <Stat label="Approved, not configured" value={c.approved} />
-        <Stat label="Launches pending" value={c.pendingLaunch} />
-        <Stat label="Live launches" value={c.live} />
-        <Stat label="Suspended" value={c.suspended} tone={c.suspended ? "bad" : undefined} />
-        <Stat label="Payouts pending" value={c.pendingPayouts} />
-        <Stat label="Payouts failed" value={c.failedPayouts} tone={c.failedPayouts ? "bad" : undefined} emphasis={c.failedPayouts > 0} />
-      </section>
+    <div className="flex flex-col gap-6">
+      <nav aria-label="Applications" className="flex flex-wrap gap-2">
+        {TABS.map((t) => {
+          const on = t.key === tab.key, n = count(t);
+          return (
+            <Link key={t.key} href={t.key === "todo" ? "/admin" : `/admin?tab=${t.key}`} aria-current={on ? "page" : undefined}
+              className={`flex items-center gap-2 rounded-full px-4 py-2 text-[0.9375rem] font-semibold ${on ? "bg-start text-start-ink" : "glass text-ink-soft hover:text-ink"}`}>
+              {t.label}
+              <span className={`grid min-w-6 place-items-center rounded-full px-1.5 text-[0.75rem] ${on ? "bg-white/25" : t.key === "todo" && n ? "bg-start text-start-ink" : "bg-surface-2"}`}>{n}</span>
+            </Link>
+          );
+        })}
+      </nav>
 
-      <section aria-label="Fees" className="rounded-[18px] glass p-5">
-        <h2 className="font-semibold text-ink">Trading fees</h2>
-        {nothingCollected ? (
-          <p className="mt-2 text-ink-soft">No fees have been collected yet. Figures appear here only from confirmed on-chain transactions.</p>
-        ) : (
-          <dl className="mt-3 grid gap-4 sm:grid-cols-3">
-            <div><dt className="text-[0.875rem] text-muted">Collected</dt><dd className="text-[1.25rem] font-bold text-ink">{lamportsToSol(c.feesCollectedRaw)}</dd></div>
-            <div><dt className="text-[0.875rem] text-muted">Distributed</dt><dd className="text-[1.25rem] font-bold text-ink">{lamportsToSol(c.feesDistributedRaw)}</dd></div>
-            <div><dt className="text-[0.875rem] text-muted">Platform share paid</dt><dd className="text-[1.25rem] font-bold text-ink">{lamportsToSol(c.platformFeesRaw)}</dd></div>
-          </dl>
-        )}
-      </section>
+      {rows.length ? (
+        <ul className="flex flex-col gap-3">
+          {rows.map((r) => <Row key={r.id} r={r} />)}
+        </ul>
+      ) : (
+        <EmptyState title={tab.key === "todo" ? "Nothing to do" : `Nothing ${tab.label.toLowerCase()}`}>
+          {tab.key === "todo" ? "New applications show up here as soon as they're submitted." : null}
+        </EmptyState>
+      )}
 
-      <section>
-        <h2 className="mb-4 text-[1.25rem] font-semibold text-ink">Waiting for a decision</h2>
-        {awaiting.length ? <QueueTable rows={awaiting} /> : <EmptyState title="Nothing waiting for review">New applications appear here after AI screening finishes.</EmptyState>}
-      </section>
-
-      <section>
-        <h2 className="mb-4 text-[1.25rem] font-semibold text-ink">In progress</h2>
-        {inFlight.length ? <QueueTable rows={inFlight} /> : <p className="text-ink-soft">No applications are being screened or waiting on launchers.</p>}
-      </section>
-      <p className="text-[0.875rem] text-muted">{c.total} applications submitted in total.</p>
+      <p className="text-[0.875rem] text-muted">
+        {c.live} live · {c.pendingPayouts} payouts pending{c.failedPayouts ? ` · ${c.failedPayouts} payouts failed` : ""} · {c.total} applications in total
+      </p>
     </div>
   );
 }
 
-function Stat({ label, value, hint, emphasis, tone }: { label: string; value: number; hint?: string; emphasis?: boolean; tone?: "bad" }) {
+function Row({ r }: { r: QueueRow }) {
+  const next = NEXT[r.status];
+  const href = next?.to === "launch" ? `/admin/applications/${r.id}/launch` : `/admin/applications/${r.id}`;
   return (
-    <div className="bg-surface p-4">
-      <p className={`text-[1.75rem] leading-none font-bold ${emphasis ? (tone === "bad" ? "text-flagged" : "text-cobalt") : "text-ink"}`}>{value}</p>
-      <p className="mt-2 text-[0.875rem] font-medium text-ink-soft">{label}</p>
-      {hint ? <p className="text-[0.75rem] text-muted">{hint}</p> : null}
-    </div>
-  );
-}
-
-function QueueTable({ rows }: { rows: QueueRow[] }) {
-  return (
-    <ul className="divide-y divide-line rounded-[18px] glass">
-      {rows.map((r) => (
-        <li key={r.id}>
-          <Link href={`/admin/applications/${r.id}`} className="grid gap-2 px-5 py-4 hover:bg-paper md:grid-cols-[1fr_auto] md:items-center">
-            <div>
-              <p className="font-semibold text-ink">{r.project_name ?? "Untitled"} {r.ticker ? <span className="font-medium text-muted">${r.ticker}</span> : null}</p>
-              <p className="text-[0.875rem] text-muted">
-                <Mono>{r.public_ref}</Mono>
-                {r.submitted_at ? ` · submitted ${new Date(r.submitted_at).toLocaleDateString()}` : ""}
-                {r.recommendation ? ` · ${REC_LABEL[r.recommendation] ?? r.recommendation}` : ""}
-                {r.latest_run_status === "failed" ? " · last screening run failed" : ""}
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              {r.flagged_count > 0 ? <span className="rounded bg-flagged-soft px-2 py-0.5 text-[0.8125rem] font-semibold text-flagged">{r.flagged_count} flagged</span> : null}
-              {r.needs_review_count > 0 ? <span className="rounded bg-review-soft px-2 py-0.5 text-[0.8125rem] font-semibold text-review">{r.needs_review_count} need review</span> : null}
-              <StatusBadge status={r.status} />
-            </div>
-          </Link>
-        </li>
-      ))}
-    </ul>
+    <li className="glass flex flex-col gap-3 rounded-[18px] p-4 sm:flex-row sm:items-center">
+      <Link href={`/admin/applications/${r.id}`} className="min-w-0 flex-1">
+        <p className="truncate font-display text-[1.125rem] font-extrabold text-ink">
+          {r.project_name ?? "Untitled"} {r.ticker ? <span className="font-semibold text-muted">${r.ticker}</span> : null}
+        </p>
+        <p className="mt-0.5 flex flex-wrap items-center gap-2 text-[0.8125rem] text-muted">
+          <StatusBadge status={r.status} />
+          {r.submitted_at ? <span>Sent {new Date(r.submitted_at).toLocaleDateString()}</span> : null}
+          {r.flagged_count > 0 ? <span className="font-semibold text-flagged">{r.flagged_count} red flags</span> : null}
+          {r.latest_run_status === "failed" ? <span className="text-flagged">AI check failed</span> : null}
+        </p>
+      </Link>
+      {next ? <Link href={href} className="btn-start self-start sm:self-auto">{next.label}</Link> : <Link href={href} className="btn-chrome self-start sm:self-auto">Open</Link>}
+    </li>
   );
 }
