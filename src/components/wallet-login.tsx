@@ -48,7 +48,8 @@ function useLoginWallets() {
  */
 async function signInWith(w: LoginWallet) {
   const supabase = createBrowserSupabase();
-  const { host, href } = window.location;
+  // Sign the bare origin, not the current page: Supabase matches the URI against its Redirect URLs list.
+  const { host, origin: href } = window.location;
   const issuedAt = new Date().toISOString();
   let message: string;
   let signature: Uint8Array;
