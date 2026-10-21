@@ -41,6 +41,7 @@
   --glow-strength: 0.16;
   --ring-opacity: 0.85;
   --glass-fill: 58%;
+  --glass-bg: linear-gradient(165deg, #7a0d1566 0%, #2a050a73 50%, #0a020499 100%);
   --glass-edge: #ffffff1a;
   --glass-shine: #ffffff14;
   --field-opacity: 0.9;
@@ -81,6 +82,7 @@
   --glow-strength: 0.22;
   --ring-opacity: 0.7;
   --glass-fill: 62%;
+  --glass-bg: linear-gradient(165deg, #fff5f6b3 0%, #ffe9ecb3 55%, #ffffffbf 100%);
   --glass-edge: #ffffffa6;
   --glass-shine: #ffffffcc;
   --field-opacity: 0.55;
@@ -126,7 +128,7 @@ html {
 
 /* Glass: frosted panels floating over the pillar field. */
 .glass {
-  background: color-mix(in oklab, var(--surface) var(--glass-fill), transparent);
+  background: var(--glass-bg);
   -webkit-backdrop-filter: blur(22px) saturate(170%);
   backdrop-filter: blur(22px) saturate(170%);
   border: 1px solid var(--glass-edge);
@@ -142,14 +144,14 @@ html {
 /* START panel: the brand card. Deep red glass in a lime glow, like the button's ring lit up. */
 .start-panel {
   position: relative;
-  border-radius: 20px;
+  border-radius: 22px;
   background:
-    linear-gradient(180deg, #ffffff1f, transparent 40%),
-    linear-gradient(135deg, #b0141f80, #5a0a1066 60%, #2a050a59);
-  -webkit-backdrop-filter: blur(20px) saturate(170%);
-  backdrop-filter: blur(20px) saturate(170%);
-  border: 1.5px solid #d8ff3c;
-  box-shadow: 0 0 22px -4px #d8ff3caa, 0 0 60px -14px #d8ff3c80, inset 0 1px 0 #ffffff33, inset 0 -1px 0 #00000033;
+    radial-gradient(120% 70% at 50% 0%, #ffffff1f, transparent 55%),
+    linear-gradient(165deg, #9c0f198c 0%, #4a060c80 45%, #0b0204b3 100%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  backdrop-filter: blur(22px) saturate(160%);
+  border: 1px solid #ffffff2b;
+  box-shadow: inset 0 1px 0 #ffffff40, inset 0 -40px 80px -40px #000000cc, 0 30px 80px -30px #000000e6, 0 0 60px -20px #e3232e80;
   color: #fff;
 }
 .start-panel .serif-title {
@@ -184,7 +186,7 @@ html {
   background:
     radial-gradient(120% 70% at 50% 0%, #ffffff1f, transparent 55%),
     radial-gradient(60% 50% at 50% 42%, #e3232e40, transparent 70%),
-    linear-gradient(165deg, #9c0f19bf 0%, #4a060cb3 45%, #0b0204d9 100%);
+    linear-gradient(165deg, #9c0f198c 0%, #4a060c80 45%, #0b0204b3 100%);
   -webkit-backdrop-filter: blur(22px) saturate(160%);
   backdrop-filter: blur(22px) saturate(160%);
   border: 1px solid #ffffff2b;
@@ -196,6 +198,12 @@ html {
   font-weight: 400;
   text-shadow: 0 2px 0 #00000080;
 }
+
+[data-theme="light"] .welcome-chip { color: #3a0a10 !important; text-shadow: none !important; }
+
+/* Page switch: a quick fade-and-rise on every navigation. */
+@keyframes page-in { from { opacity: 0; transform: translate3d(0, 10px, 0); } to { opacity: 1; transform: none; } }
+.page-in { animation: page-in 260ms cubic-bezier(.2, .7, .2, 1) both; }
 
 /* Pillar field: isometric columns rising and falling in a slow diagonal wave. */
 @keyframes pillar-rise {
@@ -216,7 +224,8 @@ html {
   .pillar:not(.pillar-core) { animation: none !important; will-change: auto !important; }
   .glass, .glass-bar, .start-panel, .ignite-board { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
   .ignite-board { background: radial-gradient(120% 70% at 50% 0%, #ffffff1a, transparent 55%), linear-gradient(165deg, #8a0d16f2 0%, #3d050af2 45%, #0b0204f7 100%); }
-  .glass { background: color-mix(in oklab, var(--surface) 90%, transparent); }
+  :root, [data-theme="dark"] { --glass-bg: linear-gradient(165deg, #5a0a10e6 0%, #22040ae6 50%, #0a0204f0 100%); }
+  [data-theme="light"] { --glass-bg: linear-gradient(165deg, #fff5f6f2 0%, #ffe9ecf2 55%, #fffffff5 100%); }
   .glass-bar { background: color-mix(in oklab, var(--paper) 92%, transparent); }
   .start-panel { background: linear-gradient(180deg, #ffffff1a, transparent 40%), linear-gradient(135deg, #8e1019e6, #4a0810eb 60%, #26050af0); }
 }

@@ -21,16 +21,15 @@ const SPLIT = [
 export function StartPanel({ href, label, hint, action, as: Tag = "h1" }: { href: string; label: string; hint: string; action?: () => Promise<void>; as?: "h1" | "h2" }) {
   return (
     <Reveal>
-      <section aria-labelledby="start-title" className="ignite-board relative overflow-hidden px-5 pt-7 pb-5 text-center sm:px-10 sm:pt-10">
-        <Tag id="start-title" className="serif-title mx-auto max-w-3xl text-[1.75rem] leading-[1.05] text-white sm:text-[2.75rem]">
-          Scaling undervalued products through meme community
+      <section aria-labelledby="start-title" className="ignite-board relative overflow-hidden px-4 pt-6 pb-5 text-center sm:px-10 sm:pt-9">
+        <Tag id="start-title" className="serif-title mx-auto max-w-3xl text-[1.55rem] leading-[1.05] text-white sm:text-[2.6rem]">
+          Scaling undervalued brands &amp; products through meme community
         </Tag>
+        <p className="mx-auto mt-2 max-w-xl text-[0.875rem] leading-snug text-white/75 sm:text-[1rem]">
+          For devs, content creators, brands and artists. Trade their trending success now.
+        </p>
 
-        <div className="mt-7 sm:mt-9">
-          <StartButton href={href} label={label} hint={hint} action={action} />
-        </div>
-
-        <ol className="mx-auto mt-7 flex max-w-3xl justify-start gap-1.5 overflow-x-auto pb-1 text-[0.8125rem] [scrollbar-width:none] sm:flex-wrap sm:justify-center">
+        <ol className="mx-auto mt-4 flex max-w-3xl justify-start gap-1.5 overflow-x-auto pb-1 text-[0.75rem] [scrollbar-width:none] sm:flex-wrap sm:justify-center sm:text-[0.8125rem]">
           {STEPS.map((s, i) => (
             <li key={s.title} title={`${s.who}: ${s.detail}`}
               className="flex shrink-0 items-center gap-1.5 rounded-full bg-white/[0.07] py-1 pr-3 pl-1 ring-1 ring-white/10">
@@ -40,8 +39,12 @@ export function StartPanel({ href, label, hint, action, as: Tag = "h1" }: { href
           ))}
         </ol>
 
-        <div className="mx-auto mt-3 flex max-w-xl items-center justify-center gap-3 text-[0.75rem] text-white/70">
-          <span className="flex h-1.5 w-20 shrink-0 overflow-hidden rounded-full sm:w-32" role="img" aria-label={SPLIT.map((s) => `${s.label} ${bpsToPercent(s.bps)}`).join(", ")}>
+        <div className="mt-5 sm:mt-7">
+          <StartButton href={href} label={label} hint={hint} action={action} />
+        </div>
+
+        <div className="mx-auto mt-4 flex max-w-xl items-center justify-center gap-3 text-[0.75rem] text-white/70">
+          <span className="flex h-1.5 w-16 shrink-0 overflow-hidden rounded-full sm:w-32" role="img" aria-label={SPLIT.map((s) => `${s.label} ${bpsToPercent(s.bps)}`).join(", ")}>
             {SPLIT.map((s) => <span key={s.label} className={s.cls} style={{ width: `${s.bps / 100}%` }} />)}
           </span>
           <span className="truncate">Fees: {SPLIT.map((s) => `${bpsToPercent(s.bps)} ${s.label === "Startit" ? s.label : s.label.toLowerCase()}`).join(" · ")}</span>

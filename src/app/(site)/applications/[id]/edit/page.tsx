@@ -13,7 +13,7 @@ import { chatAvailable, type ChatMsg } from "@/lib/applications/chat";
 export default function EditApplication(props: PageProps<"/applications/[id]/edit">) {
   return (
     <Container className="py-10 sm:py-14">
-      <Suspense fallback={<p className="text-muted">Loading…</p>}>
+      <Suspense fallback={<EditorSkeleton />}>
         <Editor {...props} />
       </Suspense>
     </Container>
@@ -31,7 +31,8 @@ async function Editor({ params, searchParams }: PageProps<"/applications/[id]/ed
   const requested = Number(sp.step);
   const step = (STEPS.some((s) => s.n === requested) ? requested : 1) as StepNumber;
   const mode = sp.mode === "chat" ? "chat" : "form";
-  const quotes = await listQuoteOptions();
+  // Pairs are only picked on the first screen; skip the catalog everywhere else.
+  const quotes = step === 1 && mode === "form" ? await listQuoteOptions() : [];
   const proofs = bundle.evidence
     .filter((e) => e.kind === "authorization" || e.kind === "founder_approval")
     .map((e) => ({ id: e.id, kb: Math.max(1, Math.round(e.byte_size / 1024)), mime: e.mime_type }));
@@ -83,6 +84,22 @@ async function Editor({ params, searchParams }: PageProps<"/applications/[id]/ed
         quoteMint={bundle.app.quote_mint}
       />
       )}
+    </div>
+  );
+}
+
+function EditorSkeleton() {
+  return (
+    <div className="mx-auto max-w-3xl animate-pulse" aria-label="Loading your application">
+      <div className="mb-8 flex gap-2">{[0, 1, 2].map((i) => <div key={i} className="h-1.5 flex-1 rounded-full bg-start/50" />)}</div>
+      <div className="glass flex flex-col gap-5 rounded-[28px] p-6 sm:p-8">
+        <div className="h-8 w-40 rounded-lg bg-surface-2/70" />
+        <div className="grid gap-6 sm:grid-cols-[11rem_1fr]">
+          <div className="aspect-square w-40 rounded-[22px] bg-surface-2/60 sm:w-auto" />
+          <div className="flex flex-col gap-3">{[0, 1, 2].map((i) => <div key={i} className="h-12 rounded-[14px] bg-surface-2/60" />)}</div>
+        </div>
+        <div className="h-24 rounded-[14px] bg-surface-2/50" />
+      </div>
     </div>
   );
 }

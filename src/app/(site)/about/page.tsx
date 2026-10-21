@@ -56,7 +56,7 @@ export default function About() {
         <section className="start-panel px-5 py-6 sm:px-8 sm:py-8">
           <p className="text-[0.8125rem] font-semibold tracking-wide text-white/70 uppercase">About Startit</p>
           <h1 className="serif-title mt-2 text-[2.25rem] leading-[1.03] text-white sm:text-[3.5rem]">
-            Scaling undervalued products through meme community
+            Scaling undervalued brands &amp; products through meme community
           </h1>
           <p className="mt-4 max-w-2xl text-[1.0625rem] leading-relaxed text-white/85">
             Memecoins have the crowd, the attention and the capital. Plenty of good products have none of that. Startit is

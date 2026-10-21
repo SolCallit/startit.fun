@@ -32,6 +32,8 @@ async function Body({ params }: PageProps<"/admin/applications/[id]/launch">) {
   const split = cfg.feeConfig
     ? { platformBps: cfg.feeConfig.platform_bps, founderBps: cfg.feeConfig.founder_bps, launcherBps: cfg.feeConfig.launcher_bps, communityBps: cfg.feeConfig.community_bps }
     : { platformBps: app.proposed_platform_bps, founderBps: app.proposed_founder_bps, launcherBps: app.proposed_launcher_bps, communityBps: app.proposed_community_bps };
+  // A self-launch has no launcher cut: fold any launcher share into Startit's so the total stays 100%.
+  if (selfLaunch && split.launcherBps) split.platformBps = (split.platformBps ?? 0) + split.launcherBps;
   const fallback = defaultSplitFor(selfLaunch);
   const t = cfg.treasury;
   const defaults: Record<string, string> = {
@@ -39,7 +41,7 @@ async function Body({ params }: PageProps<"/admin/applications/[id]/launch">) {
     launcher_bps: String(selfLaunch ? 0 : split.launcherBps ?? fallback.launcherBps), community_bps: String(split.communityBps ?? fallback.communityBps),
     deviation_reason: cfg.feeConfig?.deviation_reason ?? String(app.draft_payload?.split_reason ?? ""),
     founder_wallet: cfg.launch?.founder_wallet ?? "", launcher_wallet: cfg.launch?.launcher_wallet ?? "",
-    treasury_address: t?.address ?? "", treasury_is_multisig: t ? (t.is_multisig ? "yes" : "no") : "yes",
+    treasury_address: t?.address ?? "", treasury_is_multisig: t ? (t.is_multisig ? "yes" : "no") : "no",
     treasury_threshold: t?.threshold ? String(t.threshold) : "", treasury_signers: (t?.signers ?? []).join("\n"),
     treasury_rules: t?.control_rules ?? "",
     insider_allocations: ((cfg.launch?.insider_allocations ?? []) as { holder: string; amount: string; note: string }[]).map((a) => `${a.holder} | ${a.amount} | ${a.note}`).join("\n"),

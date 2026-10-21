@@ -17,7 +17,7 @@ export function WelcomeChips({ className = "" }: { className?: string }) {
           initial={{ opacity: 0, y: 10, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ type: "spring", stiffness: 380, damping: 22, delay: 0.05 * i }}
           whileHover={{ y: -3, rotate: i % 2 ? 2 : -2 }}
-          className="rounded-full border px-3 py-1 text-[0.875rem] font-bold"
+          className="welcome-chip rounded-full border px-3 py-1 text-[0.875rem] font-bold"
           style={{ borderColor: `${w.c}99`, color: w.c, background: `${w.c}14`, textShadow: "0 1px 0 #0006" }}>
           {w.t}
         </motion.li>

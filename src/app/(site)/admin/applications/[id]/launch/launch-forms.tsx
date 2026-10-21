@@ -18,73 +18,88 @@ function F({ name, label, hint, d, e, rows, mono }: { name: string; label: strin
   );
 }
 
+const DEFAULT_RULES = "Treasury funds are spent only for the community (marketing, liquidity, rewards). Every spend is posted on the project page with its transaction.";
+
 export function LaunchConfigForm({ appId, defaults, selfLaunch }: { appId: string; defaults: Record<string, string>; selfLaunch: boolean }) {
   const [state, action, pending] = useActionState<ConfigState, FormData>(saveLaunchConfig.bind(null, appId), {});
   const d = { ...defaults, ...state.values };
+  if (!d.treasury_rules) d.treasury_rules = DEFAULT_RULES;
   const e = state.errors;
-  const [multisig, setMultisig] = useState(d.treasury_is_multisig !== "no");
+  const [multisig, setMultisig] = useState(d.treasury_is_multisig === "yes");
+  const keys = ["community_bps", "founder_bps", "launcher_bps", "platform_bps"] as const;
+  const LABEL = { community_bps: "Community", founder_bps: "Builder", launcher_bps: "Launcher", platform_bps: "Startit" };
+  const [bps, setBps] = useState(() => Object.fromEntries(keys.map((k) => [k, Number(d[k] || 0)])) as Record<(typeof keys)[number], number>);
+  const [editSplit, setEditSplit] = useState(!!d.deviation_reason || !!e?.community_bps || !!e?.deviation_reason);
+  const total = keys.reduce((n, k) => n + bps[k], 0);
 
   return (
-    <form action={action} className="flex flex-col gap-6" noValidate>
+    <form action={action} className="flex flex-col gap-7" noValidate>
       {e?._form ? <p role="alert" className="rounded-md border border-flagged/40 bg-flagged-soft px-4 py-3 text-flagged">{e._form}</p> : null}
 
-      <fieldset className="flex flex-col gap-4">
-        <legend className="mb-2 text-[1.0625rem] font-semibold text-ink">Fee split (basis points, total 10,000)</legend>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          {(["community_bps", "founder_bps", "launcher_bps", "platform_bps"] as const).map((k) => (
-            <div key={k} className="flex flex-col gap-1.5">
-              <label htmlFor={k} className="text-[0.875rem] font-medium text-ink">{k.replace("_bps", "")}</label>
-              <input id={k} name={k} type="number" min={0} max={10000} defaultValue={d[k]}
-                readOnly={selfLaunch && k === "launcher_bps"} aria-invalid={!!e?.[k]} className={input} />
+      <fieldset className="flex flex-col gap-3">
+        <legend className="mb-1 text-[1.0625rem] font-semibold text-ink">Fee split</legend>
+        <p className="text-ink-soft">{keys.filter((k) => !(selfLaunch && k === "launcher_bps")).map((k) => `${bps[k] / 100}% ${LABEL[k].toLowerCase()}`).join(" · ")}</p>
+        {keys.map((k) => <input key={k} type="hidden" name={k} value={bps[k]} />)}
+        <label className="flex items-center gap-3 text-ink-soft">
+          <input type="checkbox" role="switch" className="switch" checked={editSplit} onChange={(ev) => setEditSplit(ev.target.checked)} />
+          Change the split
+        </label>
+        {editSplit ? (
+          <>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {keys.filter((k) => !(selfLaunch && k === "launcher_bps")).map((k) => (
+                <div key={k} className="flex flex-col gap-1">
+                  <label htmlFor={`pct-${k}`} className="text-[0.875rem] font-medium text-ink">{LABEL[k]} %</label>
+                  <input id={`pct-${k}`} type="number" min={0} max={100} step={0.5} value={bps[k] / 100} className={input}
+                    onChange={(ev) => setBps((o) => ({ ...o, [k]: Math.round(Number(ev.target.value) * 100) }))} />
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+            <p className={`text-[0.875rem] font-semibold ${total === 10000 ? "text-verified" : "text-flagged"}`}>Total {total / 100}%{total === 10000 ? "" : ", it has to be 100%"}</p>
+            <F name="deviation_reason" label="Why a different split?" hint="Shown on the project page, so buyers know why it isn't the usual split." d={d} e={e} rows={2} />
+          </>
+        ) : <input type="hidden" name="deviation_reason" value={d.deviation_reason ?? ""} />}
         {e?.community_bps ? <p className="text-[0.8125rem] text-flagged">{e.community_bps}</p> : null}
         {e?.launcher_bps ? <p className="text-[0.8125rem] text-flagged">{e.launcher_bps}</p> : null}
-        <F name="deviation_reason" label="Reason for a non-default split (published)" d={d} e={e} rows={2} />
       </fieldset>
 
       <fieldset className="flex flex-col gap-4">
-        <legend className="mb-2 text-[1.0625rem] font-semibold text-ink">Payout wallets</legend>
-        <F name="founder_wallet" label="Founder wallet" mono d={d} e={e} hint="Confirm with the founder directly. They'll prove control of it when they sign the terms." />
+        <legend className="mb-1 text-[1.0625rem] font-semibold text-ink">Who gets paid</legend>
+        <F name="founder_wallet" label="Builder wallet" mono d={d} e={e} hint="Where the builder's 30% goes. They prove it's theirs when they sign the terms." />
         {selfLaunch ? <input type="hidden" name="launcher_wallet" value="" /> :
-          <F name="launcher_wallet" label="Launcher wallet" mono d={d} e={e} hint="The scout who submitted this project. They'll sign with this wallet." />}
+          <F name="launcher_wallet" label="Launcher wallet" mono d={d} e={e} hint="The person who brought the product here. They sign with this wallet too." />}
+        <F name="treasury_address" label="Community treasury wallet" mono d={d} e={e} hint="Where the community's 50% goes." />
       </fieldset>
 
       <fieldset className="flex flex-col gap-4">
-        <legend className="mb-2 text-[1.0625rem] font-semibold text-ink">Community treasury</legend>
-        <F name="treasury_address" label="Treasury address" mono d={d} e={e} hint="For a Squads multisig, use the vault address." />
-        <div className="flex gap-6 text-ink-soft">
-          <input type="hidden" name="treasury_is_multisig" value={multisig ? "yes" : "no"} />
-          <label className="flex items-center gap-3">
-            <input type="checkbox" role="switch" className="switch" checked={multisig} onChange={(ev) => setMultisig(ev.target.checked)} />
-            <span>{multisig ? "Multisig treasury" : "Single-signer treasury"}</span>
-          </label>
-        </div>
+        <legend className="mb-1 text-[1.0625rem] font-semibold text-ink">Treasury safety</legend>
+        <input type="hidden" name="treasury_is_multisig" value={multisig ? "yes" : "no"} />
+        <label className="flex items-start justify-between gap-4">
+          <span>
+            <span className="font-medium text-ink">Shared wallet (multisig)</span>
+            <span className="block text-[0.875rem] text-muted">Needs several people to approve every spend, so no one person can drain the treasury. Recommended for real launches; fine to leave off for a test.</span>
+          </span>
+          <input type="checkbox" role="switch" className="switch mt-0.5" checked={multisig} onChange={(ev) => setMultisig(ev.target.checked)} />
+        </label>
         {multisig ? (
-          <div className="grid gap-4 sm:grid-cols-[8rem_1fr]">
-            <F name="treasury_threshold" label="Threshold" d={d} e={e} />
-            <F name="treasury_signers" label="Signers, one per line" mono rows={3} d={d} e={e} />
+          <div className="grid gap-4 sm:grid-cols-[9rem_1fr]">
+            <F name="treasury_threshold" label="Approvals needed" hint="e.g. 2" d={d} e={e} />
+            <F name="treasury_signers" label="Wallets that can approve" hint="One per line, e.g. 3 wallets with 2 approvals needed." mono rows={3} d={d} e={e} />
           </div>
         ) : (
-          <>
-            <input type="hidden" name="treasury_threshold" value="" /><input type="hidden" name="treasury_signers" value="" />
-            <p className="rounded-md border border-review/40 bg-review-soft px-3 py-2 text-[0.875rem] text-review">A single-signer treasury will be disclosed as such. A multisig is strongly preferred.</p>
-          </>
+          <><input type="hidden" name="treasury_threshold" value="" /><input type="hidden" name="treasury_signers" value="" /></>
         )}
-        <F name="treasury_rules" label="Control rules (published)" rows={3} d={d} e={e} hint="Who can spend treasury funds, how decisions are made, and where spending is reported." />
+        <F name="treasury_rules" label="How the treasury is used" hint="Shown publicly. Edit if this project needs different rules." rows={3} d={d} e={e} />
       </fieldset>
 
-      <fieldset className="flex flex-col gap-4">
-        <legend className="mb-2 text-[1.0625rem] font-semibold text-ink">Token</legend>
-        <p className="text-ink-soft">1,000,000,000 supply, 6 decimals, mint and freeze authority revoked, Solana devnet. Mainnet stays locked until the external review.</p>
-        <F name="insider_allocations" label="Insider allocations" rows={3} d={d} e={e} hint="One per line: holder | whole tokens | note. Leave empty for none — the terms will say so." />
-      </fieldset>
+      <details className="rounded-[14px] border border-line/70 p-4">
+        <summary className="cursor-pointer font-medium text-ink">Coin details (standard, nothing to change)</summary>
+        <p className="mt-3 text-[0.9375rem] text-ink-soft">1 billion supply, 6 decimals. Nobody can mint more or freeze wallets. Runs on Solana devnet until mainnet opens.</p>
+        <div className="mt-3"><F name="insider_allocations" label="Coins held by insiders at launch" rows={2} d={d} e={e} hint="Leave empty for none. One per line: who | how many | note." /></div>
+      </details>
 
       <div className="flex flex-wrap items-center gap-3 border-t border-line pt-5">
-        <button type="submit" disabled={pending} className="btn-start">
-          {pending ? "Saving…" : "Save and regenerate terms"}
-        </button>
+        <button type="submit" disabled={pending || total !== 10000} className="btn-start">{pending ? "Saving…" : "Save"}</button>
         {state.message ? <p role="status" className="text-[0.9375rem] text-verified">{state.message}</p> : null}
       </div>
     </form>
