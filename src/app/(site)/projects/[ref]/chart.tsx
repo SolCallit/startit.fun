@@ -38,7 +38,7 @@ export function TokenChart({ trades, supply, symbol }: { trades: ChartTrade[]; s
     const line = css.getPropertyValue("--line").trim() || "#213046";
     const chart = createChart(box.current, {
       autoSize: true,
-      layout: { background: { type: ColorType.Solid, color: "transparent" }, textColor: ink, fontFamily: "var(--font-schibsted), system-ui", attributionLogo: false },
+      layout: { background: { type: ColorType.Solid, color: "transparent" }, textColor: ink, fontFamily: "\"Times New Roman\", var(--font-tinos), Times, serif", attributionLogo: false },
       grid: { vertLines: { color: `${line}55` }, horzLines: { color: `${line}55` } },
       rightPriceScale: { borderVisible: false },
       timeScale: { borderVisible: false, timeVisible: true, secondsVisible: false },

@@ -3,33 +3,7 @@ import localFont from "next/font/local";
 import { Backdrop } from "@/components/backdrop";
 import "./globals.css";
 
-// Self-hosted (OFL) so builds never depend on reaching Google Fonts.
-const bricolage = localFont({
-  src: "./fonts/bricolage-grotesque-latin-wght-normal.woff2",
-  variable: "--font-bricolage",
-  weight: "200 800",
-  display: "swap",
-});
-const schibsted = localFont({
-  src: "./fonts/schibsted-grotesk-latin-wght-normal.woff2",
-  variable: "--font-schibsted",
-  weight: "400 900",
-  display: "swap",
-});
-const serif = localFont({
-  src: "./fonts/instrument-serif-latin-400-italic.woff2",
-  variable: "--font-serif",
-  weight: "400",
-  style: "italic",
-  display: "swap",
-});
-const croissant = localFont({
-  src: "./fonts/croissant-one-latin-400-normal.woff2",
-  variable: "--font-display-classic",
-  weight: "400",
-  display: "swap",
-});
-// Tinos: metric-compatible with Times New Roman, so it looks the same on phones that don't ship Times.
+// Self-hosted Tinos is metric-compatible with Times New Roman: the whole app is set in Times, even on phones without it.
 const tinos = localFont({
   src: [
     { path: "./fonts/tinos-latin-400-normal.woff2", weight: "400", style: "normal" },
@@ -37,12 +11,6 @@ const tinos = localFont({
     { path: "./fonts/tinos-latin-700-normal.woff2", weight: "700", style: "normal" },
   ],
   variable: "--font-tinos",
-  display: "swap",
-});
-const jetbrains = localFont({
-  src: "./fonts/jetbrains-mono-latin-wght-normal.woff2",
-  variable: "--font-jetbrains",
-  weight: "100 800",
   display: "swap",
 });
 
@@ -64,7 +32,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" data-theme="dark" suppressHydrationWarning className={`${bricolage.variable} ${schibsted.variable} ${jetbrains.variable} ${serif.variable} ${croissant.variable} ${tinos.variable} antialiased`}>
+    <html lang="en" data-theme="dark" suppressHydrationWarning className={`${tinos.variable} antialiased`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
       </head>
