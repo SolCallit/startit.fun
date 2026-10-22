@@ -28,13 +28,13 @@ const SPLIT = [
 export function StartPanel({ href, label, hint, action, as: Tag = "h1" }: { href: string; label: string; hint: string; action?: () => Promise<void>; as?: "h1" | "h2" }) {
   return (
     <Reveal>
-      <section aria-labelledby="start-title" className="ignite-board relative mx-auto grid max-w-5xl gap-4 overflow-hidden p-4 sm:p-5 md:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] md:gap-5">
+      <section aria-labelledby="start-title" className="ignite-board relative mx-auto grid max-w-5xl gap-4 overflow-hidden p-4 sm:p-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:gap-5">
         <div className="flex min-w-0 flex-col">
-          <Tag id="start-title" className="font-classic hero-bold max-w-[16ch] text-[2rem] leading-[1.05] text-white sm:text-[2.6rem] lg:text-[3rem]">
-            Meme power for undervalued brands.
+          <Tag id="start-title" className="font-classic hero-bold text-[1.6rem] leading-[1.12] text-white sm:text-[2.1rem] lg:text-[2.4rem]">
+            Supporting undervalued brands, devs, artists &amp; creators through memes.
           </Tag>
           <p className="mt-2.5 font-times text-[1rem] leading-snug text-white/75 sm:text-[1.125rem]">
-            Back devs and artists. Trade their success.
+            Back them early. Trade their success.
           </p>
           <ol className="mt-3 flex flex-wrap gap-1.5 font-times text-[0.8125rem] text-white/80 sm:text-[0.875rem]">
             {STEPS.map((s, i) => (
@@ -44,7 +44,7 @@ export function StartPanel({ href, label, hint, action, as: Tag = "h1" }: { href
             ))}
           </ol>
 
-          <div className="mt-4 md:mt-auto md:pt-5">
+          <div className="mt-4 lg:mt-auto lg:pt-5">
             <StartButton compact href={href} label={label} hint={hint} action={action} />
           </div>
 
@@ -58,8 +58,8 @@ export function StartPanel({ href, label, hint, action, as: Tag = "h1" }: { href
 
         <aside aria-labelledby="queue-title" className="launch-queue flex min-w-0 flex-col rounded-[18px] p-3.5 sm:p-4">
           <div className="flex items-baseline justify-between gap-2 border-b border-white/15 pb-2">
-            <h3 id="queue-title" className="font-classic font-normal tracking-normal text-[1.15rem] text-white sm:text-[1.3rem]">Upcoming launches</h3>
-            <Link href="/explore" className="font-times text-[0.8125rem] text-white/60 hover:text-white">See all →</Link>
+            <h3 id="queue-title" className="whitespace-nowrap font-classic font-normal tracking-normal text-[1.15rem] text-white sm:text-[1.3rem]">Upcoming launches</h3>
+            <Link href="/explore" className="whitespace-nowrap font-times text-[0.8125rem] text-white/60 hover:text-white">See all →</Link>
           </div>
           <Suspense fallback={<QueueSkeleton />}>
             <Queue />
