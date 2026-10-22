@@ -71,12 +71,12 @@ describe("screen()", () => {
 
     const claims = report.findings.map((f) => `${f.status}:${f.claim}`);
     expect(claims).toContain("VERIFIED:Website links to the submitted GitHub account");
-    expect(claims).toContain("NEEDS_REVIEW:The builder approved this launch");
+    expect(claims).toContain("NEEDS_REVIEW:The brand approved this launch");
     expect(report.findings.find((f) => f.claim === "Made-up claim")!.status).toBe("UNVERIFIED");
     expect(report.findings.find((f) => f.claim === "Site describes an eval harness")!.sources[0]!.url).toBe("https://neuroforge.ai");
     // Flagged finding caps confidence on a "proceed" recommendation.
     expect(report.confidence).toBe(0.5);
-    expect(report.limitations).toMatch(/Who the builder is/);
+    expect(report.limitations).toMatch(/Who the brand is/);
   });
 
   it("fences injected delimiters in untrusted application text", async () => {

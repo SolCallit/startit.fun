@@ -13,8 +13,8 @@ const toB64 = (bytes: Uint8Array) => { let s = ""; for (const b of bytes) s += S
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /**
- * The launcher's launch button. One wallet signature creates the coin and makes the starter's buy together,
- * so nobody can buy before the launcher. The new mint's key is generated here and never leaves the page.
+ * The starter's launch button. One wallet signature creates the coin and makes the starter's buy together,
+ * so nobody can buy before the starter. The new mint's key is generated here and never leaves the page.
  */
 export function LaunchMine({ appId, publicRef, ticker, approved, initialStatus, signer, starterBuy, quoteSymbol }: {
   appId: string; publicRef: string; ticker: string; approved: boolean; initialStatus: string; signer: string | null; starterBuy: number; quoteSymbol: string;

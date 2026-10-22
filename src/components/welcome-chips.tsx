@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 
 const WHO = [
   { t: "Crypto", c: "#2ee5ff" }, { t: "Web2", c: "#ff9cf6" }, { t: "Viral", c: "#d8ff3c" }, { t: "Not viral yet", c: "#ffd23f" },
-  { t: "Solo builders", c: "#2ee5ff" }, { t: "Teams", c: "#ff9cf6" }, { t: "Artists", c: "#d8ff3c" }, { t: "Developers", c: "#ffd23f" },
+  { t: "Solo devs", c: "#2ee5ff" }, { t: "Teams", c: "#ff9cf6" }, { t: "Artists", c: "#d8ff3c" }, { t: "Developers", c: "#ffd23f" },
   { t: "Content creators", c: "#ff6a6f" },
 ];
 

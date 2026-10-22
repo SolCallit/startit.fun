@@ -9,7 +9,7 @@ import { motion, useAnimationControls, useReducedMotion } from "motion/react";
  * The START button is the ignition. Idle, it pulses like it's waiting to be pressed. Pressed, it kicks like an engine
  * catching and the ring lights up, while the application opens in parallel, so there's no waiting on the animation.
  */
-export function StartButton({ href, label, hint, action }: { href: string; label: string; hint: string; action?: () => Promise<void> }) {
+export function StartButton({ href, label, hint, action, compact }: { href: string; label: string; hint: string; action?: () => Promise<void>; compact?: boolean }) {
   const router = useRouter();
   const reduce = useReducedMotion();
   const body = useAnimationControls();
@@ -37,7 +37,7 @@ export function StartButton({ href, label, hint, action }: { href: string; label
   };
 
   return (
-    <div className="flex flex-col items-center gap-2.5">
+    <div className={compact ? "flex items-center gap-4 text-left" : "flex flex-col items-center gap-2.5"}>
       <button type="button" onClick={ignite} aria-label={label} aria-busy={starting} className="relative grid place-items-center rounded-full outline-offset-8">
         <motion.span
           aria-hidden
@@ -49,13 +49,16 @@ export function StartButton({ href, label, hint, action }: { href: string; label
         />
         <motion.span animate={body} whileTap={starting ? undefined : { scale: 0.88, y: 4 }} className="relative block">
           <Image src="/brand/startit-logo.png" alt="" width={160} height={160} priority
-            className="size-[6.25rem] drop-shadow-[0_12px_18px_#000c] sm:size-[8rem]" />
+            className={compact ? "size-[4.75rem] drop-shadow-[0_10px_14px_#000c] sm:size-[5.5rem]" : "size-[6.25rem] drop-shadow-[0_12px_18px_#000c] sm:size-[8rem]"} />
         </motion.span>
       </button>
-      <motion.p key={String(starting)} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="text-[0.9375rem] font-bold tracking-wide text-white">
-        {starting ? "Starting your engine…" : label}
-      </motion.p>
-      <p className="-mt-1.5 text-[0.8125rem] text-white/60">{hint}</p>
+      <div className={compact ? "flex flex-col gap-0.5 font-times" : "contents"}>
+        <motion.p key={String(starting)} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
+          className={compact ? "text-[1rem] font-bold text-white sm:text-[1.0625rem]" : "text-[0.9375rem] font-bold tracking-wide text-white"}>
+          {starting ? "Starting your engine…" : label}
+        </motion.p>
+        <p className={compact ? "text-[0.875rem] text-white/65" : "-mt-1.5 text-[0.8125rem] text-white/60"}>{hint}</p>
+      </div>
     </div>
   );
 }

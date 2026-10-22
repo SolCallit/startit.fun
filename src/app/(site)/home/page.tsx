@@ -145,7 +145,7 @@ function FeeCard() {
     <section aria-labelledby="fees-title" className="rounded-[18px] glass p-5">
       <h2 id="fees-title" className="text-[1.125rem]">Backing a product you love?</h2>
       <p className="mt-2 text-[0.9375rem] leading-relaxed text-ink-soft">
-        You don&apos;t have to be on the team. Bring the builder&apos;s written approval and launch it yourself. Launchers earn 5% of collected
+        You don&apos;t have to be on the team. Bring the brand&apos;s written approval and launch it yourself. Starters earn 5% of collected
         trading fees, paid out of the platform&apos;s share.
       </p>
       <Link href="/fees" className="mt-3 inline-block text-[0.9375rem] font-semibold text-cobalt hover:underline">See every fee record</Link>

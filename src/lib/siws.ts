@@ -1,6 +1,6 @@
 /**
  * Sign-in-with-Solana message in the standard field order (URI, Version, Issued At).
- * Phantom and others reject messages with fields out of order, so we don't use supabase-js's builder
+ * Phantom and others reject messages with fields out of order, so we don't use supabase-js's brand
  * (which writes Version before URI). Used only for wallets without the native `solana:signIn` feature.
  */
 export function buildSiwsMessage(p: { domain: string; address: string; statement: string; uri: string; issuedAt: string }) {

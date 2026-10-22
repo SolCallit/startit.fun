@@ -63,10 +63,10 @@ export default function Home() {
           </div>
           <div>
             <div className="flex h-14 overflow-hidden rounded-md text-[0.9375rem] font-semibold" role="img"
-              aria-label={`Community ${bpsToPercent(DEFAULT_SPLIT.communityBps)}, builder ${bpsToPercent(DEFAULT_SPLIT.founderBps)}, launcher ${bpsToPercent(DEFAULT_SPLIT.launcherBps)}, platform ${bpsToPercent(DEFAULT_SPLIT.platformBps)}`}>
+              aria-label={`Community ${bpsToPercent(DEFAULT_SPLIT.communityBps)}, brand ${bpsToPercent(DEFAULT_SPLIT.founderBps)}, starter ${bpsToPercent(DEFAULT_SPLIT.launcherBps)}, platform ${bpsToPercent(DEFAULT_SPLIT.platformBps)}`}>
               <div className="flex items-center bg-cobalt px-3 text-cobalt-ink" style={{ width: "50%" }}>50%</div>
               <div className="flex items-center bg-cobalt-soft px-3 text-ink" style={{ width: "30%" }}>30%</div>
-              <div className="flex items-center justify-center bg-review-soft text-ink" style={{ width: "5%" }} title="Launcher 5%"><span className="sr-only">5%</span></div>
+              <div className="flex items-center justify-center bg-review-soft text-ink" style={{ width: "5%" }} title="Starter 5%"><span className="sr-only">5%</span></div>
               <div className="flex items-center bg-unverified-soft px-3 text-ink" style={{ width: "15%" }}>15%</div>
             </div>
             <dl className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -75,11 +75,11 @@ export default function Home() {
                 <dd className="mt-1 text-[0.9375rem] leading-relaxed text-ink-soft">Held in a public treasury wallet with published rules.</dd>
               </div>
               <div>
-                <dt className="font-semibold text-ink">Builder, 30%</dt>
+                <dt className="font-semibold text-ink">Brand, 30%</dt>
                 <dd className="mt-1 text-[0.9375rem] leading-relaxed text-ink-soft">For the team behind the product, for signing off and shipping.</dd>
               </div>
               <div>
-                <dt className="font-semibold text-ink">Launcher, 5%</dt>
+                <dt className="font-semibold text-ink">Starter, 5%</dt>
                 <dd className="mt-1 text-[0.9375rem] leading-relaxed text-ink-soft">For whoever backed the product and brought it here.</dd>
               </div>
               <div>
@@ -88,7 +88,7 @@ export default function Home() {
               </div>
             </dl>
             <p className="mt-6 text-[0.875rem] leading-relaxed text-muted">
-              When the builder launches their own coin there&apos;s no launcher cut and the platform takes 20%. Fees collect in
+              When the brand launches their own coin there&apos;s no starter cut and the platform takes 20%. Fees collect in
               a Startit multisig and get paid out from there, and every collection and payout is shown with its transaction.
             </p>
           </div>
@@ -100,7 +100,7 @@ export default function Home() {
           <div className="max-w-2xl">
             <h2 className="text-[1.75rem] leading-tight font-bold tracking-[-0.02em] text-ink">What verification does not mean</h2>
             <p className="mt-4 leading-relaxed text-ink-soft">
-              A working site, a busy GitHub or a post from the builder doesn&apos;t prove a team is trustworthy or a coin is
+              A working site, a busy GitHub or a post from the brand doesn&apos;t prove a team is trustworthy or a coin is
               safe. Approval means the project passed our checks when we ran them. It isn&apos;t a guarantee, an audit or a
               price call, and a shipped milestone never promises token returns.
             </p>

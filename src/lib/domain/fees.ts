@@ -5,7 +5,7 @@ export type FeeSplit = { platformBps: number; founderBps: number; launcherBps: n
 
 /** Someone other than the founder (a scout) found the startup and submitted it. */
 export const DEFAULT_SPLIT: FeeSplit = { platformBps: 1500, founderBps: 3000, launcherBps: 500, communityBps: 5000 };
-/** The founder launched their own project: there's no separate launcher, so that 5% stays with the platform. */
+/** The founder launched their own project: there's no separate starter, so that 5% stays with the platform. */
 export const SELF_LAUNCH_SPLIT: FeeSplit = { platformBps: 2000, founderBps: 3000, launcherBps: 0, communityBps: 5000 };
 
 export const defaultSplitFor = (applicantIsFounder: boolean | null | undefined) =>

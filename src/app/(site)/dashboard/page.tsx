@@ -54,14 +54,14 @@ async function Applications() {
   );
 }
 
-/** What a launcher has earned: their 5% share, from the public payout records. */
+/** What a starter has earned: their 5% share, from the public payout records. */
 async function LauncherRewards({ refs }: { refs: string[] }) {
   const all = await Promise.all(refs.map((r) => getPublicFees(r)));
   const payouts = all.flatMap((r) => (r.connected ? r.payouts : [])).filter((p) => p.recipient === "launcher");
   const total = (st: string[]) => payouts.filter((p) => st.includes(p.status)).reduce((a, p) => a + BigInt(p.amount_raw), BigInt(0));
   return (
     <section className="rounded-[18px] glass p-5">
-      <h2 className="font-semibold text-ink">Launcher rewards</h2>
+      <h2 className="font-semibold text-ink">Starter rewards</h2>
       <p className="mt-1 text-[0.9375rem] text-ink-soft">Your 5% of trading fees collected on projects you launched. Paid automatically from the Fee Router multisig.</p>
       <dl className="mt-4 grid grid-cols-3 gap-4">
         <div><dt className="text-[0.8125rem] text-muted">Paid</dt><dd className="text-[1.25rem] font-bold text-ink">{sol(total(["confirmed"]))}</dd></div>

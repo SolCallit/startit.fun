@@ -3,7 +3,7 @@ import { isDefaultSplit, validateSplit } from "@/lib/domain/fees";
 
 /** Three screens, pump.fun style: the coin, the fee split, then an optional starter's buy. */
 export const STEPS = [
-  { n: 1, title: "Your coin", covers: "Name, ticker, what it is, links, the builder's proof and an image" },
+  { n: 1, title: "Your coin", covers: "Name, ticker, what it is, links, the brand's proof and an image" },
   { n: 2, title: "Fees", covers: "Who gets what from collected trading fees" },
   { n: 3, title: "Starter's buy", covers: "Buy in right after launch, if you want to" },
 ] as const;
@@ -76,7 +76,7 @@ const feeSplit = z
     const r = validateSplit(split);
     if (!r.ok) ctx.addIssue({ code: "custom", message: r.error, path: ["proposed_community_bps"] });
     if (v.applicant_is_founder === "yes" && v.proposed_launcher_bps !== 0) {
-      ctx.addIssue({ code: "custom", message: "You're on the team, so there's no separate launcher share.", path: ["proposed_launcher_bps"] });
+      ctx.addIssue({ code: "custom", message: "You're on the team, so there's no separate starter share.", path: ["proposed_launcher_bps"] });
     }
     if (!isDefaultSplit(split) && !v.split_reason) ctx.addIssue({ code: "custom", message: "Say why you want a different split.", path: ["split_reason"] });
   });

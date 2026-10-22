@@ -23,9 +23,9 @@ describe("launch terms", () => {
     expect(a).toBe(b);
     expect(await sha256Hex(a)).toBe(await sha256Hex(b));
     expect(a).toContain("Community treasury: 50%");
-    expect(a).toContain("Launcher: 5%");
+    expect(a).toContain("Starter: 5%");
     expect(a).toContain("Mint authority: no person or team holds it");
-    expect(a).toContain("None. No builder, team, launcher or Startit allocation.");
+    expect(a).toContain("None. No brand, team, starter or Startit allocation.");
     expect(a).toContain("test network");
   });
   it("calls out retained authorities and non-standard splits loudly", () => {

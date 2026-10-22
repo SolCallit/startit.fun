@@ -67,4 +67,4 @@ export async function sendPlatformSetup(adminWallet: string, step: "create" | "r
 }
 
 // ───────────── Per-launch flow ─────────────
-// The launcher signs the launch (with their starter's buy) after an admin approves it: see ./self-launch.ts.
+// The starter signs the launch (with their starter's buy) after an admin approves it: see ./self-launch.ts.

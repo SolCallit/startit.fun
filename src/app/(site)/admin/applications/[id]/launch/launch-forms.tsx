@@ -27,7 +27,7 @@ export function LaunchConfigForm({ appId, defaults, selfLaunch }: { appId: strin
   const e = state.errors;
   const [multisig, setMultisig] = useState(d.treasury_is_multisig === "yes");
   const keys = ["community_bps", "founder_bps", "launcher_bps", "platform_bps"] as const;
-  const LABEL = { community_bps: "Community", founder_bps: "Builder", launcher_bps: "Launcher", platform_bps: "Startit" };
+  const LABEL = { community_bps: "Community", founder_bps: "Brand", launcher_bps: "Starter", platform_bps: "Startit" };
   const [bps, setBps] = useState(() => Object.fromEntries(keys.map((k) => [k, Number(d[k] || 0)])) as Record<(typeof keys)[number], number>);
   const [editSplit, setEditSplit] = useState(!!d.deviation_reason || !!e?.community_bps || !!e?.deviation_reason);
   const total = keys.reduce((n, k) => n + bps[k], 0);
@@ -65,9 +65,9 @@ export function LaunchConfigForm({ appId, defaults, selfLaunch }: { appId: strin
 
       <fieldset className="flex flex-col gap-4">
         <legend className="mb-1 text-[1.0625rem] font-semibold text-ink">Who gets paid</legend>
-        <F name="founder_wallet" label="Builder wallet" mono d={d} e={e} hint="Where the builder's 30% goes. They prove it's theirs when they sign the terms." />
+        <F name="founder_wallet" label="Brand wallet" mono d={d} e={e} hint="Where the brand's 30% goes. They prove it's theirs when they sign the terms." />
         {selfLaunch ? <input type="hidden" name="launcher_wallet" value="" /> :
-          <F name="launcher_wallet" label="Launcher wallet" mono d={d} e={e} hint="The person who brought the product here. They sign with this wallet too." />}
+          <F name="launcher_wallet" label="Starter wallet" mono d={d} e={e} hint="The person who brought the product here. They sign with this wallet too." />}
         <F name="treasury_address" label="Community treasury wallet" mono d={d} e={e} hint="Where the community's 50% goes." />
       </fieldset>
 

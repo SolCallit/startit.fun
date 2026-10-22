@@ -6,12 +6,12 @@ import { Reveal } from "@/components/motion";
 export const metadata: Metadata = { title: "About us" };
 
 const HOW = [
-  { n: 1, who: "You, or anyone who backs the product", title: "Bring a product", body: "Name, ticker, a line about it, its links, an image, and proof the builder is in. You don't have to be on the team." },
+  { n: 1, who: "You, or anyone who backs the product", title: "Bring a product", body: "Name, ticker, a line about it, its links, an image, and proof the brand is in. You don't have to be on the team." },
   { n: 2, who: "AI agent", title: "Checks the receipts", body: "Reads the public sources and matches them to the application. Every finding comes with a source and a time. It can flag, never approve." },
-  { n: 3, who: "Startit team", title: "Human review", body: "A person confirms the builder really signed off, then approves, rejects or asks for more." },
-  { n: 4, who: "Builder", title: "Signs the terms", body: "Supply, authorities, treasury and fee split are published and signed by wallet before anything goes on-chain." },
+  { n: 3, who: "Startit team", title: "Human review", body: "A person confirms the brand really signed off, then approves, rejects or asks for more." },
+  { n: 4, who: "Brand", title: "Signs the terms", body: "Supply, authorities, treasury and fee split are published and signed by wallet before anything goes on-chain." },
   { n: 5, who: "Startit team", title: "Launches on Raydium", body: "The launch is previewed, confirmed and sent through Raydium LaunchLab, then checked on-chain and published." },
-  { n: 6, who: "Everyone", title: "Fees flow back", body: "Collected trading fees split 50% community, 30% builder, 5% launcher and 15% Startit, every payout with its transaction." },
+  { n: 6, who: "Everyone", title: "Fees flow back", body: "Collected trading fees split 50% community, 30% brand, 5% starter and 15% Startit, every payout with its transaction." },
 ];
 
 const ROADMAP = [
@@ -41,8 +41,8 @@ const ROADMAP = [
     tone: "bg-[#ff9cf6] text-[#3a0033]",
     title: "Grow the bridge",
     items: [
-      "Launcher network: rewards and rankings for people who bring real products",
-      "Builder dashboard to post updates and claim fees in one place",
+      "Starter network: rewards and rankings for people who bring real products",
+      "Brand dashboard to post updates and claim fees in one place",
       "More pairs as Raydium and partners enable them: stocks, majors, ecosystem coins",
       "Community treasury tools so holders can see and steer how their 50% is used",
     ],
@@ -60,8 +60,8 @@ export default function About() {
           </h1>
           <p className="mt-4 max-w-2xl text-[1.0625rem] leading-relaxed text-white/85">
             Memecoins have the crowd, the attention and the capital. Plenty of good products have none of that. Startit is
-            the bridge: anyone who believes in a product can launch its coin with the builder&apos;s sign-off, and the
-            community, the builder and the launcher all share in the trading fees.
+            the bridge: anyone who believes in a product can launch its coin with the brand&apos;s sign-off, and the
+            community, the brand and the starter all share in the trading fees.
           </p>
         </section>
       </Reveal>

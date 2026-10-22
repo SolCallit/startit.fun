@@ -17,8 +17,8 @@ export const launchConfigSchema = z
     launcher_bps: z.coerce.number().int(),
     community_bps: z.coerce.number().int(),
     deviation_reason: z.string().trim().max(1000),
-    founder_wallet: address("Builder wallet"),
-    launcher_wallet: optionalAddress("Launcher wallet"),
+    founder_wallet: address("Brand wallet"),
+    launcher_wallet: optionalAddress("Starter wallet"),
     treasury_address: address("Treasury address"),
     treasury_is_multisig: z.enum(["yes", "no"]),
     treasury_threshold: z.string().trim(),
@@ -31,8 +31,8 @@ export const launchConfigSchema = z
     const r = validateSplit(split);
     if (!r.ok) ctx.addIssue({ code: "custom", path: ["community_bps"], message: r.error });
     if (!isDefaultSplit(split) && !v.deviation_reason) ctx.addIssue({ code: "custom", path: ["deviation_reason"], message: "A non-default split needs a published reason." });
-    if (v.launcher_bps > 0 && !v.launcher_wallet) ctx.addIssue({ code: "custom", path: ["launcher_wallet"], message: "Set the launcher's payout wallet." });
-    if (v.launcher_bps === 0 && v.launcher_wallet) ctx.addIssue({ code: "custom", path: ["launcher_wallet"], message: "Remove the launcher wallet or give the launcher a share." });
+    if (v.launcher_bps > 0 && !v.launcher_wallet) ctx.addIssue({ code: "custom", path: ["launcher_wallet"], message: "Set the starter's payout wallet." });
+    if (v.launcher_bps === 0 && v.launcher_wallet) ctx.addIssue({ code: "custom", path: ["launcher_wallet"], message: "Remove the starter wallet or give the starter a share." });
     if (v.treasury_is_multisig === "yes") {
       const signers = parseSigners(v.treasury_signers);
       const t = Number(v.treasury_threshold);

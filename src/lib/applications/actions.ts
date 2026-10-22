@@ -95,7 +95,7 @@ export async function saveStep(appId: string, step: StepNumber, _prev: StepState
       if ([p, f, l, c].every(Number.isInteger) && p + f + l + c === 10000 && !(isFounder && l !== 0)) {
         Object.assign(update, { proposed_platform_bps: p, proposed_founder_bps: f, proposed_launcher_bps: l, proposed_community_bps: c });
       } else if (isFounder) {
-        // The database refuses a launcher share on a self-launch; fall back to the self-launch default.
+        // The database refuses a starter share on a self-launch; fall back to the self-launch default.
         Object.assign(update, { proposed_platform_bps: 2000, proposed_founder_bps: 3000, proposed_launcher_bps: 0, proposed_community_bps: 5000 });
       }
       update.draft_payload = { ...(app.draft_payload ?? {}), split_reason: orNull(values.split_reason) };
@@ -106,8 +106,8 @@ export async function saveStep(appId: string, step: StepNumber, _prev: StepState
       if (Number.isFinite(amount) && amount >= 0) update.starter_buy_amount = amount;
       const { data: q } = await supabase.from("quote_tokens").select("symbol").eq("mint", app.quote_mint ?? "So11111111111111111111111111111111111111112").maybeSingle();
       update.insider_allocation_disclosure = amount > 0
-        ? `Starter's buy: the launcher plans to spend ${amount} ${q?.symbol ?? "SOL"} on the coin right after launch, from their own wallet. No other team, launcher or Startit allocation.`
-        : "None. No builder, team, launcher or Startit allocation, and no starter's buy.";
+        ? `Starter's buy: the starter plans to spend ${amount} ${q?.symbol ?? "SOL"} on the coin right after launch, from their own wallet. No other team, starter or Startit allocation.`
+        : "None. No brand, team, starter or Startit allocation, and no starter's buy.";
       update.disclosures_acknowledged_at = values.ack_terms === "on" ? new Date().toISOString() : null;
       break;
     }
@@ -130,7 +130,7 @@ export async function saveStep(appId: string, step: StepNumber, _prev: StepState
       const bundle = await getApplicationBundle(appId);
       const missing: FieldErrors = {};
       if (!bundle?.app.image_path) missing.image = "Add an image for the coin.";
-      if (!bundle?.evidence.some((e) => e.kind === "authorization" || e.kind === "founder_approval")) missing.proof = "Upload proof the builder is in.";
+      if (!bundle?.evidence.some((e) => e.kind === "authorization" || e.kind === "founder_approval")) missing.proof = "Upload proof the brand is in.";
       if (Object.keys(missing).length) return { errors: missing, values };
     }
     if (step < STEPS.length) redirect(`/applications/${appId}/edit?step=${step + 1}`);
@@ -153,7 +153,7 @@ async function submitAfterFinalStep(appId: string): Promise<StepState> {
   }
   if (!bundle.app.image_path) return { errors: { _form: "Your coin: add an image." } };
   if (!bundle.evidence.some((e) => e.kind === "authorization" || e.kind === "founder_approval")) {
-    return { errors: { _form: "Your coin: upload proof the builder is in." } };
+    return { errors: { _form: "Your coin: upload proof the brand is in." } };
   }
 
   const supabase = await createClient();

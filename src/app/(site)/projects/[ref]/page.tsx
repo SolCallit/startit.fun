@@ -152,12 +152,12 @@ async function Coin({ params }: { params: PageProps<"/projects/[ref]">["params"]
               <Check ok={p.mint_authority_revoked}>No one can mint more</Check>
               <Check ok={p.freeze_authority_revoked}>No one can freeze wallets</Check>
               <Check ok={verified > 0}>{verified ? `${verified} claims verified` : "Verification report pending"}</Check>
-              <Check ok>Builder signed the terms</Check>
+              <Check ok>Brand signed the terms</Check>
             </ul>
             {p.platform_bps !== null ? (
               <p className="mt-3 border-t border-line/60 pt-3 text-ink-soft">
-                Fees: <b className="text-ink">{bpsToPercent(p.community_bps!)}</b> community · <b className="text-ink">{bpsToPercent(p.founder_bps!)}</b> builder
-                {p.launcher_bps ? <> · <b className="text-ink">{bpsToPercent(p.launcher_bps)}</b> launcher</> : null} · <b className="text-ink">{bpsToPercent(p.platform_bps)}</b> Startit
+                Fees: <b className="text-ink">{bpsToPercent(p.community_bps!)}</b> community · <b className="text-ink">{bpsToPercent(p.founder_bps!)}</b> brand
+                {p.launcher_bps ? <> · <b className="text-ink">{bpsToPercent(p.launcher_bps)}</b> starter</> : null} · <b className="text-ink">{bpsToPercent(p.platform_bps)}</b> Startit
               </p>
             ) : null}
             {Number(p.starter_buy_amount) > 0 ? (

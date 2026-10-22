@@ -141,7 +141,7 @@ function CoinStep({ appId, d, e, quotes, imageUrl, proofs }: {
     <>
       <div>
         <h1 className="font-display text-[1.875rem] leading-tight font-extrabold tracking-[-0.02em] text-ink sm:text-[2.25rem]">Your coin</h1>
-        <p className="mt-1 text-ink-soft">A native meme for a product you believe in, plus proof the builder is in.</p>
+        <p className="mt-1 text-ink-soft">A native meme for a product you believe in, plus proof the brand is in.</p>
       </div>
 
       <div className="grid gap-6 sm:grid-cols-[11rem_1fr]">
@@ -257,7 +257,7 @@ export function ProofPicker({ appId, proofs, error }: { appId: string; proofs: {
   return (
     <section className="flex flex-col gap-2">
       <div className="flex items-baseline justify-between gap-3">
-        <h2 className="font-semibold text-ink">Proof the builder is in</h2>
+        <h2 className="font-semibold text-ink">Proof the brand is in</h2>
         <p className="text-[0.8125rem] text-muted">Private. Only reviewers see it.</p>
       </div>
       <motion.div
@@ -270,7 +270,7 @@ export function ProofPicker({ appId, proofs, error }: { appId: string; proofs: {
           {busy ? "Uploading…" : list.length ? "Add another" : "Upload proof"}
         </button>
         <p className="min-w-0 flex-1 text-[0.875rem] text-ink-soft">
-          A screenshot of the builder saying yes, a post from the project&apos;s account, or an email from their domain. PDF or image, 4 MB.
+          A screenshot of the brand saying yes, a post from the project&apos;s account, or an email from their domain. PDF or image, 4 MB.
         </p>
         <input ref={input} type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.txt" className="sr-only" tabIndex={-1}
           onChange={(ev) => { pick(ev.target.files?.[0]); ev.target.value = ""; }} />
@@ -440,7 +440,7 @@ function FeeStep({ d, e }: { d: Record<string, string>; e: Errors }) {
   const setTeamAndReset = (v: boolean) => { setTeam(v); setCustom(false); setS(v ? SPLITS.team : SPLITS.backer); };
   const parts = [
     { k: "c" as const, label: "Community", sub: "Public treasury wallet", cls: "bg-cobalt text-cobalt-ink" },
-    { k: "f" as const, label: "Builder", sub: "The team behind the product", cls: "bg-start text-start-ink" },
+    { k: "f" as const, label: "Brand", sub: "The team behind the product", cls: "bg-start text-start-ink" },
     { k: "l" as const, label: "You", sub: "For bringing it here", cls: "bg-review text-paper" },
     { k: "p" as const, label: "Startit", sub: "Screening, security, ops", cls: "bg-line-strong text-ink" },
   ].filter((x) => !(team && x.k === "l"));
@@ -453,7 +453,7 @@ function FeeStep({ d, e }: { d: Record<string, string>; e: Errors }) {
       </div>
 
       <Toggle name="applicant_is_founder" value="yes" off="no" checked={team} onChange={setTeamAndReset}
-        label="I'm on the builder's team" sub="Then there's no separate launcher cut, and Startit takes 20%." />
+        label="I'm on the brand's team" sub="Then there's no separate starter cut, and Startit takes 20%." />
 
       <div className="flex flex-col gap-4">
         <div className="flex h-16 overflow-hidden rounded-[18px] text-[0.9375rem] font-bold shadow-raise" role="img"
@@ -494,7 +494,7 @@ function FeeStep({ d, e }: { d: Record<string, string>; e: Errors }) {
               <p className={`font-semibold ${total === 10000 ? "text-verified" : "text-flagged"}`} aria-live="polite">
                 Total {total / 100}%{total === 10000 ? "" : ". Has to be exactly 100%."}
               </p>
-              <Field name="split_reason" label="Why this split?" errors={e} defaultValue={d.split_reason} placeholder="The builder is funding liquidity, …" />
+              <Field name="split_reason" label="Why this split?" errors={e} defaultValue={d.split_reason} placeholder="The brand is funding liquidity, …" />
             </div>
           </motion.div>
         ) : <input key="no-reason" type="hidden" name="split_reason" value="" />}
@@ -545,7 +545,7 @@ function StarterStep({ d, e, symbol }: { d: Record<string, string>; e: Errors; s
       <div className="rounded-[18px] border border-line/70 bg-surface/40 p-4">
         <Toggle name="ack_terms" checked={agree} onChange={setAgree}
           label="I agree to the terms"
-          sub={<>No price promises, the builder&apos;s approval doesn&apos;t make them the owner, everything gets published before launch, and what I sent is accurate. <Link href="/terms" className="font-semibold text-cobalt underline-offset-4 hover:underline" target="_blank">Read them</Link>.</>} />
+          sub={<>No price promises, the brand&apos;s approval doesn&apos;t make them the owner, everything gets published before launch, and what I sent is accurate. <Link href="/terms" className="font-semibold text-cobalt underline-offset-4 hover:underline" target="_blank">Read them</Link>.</>} />
         <Err msg={e?.ack_terms} />
       </div>
     </>

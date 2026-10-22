@@ -8,7 +8,7 @@ import { prepareStarterBuy, sendStarterBuy } from "@/lib/launch/starter-buy";
 const fromB64 = (b64: string) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
 const toB64 = (bytes: Uint8Array) => { let s = ""; for (const b of bytes) s += String.fromCharCode(b); return btoa(s); };
 
-/** The launcher's disclosed starter's buy, signed in their own wallet once the coin is live. */
+/** The starter's disclosed starter's buy, signed in their own wallet once the coin is live. */
 export function StarterBuy({ appId, amount, symbol, doneTx }: { appId: string; amount: number; symbol: string; doneTx: string | null }) {
   const w = useTxWallet();
   const [busy, setBusy] = useState<string | null>(null);

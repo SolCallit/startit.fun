@@ -127,7 +127,7 @@ async function ReviewBody({ params }: PageProps<"/admin/applications/[id]">) {
                   <li key={l.id}><span className="text-muted">{l.kind}: </span><a href={l.url} target="_blank" rel="noopener noreferrer nofollow" className="break-all text-cobalt hover:underline">{l.url}</a></li>
                 ))}</ul>
               </Item>
-              {app.founder_approval_statement ? <Item label="Builder approval (written)"><p className="whitespace-pre-wrap">{app.founder_approval_statement}</p></Item> : null}
+              {app.founder_approval_statement ? <Item label="Brand approval (written)"><p className="whitespace-pre-wrap">{app.founder_approval_statement}</p></Item> : null}
               {app.permitted_branding ? <Item label="Permitted branding">{app.permitted_branding}</Item> : null}
               <Item label="Coin">
                 <span className="flex items-center gap-3">
@@ -153,7 +153,7 @@ async function ReviewBody({ params }: PageProps<"/admin/applications/[id]">) {
               <Item label="Milestones">{bundle.milestones.length ? <ul className="list-disc pl-5">{bundle.milestones.map((m) => <li key={m.id}>{m.title}</li>)}</ul> : null}</Item>
               <Item label="Insider allocations">{app.insider_allocation_disclosure}</Item>
               <Item label="Proposed split">
-                Community {bpsToPercent(split.communityBps)}, builder {bpsToPercent(split.founderBps)}, launcher {bpsToPercent(split.launcherBps)}, platform {bpsToPercent(split.platformBps)}
+                Community {bpsToPercent(split.communityBps)}, brand {bpsToPercent(split.founderBps)}, starter {bpsToPercent(split.launcherBps)}, platform {bpsToPercent(split.platformBps)}
                 {!isDefaultSplit(split) ? (
                   <span className="mt-1 block text-review">Non-default split. Reason: {String(app.draft_payload?.split_reason ?? "none given")}</span>
                 ) : null}

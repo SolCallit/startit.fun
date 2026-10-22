@@ -12,7 +12,7 @@ export function planPayouts(
   split: FeeSplit,
   wallets: { platform: string; founder: string; launcher: string | null; community: string },
 ): PlannedPayout[] {
-  if (split.launcherBps > 0 && !wallets.launcher) throw new Error("Launcher share is set but no launcher wallet is configured.");
+  if (split.launcherBps > 0 && !wallets.launcher) throw new Error("Starter share is set but no starter wallet is configured.");
   const a = allocate(claimAmountRaw, split);
   const rows: PlannedPayout[] = [
     { recipient: "community", recipientAddress: wallets.community, amountRaw: a.community },

@@ -33,7 +33,7 @@ async function Body({ params }: PageProps<"/admin/applications/[id]/launch">) {
   const split = cfg.feeConfig
     ? { platformBps: cfg.feeConfig.platform_bps, founderBps: cfg.feeConfig.founder_bps, launcherBps: cfg.feeConfig.launcher_bps, communityBps: cfg.feeConfig.community_bps }
     : { platformBps: app.proposed_platform_bps, founderBps: app.proposed_founder_bps, launcherBps: app.proposed_launcher_bps, communityBps: app.proposed_community_bps };
-  // A self-launch has no launcher cut: fold any launcher share into Startit's so the total stays 100%.
+  // A self-launch has no starter cut: fold any starter share into Startit's so the total stays 100%.
   if (selfLaunch && split.launcherBps) split.platformBps = (split.platformBps ?? 0) + split.launcherBps;
   const fallback = defaultSplitFor(selfLaunch);
   const t = cfg.treasury;
@@ -57,7 +57,7 @@ async function Body({ params }: PageProps<"/admin/applications/[id]/launch">) {
       <header className="mb-8 border-b border-line pb-6">
         <div className="flex flex-wrap items-center gap-3"><StatusBadge status={app.status} /><Mono className="text-muted">{app.public_ref}</Mono></div>
         <h1 className="mt-3 text-[2rem] leading-tight font-bold tracking-[-0.02em] text-ink">Launch configuration — {app.project_name} <span className="text-muted">${app.ticker}</span></h1>
-        <p className="mt-2 text-ink-soft">{selfLaunch ? "The builder submitted this themselves, so there's no launcher share." : "Submitted by a launcher on the builder's behalf."}</p>
+        <p className="mt-2 text-ink-soft">{selfLaunch ? "The brand submitted this themselves, so there's no starter share." : "Submitted by a starter on the brand's behalf."}</p>
       </header>
 
       {!cfg.feeRouter ? <div className="mb-6"><Notice tone="warn">No Fee Router address is set. An admin must add it in <Link href="/admin/settings" className="font-semibold text-cobalt">Platform settings</Link> first.</Notice></div> : null}

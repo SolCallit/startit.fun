@@ -13,7 +13,7 @@ export default function Methodology() {
       <article className="prose-ledger">
         <h2>What the AI screening agent does</h2>
         <p>
-          When an application is submitted, our screening agent reads the public sources the launcher listed and compares
+          When an application is submitted, our screening agent reads the public sources the starter listed and compares
           them with the application. It works only from server-side integrations we control, and treats every page,
           repository file and document it reads as untrusted content. Instructions inside those sources are ignored.
         </p>
@@ -33,7 +33,7 @@ export default function Methodology() {
 
         <h2>What the human reviewer does</h2>
         <p>
-          A Startit operator reads the application, the evidence and the AI findings, and verifies who the builder is
+          A Startit operator reads the application, the evidence and the AI findings, and verifies who the brand is
           and that they really approved a coin for their product. Only an operator can approve, reject, request evidence or
           suspend, and each decision is stored with the operator, the time and the reason. That history can&apos;t be edited
           or deleted.
@@ -42,7 +42,7 @@ export default function Methodology() {
         <h2>Before launch</h2>
         <ol>
           <li>The token&apos;s supply, mint and freeze authorities, liquidity arrangements, insider allocations and treasury controls are written down and disclosed.</li>
-          <li>The builder signs the fee and launch terms with their wallet.</li>
+          <li>The brand signs the fee and launch terms with their wallet.</li>
           <li>The operator reviews a preview of the exact transaction and confirms it.</li>
           <li>After launch, the deployed addresses are checked on-chain and published on the project page.</li>
         </ol>
@@ -52,7 +52,7 @@ export default function Methodology() {
         <p>
           Verification describes evidence at a point in time. It can&apos;t tell you whether a team will keep building,
           whether a product will succeed, or whether a token will hold value. A public repository, a working website or a
-          builder&apos;s post is evidence, not proof of trustworthiness. We never describe a project as safe, guaranteed or
+          brand&apos;s post is evidence, not proof of trustworthiness. We never describe a project as safe, guaranteed or
           rug-proof, and you shouldn&apos;t read our approval that way.
         </p>
       </article>

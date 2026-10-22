@@ -62,7 +62,7 @@ export function renderLaunchTerms(t: LaunchTermsInput): string {
     `## Insider holdings at launch`,
     ...(t.insiderAllocations.length
       ? t.insiderAllocations.map((a) => `- ${a.holder}: ${a.amount} tokens — ${a.note}`)
-      : [`- None. No builder, team, launcher or Startit allocation.`]),
+      : [`- None. No brand, team, starter or Startit allocation.`]),
     ...(t.starterBuy
       ? [Number(t.starterBuy.amount) > 0
           ? `- Starter's buy: up to ${t.starterBuy.amount} ${t.starterBuy.symbol} of $${t.ticker}, bought on the bonding curve by ${t.starterBuy.wallet ?? "the applicant's wallet"} right after launch, as its own transaction.`
@@ -72,16 +72,16 @@ export function renderLaunchTerms(t: LaunchTermsInput): string {
     `## Trading fees`,
     `Shares of trading fees Startit actually collects (not trading volume):`,
     `- Community treasury: ${bpsToPercent(s.communityBps)}`,
-    `- Builder: ${bpsToPercent(s.founderBps)}`,
-    `- Launcher: ${bpsToPercent(s.launcherBps)}`,
+    `- Brand: ${bpsToPercent(s.founderBps)}`,
+    `- Starter: ${bpsToPercent(s.launcherBps)}`,
     `- Startit platform: ${bpsToPercent(s.platformBps)}`,
     ...(isDefaultSplit(s) ? [] : [`- Non-standard split, approved because: ${t.deviationReason ?? "(no reason recorded)"}`]),
     `Fees are collected into the Startit Fee Router (${t.wallets.feeRouter}), a multisig, and paid out from there.`,
     `Raydium charges its own protocol fee separately; it is not part of this split.`,
     ``,
     `## Payout wallets`,
-    `- Builder: ${t.wallets.founder}`,
-    `- Launcher: ${t.wallets.launcher ?? "none (the builder launched this themselves)"}`,
+    `- Brand: ${t.wallets.founder}`,
+    `- Starter: ${t.wallets.launcher ?? "none (the brand launched this themselves)"}`,
     `- Community treasury: ${t.wallets.communityTreasury}`,
     ``,
     `## Community treasury control`,
@@ -90,10 +90,10 @@ export function renderLaunchTerms(t: LaunchTermsInput): string {
     `- Rules: ${t.treasury.controlRules}`,
     ``,
     `## Acknowledgements`,
-    `- The builder's approval does not make the builder the owner or controller of the token.`,
+    `- The brand's approval does not make the brand the owner or controller of the token.`,
     `- Nobody may promise or imply price appreciation; product milestones are not promises of token returns.`,
     `- Everything above is published on the project's public page before launch.`,
-    `- Launcher rewards start only after launch and are forfeited if the project is suspended for misrepresentation.`,
+    `- Starter rewards start only after launch and are forfeited if the project is suspended for misrepresentation.`,
     `- Startit may pause payouts if collections and payouts don't reconcile.`,
   ];
   return lines.join("\n") + "\n";

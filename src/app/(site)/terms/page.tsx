@@ -24,14 +24,14 @@ export default function Terms() {
         <h2>A token is not equity</h2>
         <p>
           Holding a token does not give you shares, profit rights, voting rights in the project or any claim on its
-          revenue. The builder&apos;s approval means they consented to the launch and its branding. It does not make the
+          revenue. The brand&apos;s approval means they consented to the launch and its branding. It does not make the
           team responsible for the token&apos;s price.
         </p>
         <h2>Fees and custody</h2>
         <p>
           Trading fees captured by Startit on Raydium LaunchLab are collected into a Startit-controlled multisig and then
-          paid out by the disclosed split. By default that&apos;s 50% to the community treasury, 30% to the builder, 5% to the person
-          who launched the project and 15% to Startit (20% when the builder launched it themselves). Between collection and
+          paid out by the disclosed split. By default that&apos;s 50% to the community treasury, 30% to the brand, 5% to the person
+          who launched the project and 15% to Startit (20% when the brand launched it themselves). Between collection and
           payout, Startit holds those funds. Every collection and
           payout is published with its transaction signature. Raydium charges its own protocol fee, which is separate.
         </p>

@@ -21,7 +21,7 @@ export async function decide(appId: string, _prev: DecisionState, formData: Form
   if (!isUuid(appId) || !APPLICATION_STATUSES.includes(to)) return { error: "Unknown action." };
 
   if (to === "approved" && formData.get("confirm_builder") !== "on") {
-    return { error: "Switch on the check that the builder approved this launch." };
+    return { error: "Switch on the check that the brand approved this launch." };
   }
   if (to === "awaiting_review" && !staff.roles.includes("admin")) return { error: "Only admins can skip AI screening." };
   if (["rejected", "suspended", "evidence_requested"].includes(to) && !reason) {
@@ -32,7 +32,7 @@ export async function decide(appId: string, _prev: DecisionState, formData: Form
   // A double tap lands here after the first one already moved it: treat that as done.
   const { data: current } = await supabase.from("applications").select("status").eq("id", appId).maybeSingle();
   if (current?.status === to) redirect(to === "launch_config_pending" ? `/admin/applications/${appId}/launch` : `/admin/applications/${appId}`);
-  const defaultReason = to === "awaiting_review" ? "AI screening not switched on yet; reviewed manually." : to === "approved" ? "Builder approval checked against the uploaded proof." : "";
+  const defaultReason = to === "awaiting_review" ? "AI screening not switched on yet; reviewed manually." : to === "approved" ? "Brand approval checked against the uploaded proof." : "";
   if (to === "evidence_requested") {
     const { error } = await supabase.from("evidence_requests").insert({ application_id: appId, requested_by: staff.id, message: reason });
     if (error) return { error: `Couldn't record the request: ${error.message}` };

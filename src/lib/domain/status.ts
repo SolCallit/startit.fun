@@ -19,7 +19,7 @@ export const STATUS_LABEL: Record<ApplicationStatus, string> = {
   draft: "Draft",
   submitted: "Submitted",
   ai_screening: "AI is checking it",
-  evidence_requested: "Waiting on launcher",
+  evidence_requested: "Waiting on starter",
   awaiting_review: "Needs review",
   approved: "Approved",
   launch_config_pending: "Setting up launch",

@@ -13,7 +13,7 @@ export async function GET(_req: Request, ctx: RouteContext<"/api/token-metadata/
   return NextResponse.json({
     name: data.token_name,
     symbol: data.ticker,
-    description: `${data.token_concept}\n\nCommunity token for ${data.project_name}, launched on Startit with the builder's approval. Verification report: ${site}/projects/${ref}`,
+    description: `${data.token_concept}\n\nCommunity token for ${data.project_name}, launched on Startit with the brand's approval. Verification report: ${site}/projects/${ref}`,
     image: projectImageUrl(data.image_path) ?? `${site}/api/token-image/${ref}`,
     external_url: `${site}/projects/${ref}`,
   }, { headers: { "cache-control": "public, max-age=300" } });

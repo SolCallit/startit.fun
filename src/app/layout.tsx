@@ -23,6 +23,22 @@ const serif = localFont({
   style: "italic",
   display: "swap",
 });
+const croissant = localFont({
+  src: "./fonts/croissant-one-latin-400-normal.woff2",
+  variable: "--font-display-classic",
+  weight: "400",
+  display: "swap",
+});
+// Tinos: metric-compatible with Times New Roman, so it looks the same on phones that don't ship Times.
+const tinos = localFont({
+  src: [
+    { path: "./fonts/tinos-latin-400-normal.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/tinos-latin-400-italic.woff2", weight: "400", style: "italic" },
+    { path: "./fonts/tinos-latin-700-normal.woff2", weight: "700", style: "normal" },
+  ],
+  variable: "--font-tinos",
+  display: "swap",
+});
 const jetbrains = localFont({
   src: "./fonts/jetbrains-mono-latin-wght-normal.woff2",
   variable: "--font-jetbrains",
@@ -43,12 +59,12 @@ const THEME_INIT = `try{var t=localStorage.getItem("startit-theme");document.doc
 export const metadata: Metadata = {
   title: { default: "Startit: memecoin money for real products", template: "%s · Startit" },
   description:
-    "Back a real product, get the builder's sign-off and launch its coin. Every launch is screened, reviewed by a person and paid out in public.",
+    "Back a real product, get the brand's sign-off and launch its coin. Every launch is screened, reviewed by a person and paid out in public.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" data-theme="dark" suppressHydrationWarning className={`${bricolage.variable} ${schibsted.variable} ${jetbrains.variable} ${serif.variable} antialiased`}>
+    <html lang="en" data-theme="dark" suppressHydrationWarning className={`${bricolage.variable} ${schibsted.variable} ${jetbrains.variable} ${serif.variable} ${croissant.variable} ${tinos.variable} antialiased`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
       </head>

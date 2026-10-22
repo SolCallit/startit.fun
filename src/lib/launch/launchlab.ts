@@ -180,7 +180,7 @@ export async function readMint(mint: PublicKey) {
   return { supplyRaw: parsed.supply, decimals: parsed.decimals, mintAuthority: parsed.mintAuthority ?? null, freezeAuthority: parsed.freezeAuthority ?? null };
 }
 
-/** The launcher's starter's buy: a plain bonding-curve buy from their own wallet, built unsigned for them to sign. */
+/** The starter's buy: a plain bonding-curve buy from their own wallet, built unsigned for them to sign. */
 export async function buildStarterBuyTx(p: { buyer: PublicKey; mint: PublicKey; quoteMint: PublicKey; amountRaw: string; slippageBps?: number }) {
   const r = await raydium(p.buyer);
   const res = await r.launchpad.buyToken({

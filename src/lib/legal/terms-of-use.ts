@@ -33,7 +33,7 @@ export const TERMS_SECTIONS: TermsSection[] = [
   {
     title: "3. No advice, no offer, no fiduciary duty",
     body: [
-      "Tokens launched through Startit are community memecoins. They are not shares, debt, profit-sharing rights or claims on any company, product or revenue, and holding one gives you no rights against Startit, a builder, a launcher or anyone else.",
+      "Tokens launched through Startit are community memecoins. They are not shares, debt, profit-sharing rights or claims on any company, product or revenue, and holding one gives you no rights against Startit, a brand, a starter or anyone else.",
       "Information on the Services, including verification reports, milestones, project pages, fee records and anything produced by our AI screening tools, is provided for general information only. It is not investment, financial, legal or tax advice, and it is not a recommendation to buy, sell or hold anything. You alone decide whether to transact, and you should consult your own advisers.",
       "Startit owes you no fiduciary duty. To the fullest extent permitted by law, you waive any fiduciary or similar duty you might otherwise claim against us.",
     ],
@@ -60,11 +60,11 @@ export const TERMS_SECTIONS: TermsSection[] = [
     ],
   },
   {
-    title: "7. Launchers and builders",
+    title: "7. Starters and brands",
     body: [
-      "If you submit an application, you represent and warrant that everything you provide is true, complete and not misleading; that the builder of the product has approved the launch, its name, ticker and branding; that you have the rights to every name, image, logo and other material you submit; and that the launch does not infringe anyone's rights or break any law.",
+      "If you submit an application, you represent and warrant that everything you provide is true, complete and not misleading; that the brand of the product has approved the launch, its name, ticker and branding; that you have the rights to every name, image, logo and other material you submit; and that the launch does not infringe anyone's rights or break any law.",
       "Submitting an application does not oblige us to review, approve or launch anything. We may approve, reject, request more information, suspend, delay, delist or decline to support any application, project or token at any time, for any reason or no reason, without liability. Our decisions are final.",
-      "If an application is found to be false, misleading, unauthorized or infringing, we may suspend the project, publish a notice, withhold and forfeit any launcher or builder rewards that have not been paid, and recover rewards already paid.",
+      "If an application is found to be false, misleading, unauthorized or infringing, we may suspend the project, publish a notice, withhold and forfeit any starter or brand rewards that have not been paid, and recover rewards already paid.",
       "You grant Startit a worldwide, non-exclusive, royalty-free, perpetual and irrevocable licence to host, store, reproduce, display, adapt and publish everything you submit, including names, images, logos, links, signed terms and verification results, to operate, promote and keep a public record of the Services and any token launched through them.",
     ],
   },
@@ -72,7 +72,7 @@ export const TERMS_SECTIONS: TermsSection[] = [
     title: "8. Fees, rewards and payouts",
     body: [
       "Startit charges the fees shown in the Services and in each launch's signed terms, including a share of trading fees actually collected. Fees are earned when collected and are non-refundable. Network fees, Raydium protocol fees and third-party charges are separate and are not refunded by us.",
-      "Builder, launcher and community shares are paid from fees actually collected, not from trading volume, in the token the launch trades against, to the wallets in the signed terms. Payouts are made when they are reconciled and practical; we do not promise any amount or schedule.",
+      "Brand, starter and community shares are paid from fees actually collected, not from trading volume, in the token the launch trades against, to the wallets in the signed terms. Payouts are made when they are reconciled and practical; we do not promise any amount or schedule.",
       "We may delay, withhold, offset or cancel any payout if collections and payouts do not reconcile, if a wallet is unreachable or sanctioned, if we suspect fraud, misrepresentation or a breach of these Terms, if a protocol or token malfunctions, or if the law requires it. Amounts that cannot be delivered after reasonable effort for 12 months may be treated as forfeited. You are responsible for any taxes on amounts you receive.",
       "A starter's buy, if disclosed, is made by the applicant from their own wallet at their own risk. It is not guaranteed to be the first buy or to get any particular price.",
     ],

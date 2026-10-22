@@ -10,7 +10,7 @@ export const metadata: Metadata = { title: "Launch a coin" };
 const NEEDS = [
   "The product, a meme name and ticker for its coin, and a line or two about it",
   "Its website, X or GitHub (Telegram and Discord if it has them)",
-  "Proof the builder is in: a screenshot, a post or an email from them",
+  "Proof the brand is in: a screenshot, a post or an email from them",
   "An image for the coin",
   "Optional: a starter's buy, like a creator's buy",
 ];
@@ -25,7 +25,7 @@ export default function Apply() {
         <p className="mt-3 max-w-2xl text-[1.0625rem] leading-relaxed text-white/85">
           Any product or brand, crypto or web2, viral or not yet, solo or team. Give it a meme name like{" "}
           <span className="font-bold text-[#d8ff3c]">$PREDAINU</span> or <span className="font-bold text-[#2ee5ff]">$CALLCAT</span>: the
-          product&apos;s real name looks too corporate on a chart. You don&apos;t have to be on the team, just bring the builder&apos;s sign-off.
+          product&apos;s real name looks too corporate on a chart. You don&apos;t have to be on the team, just bring the brand&apos;s sign-off.
         </p>
         <WelcomeChips className="mt-5" />
       </section>
@@ -47,7 +47,7 @@ export default function Apply() {
           <h2 className="font-semibold text-ink">What happens after you submit</h2>
           <p className="mt-3 leading-relaxed">
             Our AI agent checks the public sources and writes a report for a human reviewer. Usually within a few days,
-            the reviewer approves it, asks for more, or tells you why not. Nothing launches until the builder has signed
+            the reviewer approves it, asks for more, or tells you why not. Nothing launches until the brand has signed
             the final coin and fee terms.
           </p>
         </aside>

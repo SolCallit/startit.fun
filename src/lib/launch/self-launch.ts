@@ -10,9 +10,9 @@ import { assertMatchesConfirmed, evaluateMintState, summarizeTransaction } from 
 import { buildLaunchTx, connection, LAUNCHLAB_AUTH, LAUNCHLAB_PROGRAM, readMint, SOL_MINT } from "./launchlab";
 
 /**
- * Launcher-signed launch.
+ * Starter-signed launch.
  * 1. An admin approves the exact launch parameters (the human gate before anything irreversible).
- * 2. The launcher's wallet signs ONE transaction that creates the coin and makes their disclosed starter's buy.
+ * 2. The starter's wallet signs ONE transaction that creates the coin and makes their disclosed starter's buy.
  * 3. Anyone involved verifies it on-chain; only a passing check marks the coin launched.
  * Fees are unaffected by who signs: Startit's LaunchLab platform has a 0% creator fee and routes LP and
  * post-graduation creator fees to the Fee Router.
@@ -51,7 +51,7 @@ async function loadParams(appId: string) {
     const { data: prof } = await svc.from("profiles").select("wallet_address").eq("id", app.applicant_id).single();
     signer = prof?.wallet_address ?? null;
   }
-  if (!signer) throw new Error("No wallet to launch from: the launcher has no wallet on the signed terms or their profile.");
+  if (!signer) throw new Error("No wallet to launch from: the starter has no wallet on the signed terms or their profile.");
   const quoteMint = launch.quote_mint ?? SOL_MINT;
   const { data: q } = await svc.from("quote_tokens").select("decimals, symbol").eq("mint", quoteMint).maybeSingle();
   const starterBuy = String(Number(launch.starter_buy_amount ?? 0));
@@ -80,7 +80,7 @@ export async function approveLaunch(appId: string): Promise<Result<object>> {
     const { app, launch, hash, params } = await loadParams(appId);
     if (app.status !== "ready_for_deployment") throw new Error("The application must be ready to launch.");
     if (launch.network !== "solana-devnet") throw new Error("Only devnet launches are enabled.");
-    if (!launch.founder_confirmed_at) throw new Error("The builder hasn't signed the terms.");
+    if (!launch.founder_confirmed_at) throw new Error("The brand hasn't signed the terms.");
     if (!["planned", "previewed", "operator_confirmed"].includes(launch.status)) throw new Error(`Launch is already ${launch.status}.`);
     const supabase = await createClient();
     const { error } = await supabase.from("launches").update({
@@ -107,7 +107,7 @@ async function loadForSigner(appId: string) {
 const retryable = (launch: { status: string; tx_signature: string | null; verification: unknown }) =>
   launch.status === "failed" && !!(launch.verification as { txErr?: unknown } | null)?.txErr;
 
-/** Step 2a (launcher): build the exact transaction for their wallet to sign. */
+/** Step 2a (starter): build the exact transaction for their wallet to sign. */
 export async function prepareMyLaunch(appId: string, wallet: string, mintPubkey: string): Promise<Result<{ txBase64: string; poolId: string; params: LaunchParams }>> {
   try {
     const { svc, launch, params } = await loadForSigner(appId);
@@ -131,7 +131,7 @@ export async function prepareMyLaunch(appId: string, wallet: string, mintPubkey:
   } catch (e) { return fail(e); }
 }
 
-/** Step 2b (launcher): broadcast only the byte-identical transaction that was built for them, fully signed. */
+/** Step 2b (starter): broadcast only the byte-identical transaction that was built for them, fully signed. */
 export async function submitMyLaunch(appId: string, signedBase64: string): Promise<Result<{ signature: string }>> {
   try {
     const { svc, launch } = await loadForSigner(appId);
@@ -145,7 +145,7 @@ export async function submitMyLaunch(appId: string, signedBase64: string): Promi
   } catch (e) { return fail(e); }
 }
 
-/** Step 3 (launcher or staff): check the chain, not our records. Marks the coin live and records the starter's buy. */
+/** Step 3 (starter or staff): check the chain, not our records. Marks the coin live and records the starter's buy. */
 export async function verifyMyLaunch(appId: string): Promise<Result<{ problems: string[]; pending: boolean }>> {
   try {
     const user = await requireUser();

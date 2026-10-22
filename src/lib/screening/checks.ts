@@ -52,7 +52,7 @@ export function runChecks(input: CheckInput): { findings: Finding[]; limitations
   const now = input.now ?? new Date();
   const findings: Finding[] = [];
   const limitations: string[] = [
-    "Who the builder is, and whether they approved this launch, can't be established from public sources. A person has to verify it.",
+    "Who the brand is, and whether they approved this launch, can't be established from public sources. A person has to verify it.",
     "X (Twitter) content was not fetched; X accounts are checked only through links to and from the website and GitHub.",
     "Token tickers on other launchpads and exchanges were not checked for collisions.",
   ];
@@ -164,8 +164,8 @@ export function runChecks(input: CheckInput): { findings: Finding[]; limitations
     }
   }
 
-  findings.push({ category: "identity", claim: "The builder approved this launch", status: "NEEDS_REVIEW",
-    detail: "The uploaded proof and the builder's written approval have to be checked by a reviewer. The AI doesn't read private evidence files.", severity: 3, sources: [] });
+  findings.push({ category: "identity", claim: "The brand approved this launch", status: "NEEDS_REVIEW",
+    detail: "The uploaded proof and the brand's written approval have to be checked by a reviewer. The AI doesn't read private evidence files.", severity: 3, sources: [] });
 
   return { findings, limitations };
 }
