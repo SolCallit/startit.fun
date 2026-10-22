@@ -4,9 +4,12 @@ import { clusterApiUrl, Connection, PublicKey, TransactionMessage, VersionedTran
 import { NATIVE_MINT } from "@solana/spl-token";
 import {
   createPlatformAllowConfigIns,
+  ALL_PROGRAM_ID,
   DEV_LAUNCHPAD_AUTH,
   DEV_LAUNCHPAD_PROGRAM,
   DEVNET_PROGRAM_ID,
+  LAUNCHPAD_AUTH,
+  LAUNCHPAD_PROGRAM,
   getCpmmPdaAmmConfigId,
   getPdaLaunchpadConfigId,
   getPdaPlatformAllowConfig,
@@ -16,13 +19,18 @@ import {
   TxVersion,
 } from "@raydium-io/raydium-sdk-v2";
 
+import { IS_MAINNET, NETWORK } from "@/lib/network";
+
 /**
- * Raydium LaunchLab integration — DEVNET ONLY until the external review.
- * The server only BUILDS unsigned transactions. Every signature happens in the operator's wallet in the browser.
+ * Raydium LaunchLab integration. Devnet or mainnet comes from src/lib/network.ts.
+ * The server only BUILDS unsigned transactions. Every signature happens in the user's wallet in the browser.
  */
-export const LAUNCHLAB_PROGRAM = DEV_LAUNCHPAD_PROGRAM;
-export const LAUNCHLAB_AUTH = DEV_LAUNCHPAD_AUTH;
-export const CPMM_PROGRAM = DEVNET_PROGRAM_ID.CREATE_CPMM_POOL_PROGRAM;
+export const LAUNCHLAB_PROGRAM = IS_MAINNET ? LAUNCHPAD_PROGRAM : DEV_LAUNCHPAD_PROGRAM;
+export const LAUNCHLAB_AUTH = IS_MAINNET ? LAUNCHPAD_AUTH : DEV_LAUNCHPAD_AUTH;
+export const CPMM_PROGRAM = IS_MAINNET ? ALL_PROGRAM_ID.CREATE_CPMM_POOL_PROGRAM : DEVNET_PROGRAM_ID.CREATE_CPMM_POOL_PROGRAM;
+const CLUSTER: "mainnet" | "devnet" = IS_MAINNET ? "mainnet" : "devnet";
+/** Public fallback only; production must set SOLANA_RPC_URL to a paid RPC. */
+export const RPC_URL = process.env.SOLANA_RPC_URL || clusterApiUrl(IS_MAINNET ? "mainnet-beta" : "devnet");
 
 /** Pump.fun charges traders 1.25% on the bonding curve; we target the same total. Units: 1/1,000,000. */
 export const TARGET_TOTAL_TRADE_FEE = 12_500;
@@ -30,11 +38,11 @@ export const MAX_PLATFORM_FEE = 50_000; // LaunchLab cap (500 bps)
 export const LP_SCALE_ALL_TO_PLATFORM = { platformScale: new BN(1_000_000), creatorScale: new BN(0), burnScale: new BN(0) };
 
 export function connection() {
-  return new Connection(process.env.SOLANA_RPC_URL || clusterApiUrl("devnet"), "confirmed");
+  return new Connection(RPC_URL, "confirmed");
 }
 
 async function raydium(owner: PublicKey) {
-  return Raydium.load({ connection: connection(), owner, cluster: "devnet", disableFeatureCheck: true, disableLoadToken: true, blockhashCommitment: "finalized" });
+  return Raydium.load({ connection: connection(), owner, cluster: CLUSTER, disableFeatureCheck: true, disableLoadToken: true, blockhashCommitment: "finalized" });
 }
 
 export const SOL_MINT = NATIVE_MINT.toBase58();
@@ -74,7 +82,7 @@ export const platformIdFor = (admin: PublicKey) => getPdaPlatformId(LAUNCHLAB_PR
 export async function readRaydiumTradeFee(): Promise<{ tradeFeeRate: number; migrateFeeLamports: string; configId: string }> {
   const id = solGlobalConfigId();
   const info = await connection().getAccountInfo(id);
-  if (!info) throw new Error(`LaunchLab global config ${id.toBase58()} not found on devnet.`);
+  if (!info) throw new Error(`LaunchLab global config ${id.toBase58()} not found on ${NETWORK}.`);
   const cfg = LaunchpadConfig.decode(info.data);
   return { tradeFeeRate: cfg.tradeFeeRate.toNumber(), migrateFeeLamports: cfg.migrateFee.toString(), configId: id.toBase58() };
 }

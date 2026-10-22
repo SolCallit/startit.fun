@@ -1,5 +1,6 @@
 const KNOWN: Record<string, string> = {
   DRay6fNdQ5J82H7xV6uq2aV3mNrUZ1J4PgSKsWgptcm6: "Raydium LaunchLab (devnet)",
+  LanMV9sAd7wArD4vJFi2qDdfnVhFxYSUg6eADduJ3uj: "Raydium LaunchLab",
   ComputeBudget111111111111111111111111111111: "Compute budget",
   "11111111111111111111111111111111": "System program",
   TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA: "SPL Token",

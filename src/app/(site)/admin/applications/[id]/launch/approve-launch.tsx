@@ -1,5 +1,7 @@
 "use client";
 
+import { solscan } from "@/lib/network";
+
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { approveLaunch, verifyMyLaunch, type LaunchParams } from "@/lib/launch/self-launch";
@@ -20,7 +22,7 @@ export function ApproveLaunch({ appId, params, approved, status, signature }: {
   if (status === "submitted") {
     return (
       <div className="flex flex-col gap-3">
-        <p className="text-ink">The starter sent the launch: <a className="font-mono text-[0.875rem] text-cobalt break-all" target="_blank" rel="noopener noreferrer" href={`https://solscan.io/tx/${signature}?cluster=devnet`}>{signature}</a></p>
+        <p className="text-ink">The starter sent the launch: <a className="font-mono text-[0.875rem] text-cobalt break-all" target="_blank" rel="noopener noreferrer" href={solscan("tx", signature ?? "")}>{signature}</a></p>
         <button type="button" disabled={pending} className="self-start btn-start" onClick={() => start(async () => {
           const r = await verifyMyLaunch(appId);
           if (!r.ok) return setMsg({ ok: false, text: r.error });

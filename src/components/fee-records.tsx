@@ -1,8 +1,9 @@
+import { explorer } from "@/lib/network";
 import { EmptyState, Mono } from "@/components/ui";
 import type { PublicFeeClaim, PublicPayout } from "@/lib/data/public";
 
 export const sol = (raw: string | number | bigint) => `${(Number(raw) / 1e9).toLocaleString("en-US", { maximumFractionDigits: 6 })} SOL`;
-const tx = (s: string, cluster = "devnet") => `https://explorer.solana.com/tx/${s}?cluster=${cluster}`;
+const tx = (s: string) => explorer("tx", s);
 const SOURCE: Record<string, string> = { platform_fee: "Bonding-curve fees", lp_fee_key: "Pool LP fees", cpmm_creator_fee: "Pool creator fees" };
 const RECIPIENT: Record<string, string> = { community: "Community treasury", founder: "Brand", launcher: "Starter", platform: "Startit" };
 

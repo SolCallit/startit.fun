@@ -1,3 +1,4 @@
+import { NETWORK_LABEL } from "@/lib/network";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -71,7 +72,7 @@ async function Body({ params }: PageProps<"/admin/applications/[id]/launch">) {
             <Panel title="Settings"><LaunchConfigForm appId={id} defaults={defaults} selfLaunch={selfLaunch} /></Panel>
           ) : null}
           {app.status === "ready_for_deployment" || app.status === "launched" ? (
-            <Panel title="Launch on Solana devnet">
+            <Panel title={`Launch on ${NETWORK_LABEL}`}>
               {cfg.launch?.status === "failed" && cfg.launch?.error ? (
                 <div className="mb-4"><Notice tone="error">Last attempt failed: {String(cfg.launch.error)}</Notice></div>
               ) : null}

@@ -1,10 +1,12 @@
 "use client";
 
+import { DB_NETWORK } from "@/lib/network";
+
 import { useMemo, useState } from "react";
 import { motion } from "motion/react";
 
 export type PairOption = { mint: string; symbol: string; name: string; category?: string; logo_url?: string | null; network?: string };
-const LIVE_NETWORK = "solana-devnet";
+const LIVE_NETWORK = DB_NETWORK;
 
 const LABEL: Record<string, string> = {
   xstocks: "xStocks", prestocks: "PreStocks", currencies: "Currencies", solana: "Solana", majors: "Majors", custom: "Custom",

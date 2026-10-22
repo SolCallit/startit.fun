@@ -1,4 +1,5 @@
 import "server-only";
+import { DB_NETWORK, IS_MAINNET } from "@/lib/network";
 import { createClient } from "@/lib/supabase/server";
 import type { ApplicationStatus } from "@/lib/domain/status";
 
@@ -133,7 +134,8 @@ export async function listQuoteOptions(): Promise<QuoteOption[]> {
   const supabase = await createClient();
   const { data } = await supabase.from("quote_tokens").select("mint, symbol, name, category, logo_url, network")
     .or("listed.eq.true,enabled.eq.true").order("symbol").limit(2000);
-  const rows = (data ?? []) as QuoteOption[];
   const sol = "So11111111111111111111111111111111111111112";
+  // On devnet, mainnet pairs show as a locked preview. On mainnet, only mainnet pairs (and SOL) are offered.
+  const rows = ((data ?? []) as QuoteOption[]).filter((q) => !IS_MAINNET || q.mint === sol || q.network === DB_NETWORK);
   return [...rows.filter((q) => q.mint === sol), ...rows.filter((q) => q.mint !== sol)];
 }

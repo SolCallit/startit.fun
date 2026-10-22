@@ -1,3 +1,4 @@
+import { NETWORK_LABEL } from "@/lib/network";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Container, Notice, PageHeader, Panel } from "@/components/ui";
@@ -35,7 +36,7 @@ async function Body() {
         {data ? <p className="mt-4 text-[0.8125rem] text-muted">Last changed {new Date(data.updated_at).toLocaleString()}.</p> : null}
       </Panel>
       <div className="mt-6">
-        <Panel title="Raydium LaunchLab platform (devnet)">
+        <Panel title={`Raydium LaunchLab platform (${NETWORK_LABEL})`}>
           {!data ? <p className="text-ink-soft">Set the Fee Router first.</p> : !user.roles.includes("admin") ? (
             <p className="text-ink-soft">{get("launchlab_platform_id") ? `Platform ${get("launchlab_platform_id")!.value}` : "Not set up yet. An admin must do this."}</p>
           ) : (

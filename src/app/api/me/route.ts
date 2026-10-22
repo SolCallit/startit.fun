@@ -1,5 +1,7 @@
+import { DB_NETWORK } from "@/lib/network";
+import { RPC_URL } from "@/lib/launch/launchlab";
 import { NextResponse } from "next/server";
-import { Connection, PublicKey, clusterApiUrl } from "@solana/web3.js";
+import { Connection, PublicKey } from "@solana/web3.js";
 import { getCurrentUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { createAnonClient } from "@/lib/supabase/anon";
@@ -25,7 +27,7 @@ export async function GET() {
   if (!user) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
 
   const supabase = await createClient();
-  const network = process.env.SOLANA_NETWORK === "mainnet" ? "solana-mainnet" : "solana-devnet";
+  const network = DB_NETWORK;
 
   const { data: apps } = await supabase
     .from("applications")
@@ -70,7 +72,7 @@ export async function GET() {
 
 async function solBalance(address: string): Promise<number | null> {
   try {
-    const conn = new Connection(process.env.SOLANA_RPC_URL || clusterApiUrl("devnet"), "confirmed");
+    const conn = new Connection(RPC_URL, "confirmed");
     const lamports = await Promise.race([
       conn.getBalance(new PublicKey(address)),
       new Promise<never>((_, rej) => setTimeout(() => rej(new Error("timeout")), 4000)),

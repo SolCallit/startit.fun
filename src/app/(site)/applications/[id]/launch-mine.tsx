@@ -1,5 +1,7 @@
 "use client";
 
+import { NETWORK_LABEL, solscan } from "@/lib/network";
+
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -88,7 +90,7 @@ export function LaunchMine({ appId, publicRef, ticker, approved, initialStatus, 
             One signature creates your coin{starterBuy > 0 ? <> and makes your <b className="text-ink">{starterBuy} {quoteSymbol} starter&apos;s buy</b> in the same instant, so no one gets in before you</> : null}.
             You pay about 0.03 SOL in network costs{starterBuy > 0 ? " plus your buy" : ""}.
           </p>
-          {signer ? <p className="text-[0.8125rem] text-muted">Use the wallet on your signed terms: <span className="font-mono">{signer.slice(0, 4)}…{signer.slice(-4)}</span>, on devnet.</p> : null}
+          {signer ? <p className="text-[0.8125rem] text-muted">Use the wallet on your signed terms: <span className="font-mono">{signer.slice(0, 4)}…{signer.slice(-4)}</span>, on {NETWORK_LABEL}.</p> : null}
           <div className="mt-1 flex flex-wrap gap-2">
             {initialStatus === "submitted" && !sig ? (
               <button type="button" disabled={!!busy} onClick={resume} className="btn-start">Check my launch</button>
@@ -102,7 +104,7 @@ export function LaunchMine({ appId, publicRef, ticker, approved, initialStatus, 
               </motion.button>
             )}
           </div>
-          {sig ? <a className="font-mono text-[0.8125rem] text-cobalt break-all" target="_blank" rel="noopener noreferrer" href={`https://solscan.io/tx/${sig}?cluster=devnet`}>{sig}</a> : null}
+          {sig ? <a className="font-mono text-[0.8125rem] text-cobalt break-all" target="_blank" rel="noopener noreferrer" href={solscan("tx", sig)}>{sig}</a> : null}
         </div>
       )}
       {busy && !w.address ? <p role="status" className="mt-3 text-ink-soft">{busy}</p> : null}

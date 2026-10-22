@@ -1,5 +1,7 @@
 "use client";
 
+import { NETWORK_LABEL } from "@/lib/network";
+
 import { useState } from "react";
 import { useTxWallet } from "@/components/use-wallet";
 import { TxSummary, type TxSummaryView } from "@/components/tx-summary";
@@ -59,7 +61,7 @@ export function PlatformSetup({ platformId, redirected }: { platformId: string |
             const r = await sendPlatformSetup(w.address!, step, toB64(signed));
             if (!r.ok) throw new Error(r.error);
             setMsg({ ok: true, text: `Done: ${r.signature}. Reload to continue.` }); setPrep(null);
-          })} className="self-start btn-start">Sign and send on devnet</button>
+          })} className="self-start btn-start">Sign and send on {NETWORK_LABEL}</button>
         </div>
       )}
       {busy ? <p role="status" className="text-ink-soft">{busy}</p> : null}

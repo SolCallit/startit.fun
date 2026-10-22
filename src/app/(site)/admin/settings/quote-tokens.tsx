@@ -1,5 +1,7 @@
 "use client";
 
+import { NETWORK, NETWORK_LABEL } from "@/lib/network";
+
 import { useActionState, useState, useTransition } from "react";
 import { useTxWallet } from "@/components/use-wallet";
 import { TxSummary, type TxSummaryView } from "@/components/tx-summary";
@@ -33,11 +35,11 @@ export function QuoteTokens({ rows, platformReady }: { rows: QuoteRow[]; platfor
       </p>
       <div className="flex flex-wrap items-center gap-3 rounded-[16px] border border-line bg-surface/60 p-4">
         {(["devnet", "mainnet"] as const).map((n) => (
-          <button key={n} type="button" className={n === "devnet" ? "btn-start" : "btn-chrome"} disabled={syncing} onClick={() => startSync(async () => {
+          <button key={n} type="button" className={n === NETWORK ? "btn-start" : "btn-chrome"} disabled={syncing} onClick={() => startSync(async () => {
             setSyncMsg(null);
             const r = await syncPairs(n);
             setSyncMsg(r.ok ? { ok: true, text: `${n}: found ${r.found} configs, ${r.added} new, ${r.updated} updated, ${r.delisted} delisted.` } : { ok: false, text: r.error });
-          })}>{syncing ? "Reading Raydium…" : n === "devnet" ? "Sync devnet pairs" : "Sync mainnet catalog (preview)"}</button>
+          })}>{syncing ? "Reading Raydium…" : n === NETWORK ? `Sync ${n} pairs` : `Sync ${n} catalog (preview)`}</button>
         ))}
         <span className="text-[0.875rem] text-muted">{listed} listed for applicants · {rows.filter((r) => r.enabled).length} switched on for launches</span>
         {syncMsg ? <p role={syncMsg.ok ? "status" : "alert"} className={`w-full text-[0.875rem] ${syncMsg.ok ? "text-verified" : "text-flagged"}`}>{syncMsg.text}</p> : null}
@@ -127,7 +129,7 @@ function AllowFlow({ mint, symbol }: { mint: string; symbol: string }) {
             const signed = await w.signTransaction(fromB64(prep.txBase64)); setBusy("Sending…");
             const r = await sendAllowQuote(mint, w.address!, toB64(signed)); if (!r.ok) throw new Error(r.error);
             setMsg({ ok: true, text: `Allowed: ${r.signature}` }); setPrep(null);
-          })}>Sign and send on devnet</button>
+          })}>Sign and send on {NETWORK_LABEL}</button>
         </>
       )}
       {busy ? <p role="status" className="text-[0.875rem] text-ink-soft">{busy}</p> : null}

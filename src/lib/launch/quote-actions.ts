@@ -1,5 +1,6 @@
 "use server";
 
+import { DB_NETWORK, NETWORK } from "@/lib/network";
 import { revalidatePath } from "next/cache";
 import { PublicKey, VersionedTransaction } from "@solana/web3.js";
 import { requireStaff } from "@/lib/auth";
@@ -35,7 +36,7 @@ export async function addQuoteToken(_prev: unknown, form: FormData): Promise<Res
     const cfg = await readQuoteConfig(mint);
     const supabase = await createClient();
     const { error } = await supabase.from("quote_tokens").insert({
-      mint: mint.toBase58(), symbol, name, decimals: cfg.decimals, network: "solana-devnet",
+      mint: mint.toBase58(), symbol, name, decimals: cfg.decimals, network: DB_NETWORK,
       launchlab_config_id: cfg.configId, enabled: false, added_by: user.id,
     });
     if (error) throw new Error(error.code === "23505" ? "That token is already on the list." : error.message);
@@ -107,7 +108,9 @@ export async function syncPairs(network: "devnet" | "mainnet" = "devnet"): Promi
     const catalog = await buildCatalog(network);
     const net = network === "devnet" ? "solana-devnet" : "solana-mainnet";
     const { Connection, clusterApiUrl } = await import("@solana/web3.js");
-    const conn = network === "devnet" ? connection() : new Connection(process.env.SOLANA_MAINNET_RPC_URL || clusterApiUrl("mainnet-beta"), "confirmed");
+    // The live network uses our RPC; the other one (preview catalog) uses its own URL or the public endpoint.
+    const conn = network === NETWORK ? connection()
+      : new Connection((network === "mainnet" ? process.env.SOLANA_MAINNET_RPC_URL : process.env.SOLANA_DEVNET_RPC_URL) || clusterApiUrl(network === "mainnet" ? "mainnet-beta" : "devnet"), "confirmed");
 
     // Decimals and token program from the chain where Jupiter didn't know the token.
     const missing = catalog.filter((c) => c.decimals === null || !c.tokenProgram);

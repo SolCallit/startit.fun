@@ -1,6 +1,7 @@
 "use server";
 
 import { PublicKey, VersionedTransaction } from "@solana/web3.js";
+import { DB_NETWORK } from "@/lib/network";
 import { getPublicProject } from "@/lib/data/public";
 import { getPoolState } from "./token-market";
 import { summarizeTransaction } from "@/lib/launch/chain-checks";
@@ -24,6 +25,7 @@ async function liveCoin(ref: string) {
   const data = await getPublicProject(ref);
   const p = data?.project;
   if (!p || p.status !== "launched" || !p.mint_address) throw new Error("This coin isn't live yet.");
+  if ((p.network ?? "solana-devnet") !== DB_NETWORK) throw new Error("This coin lives on another Solana network and can't be traded from here.");
   return p;
 }
 

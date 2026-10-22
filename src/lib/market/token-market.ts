@@ -1,10 +1,11 @@
 import "server-only";
 import { cacheLife } from "next/cache";
-import { Connection, PublicKey, clusterApiUrl } from "@solana/web3.js";
+import { Connection, PublicKey } from "@solana/web3.js";
+import { RPC_URL } from "@/lib/launch/launchlab";
 import { LaunchpadPool } from "@raydium-io/raydium-sdk-v2";
 
 /** Reads fail fast on rate limits instead of retrying for seconds; the page shows what it has. */
-const connection = () => new Connection(process.env.SOLANA_RPC_URL || clusterApiUrl("devnet"), { commitment: "confirmed", disableRetryOnRateLimit: true });
+const connection = () => new Connection(RPC_URL, { commitment: "confirmed", disableRetryOnRateLimit: true });
 const MARKET_CACHE = { stale: 15, revalidate: 20, expire: 600 };
 
 /**

@@ -1,5 +1,6 @@
 "use server";
 
+import { DB_NETWORK } from "@/lib/network";
 import { createHash, randomBytes } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { requireStaff } from "@/lib/auth";
@@ -66,7 +67,7 @@ export async function saveLaunchConfig(appId: string, _prev: ConfigState, formDa
 
   const termsText = renderLaunchTerms({
     publicRef: app.public_ref, projectName: app.project_name, tokenName: app.token_name, ticker: app.ticker,
-    network: "solana-devnet", totalSupply: DEFAULT_SUPPLY, decimals: DEFAULT_DECIMALS,
+    network: DB_NETWORK, totalSupply: DEFAULT_SUPPLY, decimals: DEFAULT_DECIMALS,
     mintAuthorityRevoked: true, freezeAuthorityRevoked: true, insiderAllocations: allocations,
     split: { platformBps: v.platform_bps, founderBps: v.founder_bps, launcherBps: v.launcher_bps, communityBps: v.community_bps },
     deviationReason: v.deviation_reason || null,
@@ -79,7 +80,7 @@ export async function saveLaunchConfig(appId: string, _prev: ConfigState, formDa
   const termsSha = await sha256Hex(termsText);
 
   const launchRow = {
-    application_id: appId, fee_config_id: feeConfigId, network: "solana-devnet",
+    application_id: appId, fee_config_id: feeConfigId, network: DB_NETWORK,
     total_supply_raw: wholeToRaw(DEFAULT_SUPPLY, DEFAULT_DECIMALS), decimals: DEFAULT_DECIMALS,
     mint_authority_revoked: true, freeze_authority_revoked: true, insider_allocations: allocations,
     founder_wallet: v.founder_wallet, launcher_wallet: v.launcher_wallet || null, terms_text: termsText, terms_sha256: termsSha,

@@ -1,5 +1,6 @@
 "use server";
 
+import { DB_NETWORK } from "@/lib/network";
 import { createHash, randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
@@ -59,7 +60,7 @@ export async function saveStep(appId: string, step: StepNumber, _prev: StepState
       update.quote_mint = orNull(values.quote_mint);
       if (update.quote_mint) {
         const { data: q } = await supabase.from("quote_tokens").select("network").eq("mint", update.quote_mint as string).maybeSingle();
-        if (q && q.network !== "solana-devnet") return { errors: { quote_mint: "That pair unlocks when Startit moves to mainnet. Pick one without the Mainnet tag." }, values };
+        if (q && q.network !== DB_NETWORK) return { errors: { quote_mint: "That pair unlocks when Startit moves to mainnet. Pick one without the Mainnet tag." }, values };
       }
       const kind = orNull(values.pair_kind);
       update.pair_kind = kind;

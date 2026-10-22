@@ -1,5 +1,6 @@
 "use client";
 
+import { WALLET_CHAIN } from "@/lib/network";
 import { useEffect, useState } from "react";
 import { getWallets } from "@wallet-standard/app";
 import type { Wallet, WalletAccount } from "@wallet-standard/base";
@@ -33,7 +34,7 @@ export function useTxWallet() {
 
   async function signTransaction(tx: Uint8Array): Promise<Uint8Array> {
     if (!conn) throw new Error("Connect a wallet first.");
-    const [out] = await conn.wallet.features[SolanaSignTransaction].signTransaction({ account: conn.account, transaction: tx, chain: "solana:devnet" });
+    const [out] = await conn.wallet.features[SolanaSignTransaction].signTransaction({ account: conn.account, transaction: tx, chain: WALLET_CHAIN });
     if (!out) throw new Error("The wallet returned nothing.");
     return out.signedTransaction;
   }

@@ -1,3 +1,4 @@
+import { solscan as netSolscan } from "@/lib/network";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -34,7 +35,7 @@ export default function CoinPage({ params }: PageProps<"/projects/[ref]">) {
   );
 }
 
-const solscan = (kind: "account" | "token" | "tx", v: string, devnet: boolean) => `https://solscan.io/${kind}/${v}${devnet ? "?cluster=devnet" : ""}`;
+const solscan = (kind: "account" | "token" | "tx", v: string, devnet: boolean) => netSolscan(kind, v, devnet ? "solana-devnet" : "solana-mainnet");
 const LINK_LABEL: Record<string, string> = { website: "Website", x: "X", github: "GitHub", telegram: "Telegram", discord: "Discord", docs: "Docs", demo: "Demo", other: "Link" };
 
 function volumeSince(trades: Trade[], seconds: number) {

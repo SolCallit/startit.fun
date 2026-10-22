@@ -7,6 +7,7 @@ import { requireStaff, requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { assertMatchesConfirmed, evaluateMintState, summarizeTransaction } from "./chain-checks";
+import { DB_NETWORK, IS_MAINNET } from "@/lib/network";
 import { buildLaunchTx, connection, LAUNCHLAB_AUTH, LAUNCHLAB_PROGRAM, readMint, SOL_MINT } from "./launchlab";
 
 /**
@@ -64,6 +65,21 @@ async function loadParams(appId: string) {
   return { svc, app, launch, params, hash };
 }
 
+/** Mainnet launches need an explicit server switch on top of the network setting: a second key for real money. */
+function assertLaunchesOpen() {
+  if (IS_MAINNET && process.env.MAINNET_LAUNCHES_ENABLED !== "true") {
+    throw new Error("Mainnet launches are switched off. Set MAINNET_LAUNCHES_ENABLED=true on the server when you're ready.");
+  }
+}
+
+/** The platform account must exist on this network and belong to LaunchLab, so a devnet setting can't leak into mainnet. */
+async function assertPlatformOnChain(platformId: string) {
+  const info = await connection().getAccountInfo(new PublicKey(platformId), "confirmed");
+  if (!info || !info.owner.equals(LAUNCHLAB_PROGRAM)) {
+    throw new Error("The saved LaunchLab platform doesn't exist on this network. Set the platform up again in Admin settings.");
+  }
+}
+
 /** What the admin is about to approve, for display. */
 export async function launchParamsFor(appId: string): Promise<Result<{ params: LaunchParams; approved: boolean }>> {
   try {
@@ -79,7 +95,8 @@ export async function approveLaunch(appId: string): Promise<Result<object>> {
     const staff = await requireStaff();
     const { app, launch, hash, params } = await loadParams(appId);
     if (app.status !== "ready_for_deployment") throw new Error("The application must be ready to launch.");
-    if (launch.network !== "solana-devnet") throw new Error("Only devnet launches are enabled.");
+    if (launch.network !== DB_NETWORK) throw new Error(`This launch was set up for ${launch.network}, but Startit is running on ${DB_NETWORK}.`);
+    assertLaunchesOpen();
     if (!launch.founder_confirmed_at) throw new Error("The brand hasn't signed the terms.");
     if (!["planned", "previewed", "operator_confirmed"].includes(launch.status)) throw new Error(`Launch is already ${launch.status}.`);
     const supabase = await createClient();
@@ -115,6 +132,9 @@ export async function prepareMyLaunch(appId: string, wallet: string, mintPubkey:
       throw new Error(launch.status === "submitted" ? "Your launch was sent. Check it below." : `Launch is ${launch.status}.`);
     }
     if (wallet !== params.signer) throw new Error(`Connect the wallet on the signed terms (${params.signer.slice(0, 4)}…${params.signer.slice(-4)}).`);
+    assertLaunchesOpen();
+    if (launch.network !== DB_NETWORK) throw new Error("This launch was set up for a different network.");
+    await assertPlatformOnChain(params.platformId);
     const { tx, poolId } = await buildLaunchTx({
       operator: pk(wallet, "Wallet"), mint: pk(mintPubkey, "Mint"), platformId: pk(params.platformId, "Platform"),
       name: params.name, symbol: params.symbol, uri: params.uri, decimals: params.decimals, supplyRaw: params.supplyRaw,

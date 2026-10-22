@@ -1,5 +1,7 @@
 "use client";
 
+import { solscan } from "@/lib/network";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
@@ -111,7 +113,7 @@ export function TradePanel({ refId, ticker, quoteSymbol, priceQuote, graduated, 
           <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} role={msg.ok ? "status" : "alert"}
             className={`text-[0.875rem] ${msg.ok ? "text-verified" : "text-flagged"}`}>
             {msg.text}
-            {msg.sig ? <> · <a className="underline" target="_blank" rel="noopener noreferrer" href={`https://solscan.io/tx/${msg.sig}${devnet ? "?cluster=devnet" : ""}`}>view</a></> : null}
+            {msg.sig ? <> · <a className="underline" target="_blank" rel="noopener noreferrer" href={solscan("tx", msg.sig, devnet ? "solana-devnet" : "solana-mainnet")}>view</a></> : null}
           </motion.p>
         ) : null}
       </AnimatePresence>

@@ -1,5 +1,7 @@
 "use client";
 
+import { NETWORK_LABEL } from "@/lib/network";
+
 import { useActionState, useState } from "react";
 import { createSigningLink, markReadyForDeployment, saveLaunchConfig, type ConfigState, type LinkState } from "@/lib/launch/actions";
 
@@ -94,7 +96,7 @@ export function LaunchConfigForm({ appId, defaults, selfLaunch }: { appId: strin
 
       <details className="rounded-[14px] border border-line/70 p-4">
         <summary className="cursor-pointer font-medium text-ink">Coin details (standard, nothing to change)</summary>
-        <p className="mt-3 text-[0.9375rem] text-ink-soft">1 billion supply, 6 decimals. Nobody can mint more or freeze wallets. Runs on Solana devnet until mainnet opens.</p>
+        <p className="mt-3 text-[0.9375rem] text-ink-soft">1 billion supply, 6 decimals. Nobody can mint more or freeze wallets. Runs on {NETWORK_LABEL}.</p>
         <div className="mt-3"><F name="insider_allocations" label="Coins held by insiders at launch" rows={2} d={d} e={e} hint="Leave empty for none. One per line: who | how many | note." /></div>
       </details>
 
