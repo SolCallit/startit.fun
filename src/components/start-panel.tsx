@@ -7,11 +7,11 @@ import { listPublicProjects } from "@/lib/data/public";
 import { projectImageUrl } from "@/lib/project-image";
 
 const STEPS = [
-  { short: "Bring a product", detail: "Site, GitHub and socials, plus proof the brand approves the coin, its name and branding." },
-  { short: "AI checks receipts", detail: "Matches public sources to the application. Every finding has a source and a time. It can flag, never approve." },
-  { short: "Human review", detail: "Confirms the brand really signed off, then approves, rejects or asks for more." },
-  { short: "Brand signs", detail: "Supply, authorities, treasury and fee split, signed by wallet before anything goes on-chain." },
-  { short: "Live on Raydium", detail: "The starter presses Launch: the coin and their starter's buy go live in one transaction." },
+  { short: "Submit", detail: "Bring a product: site, GitHub and socials, plus proof the brand approves the coin, its name and branding." },
+  { short: "Brand signs", detail: "The brand signs off on the coin, its supply and the fee split, by wallet, before anything goes on-chain." },
+  { short: "AI check", detail: "Matches public sources to the application. Every finding has a source and a time. It can flag, never approve." },
+  { short: "Review", detail: "A person confirms the brand really signed off, then approves, rejects or asks for more." },
+  { short: "Live", detail: "The starter presses Launch: the coin and their starter's buy go live on Raydium in one transaction." },
 ];
 
 const SPLIT = [
@@ -30,16 +30,16 @@ export function StartPanel({ href, label, hint, action, as: Tag = "h1" }: { href
     <Reveal>
       <section aria-labelledby="start-title" className="ignite-board relative mx-auto grid max-w-5xl gap-4 overflow-hidden p-4 sm:p-5 md:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] md:gap-5">
         <div className="flex min-w-0 flex-col">
-          <Tag id="start-title" className="font-classic font-normal tracking-normal text-[1.4rem] leading-[1.18] text-white [text-shadow:0_2px_0_#0008] sm:text-[1.75rem] lg:text-[2rem]">
-            Scaling undervalued brands &amp; products through meme community.
+          <Tag id="start-title" className="font-classic hero-bold max-w-[16ch] text-[2rem] leading-[1.05] text-white sm:text-[2.6rem] lg:text-[3rem]">
+            Meme power for undervalued brands.
           </Tag>
-          <p className="mt-2.5 font-times text-[0.9375rem] leading-snug text-white/80 sm:text-[1.0625rem]">
-            For devs, content creators, brands and artists. Trade their trending success now.
+          <p className="mt-2.5 font-times text-[1rem] leading-snug text-white/75 sm:text-[1.125rem]">
+            Back devs and artists. Trade their success.
           </p>
-          <ol className="mt-2.5 flex flex-wrap gap-x-3 gap-y-1 font-times text-[0.8125rem] text-white/70 sm:text-[0.875rem]">
+          <ol className="mt-3 flex flex-wrap gap-1.5 font-times text-[0.8125rem] text-white/80 sm:text-[0.875rem]">
             {STEPS.map((s, i) => (
-              <li key={s.short} title={s.detail} className="whitespace-nowrap">
-                <span className="text-[#ff5a63]">{i + 1}.</span> {s.short}
+              <li key={s.short} title={s.detail} className="whitespace-nowrap rounded-full bg-black/25 px-2.5 py-0.5 ring-1 ring-white/10">
+                <span className="text-[#ff5a63]">{i + 1}</span> {s.short}
               </li>
             ))}
           </ol>

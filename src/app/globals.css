@@ -258,6 +258,8 @@ h1, h2, h3 {
 }
 /* Classic display face (Croissant One) for headline moments; beats the heading default above. */
 .font-classic { font-family: var(--font-display-classic), Georgia, serif; font-weight: 400; letter-spacing: 0; }
+/* Croissant One ships one weight; a hairline stroke gives the hero headline real heft without faux-bold blur. */
+.hero-bold { -webkit-text-stroke: 1.1px currentColor; paint-order: stroke fill; text-shadow: 0 3px 0 #0009, 0 0 28px #ff2a3a40; }
 
 ::selection { background: var(--cobalt-soft); color: var(--ink); }
 
